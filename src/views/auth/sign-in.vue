@@ -20,9 +20,22 @@
                 @submit.prevent="handleSignIn"
                 class="authentication-form"
               >
-                <div v-if="error.length > 0" class="mb-2 text-danger">
-                  {{ error }}
-                </div>
+                <!-- Error Alert -->
+                <b-alert
+                  v-model="showError"
+                  variant="danger"
+                  dismissible
+                  class="mb-3"
+                  @dismissed="error = ''"
+                >
+                  <i class="bx bx-error-circle me-2"></i>{{ error }}
+                </b-alert>
+
+                <!-- Success Alert -->
+                <b-alert v-model="showSuccess" variant="success" class="mb-3">
+                  <i class="bx bx-check-circle me-2"></i>Login successful!
+                  Redirecting...
+                </b-alert>
                 <b-form-group label="Email" class="mb-3">
                   <b-form-input
                     type="email"
@@ -38,21 +51,35 @@
                   </div>
                 </b-form-group>
                 <div class="mb-3">
-                  <router-link
+                  <!-- <router-link
                     :to="{ name: 'auth.reset-password' }"
                     class="float-end text-muted text-unline-dashed ms-1"
                     >Reset password</router-link
-                  >
+                  > -->
                   <label class="form-label" for="example-password"
                     >Password</label
                   >
-                  <input
-                    type="password"
-                    id="example-password"
-                    class="form-control"
-                    placeholder="Enter your password"
-                    v-model="v.password.$model"
-                  />
+                  <div class="position-relative">
+                    <input
+                      :type="showPassword ? 'text' : 'password'"
+                      id="example-password"
+                      class="form-control"
+                      :class="{ 'is-invalid': v.password.$error }"
+                      placeholder="Enter your password"
+                      v-model="v.password.$model"
+                      :disabled="isLoading"
+                    />
+                    <button
+                      type="button"
+                      class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted"
+                      @click="togglePasswordVisibility"
+                      :disabled="isLoading"
+                    >
+                      <i
+                        :class="showPassword ? 'bx bx-hide' : 'bx bx-show'"
+                      ></i>
+                    </button>
+                  </div>
                   <div v-if="v.password.$errors" class="text-danger">
                     <span v-for="(err, idx) in v.password.$errors" :key="idx">
                       {{ err.$message }}
@@ -66,11 +93,23 @@
                 </div>
 
                 <div class="mb-1 text-center d-grid">
-                  <b-button variant="primary" type="submit">Sign In</b-button>
+                  <b-button
+                    variant="primary"
+                    type="submit"
+                    :disabled="isLoading"
+                  >
+                    <span v-if="isLoading">
+                      <span
+                        class="spinner-border spinner-border-sm me-1"
+                      ></span>
+                      Signing in...
+                    </span>
+                    <span v-else>Sign In</span>
+                  </b-button>
                 </div>
               </b-form>
 
-              <p class="mt-3 fw-semibold no-span">OR sign with</p>
+              <!-- <p class="mt-3 fw-semibold no-span">OR sign with</p>
 
               <div class="text-center">
                 <a href="javascript:void(0);" class="btn btn-light shadow-none"
@@ -82,18 +121,18 @@
                 <a href="javascript:void(0);" class="btn btn-light shadow-none"
                   ><i class="bx bxl-github fs-20"></i
                 ></a>
-              </div>
+              </div> -->
             </div>
           </b-card-body>
         </b-card>
-        <p class="mb-0 text-center">
+        <!-- <p class="mb-0 text-center">
           New here?
           <router-link
             :to="{ name: 'auth.sign-up' }"
             class="text-reset fw-bold ms-1"
             >Sign Up</router-link
           >
-        </p>
+        </p> -->
       </b-col>
     </b-row>
   </AuthLayout>
@@ -106,18 +145,17 @@ import { required, email } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
 
 import { ref, reactive, computed } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 import HttpClient from "@/helpers/http-client";
 import { useAuthStore } from "@/stores/auth";
 
 import type { AxiosResponse } from "axios";
 import type { User } from "@/types/auth";
-import router from "@/router";
 
 const credentials = reactive({
-  email: "user@email.com",
-  password: "password",
+  email: "superadmin@example.com",
+  password: "password123",
 });
 
 const vuelidateRules = computed(() => ({
@@ -129,34 +167,82 @@ const v = useVuelidate(vuelidateRules, credentials);
 
 const useAuth = useAuthStore();
 const route = useRoute();
+const router = useRouter();
 const query = route.query;
 
 const error = ref("");
-const checked = ref(false);
+const showError = computed({
+  get: () => error.value.length > 0,
+  set: (val) => {
+    if (!val) error.value = "";
+  },
+});
+const showSuccess = ref(false);
+const isLoading = ref(false);
+const showPassword = ref(false);
+
+const togglePasswordVisibility = () => {
+  showPassword.value = !showPassword.value;
+};
 
 const handleSignIn = async () => {
+  // Reset states
+  error.value = "";
+  showSuccess.value = false;
+
   const result = await v.value.$validate();
 
-  if (result) {
-    try {
-      const res: AxiosResponse<User> = await HttpClient.post(
-        "/sign-in",
-        credentials,
-      );
-      console.log("res", res);
+  if (!result) {
+    return;
+  }
 
-      if (res.data.token) {
-        useAuth.saveSession({
-          ...res.data,
-          token: res.data.token,
-        });
+  const payload = {
+    email: credentials.email.trim(),
+    password: credentials.password,
+  };
+
+  isLoading.value = true;
+
+  try {
+    const res: AxiosResponse<User> = await HttpClient.post(
+      "/auth/login",
+      payload,
+    );
+
+    console.log("Login response:", res);
+
+    // Validate response
+    if (res.data?.access_token) {
+      // Save session
+      useAuth.saveSession({
+        ...res.data,
+        token: res.data.access_token,
+      });
+
+      // Show success message
+      showSuccess.value = true;
+
+      // Redirect after short delay
+      setTimeout(() => {
         redirectUser();
-      }
-    } catch (e: any) {
-      if (e.response?.data?.error) {
-        if (error.value.length == 0) error.value = e.response?.data?.error;
-      }
+      }, 500);
+    } else {
+      error.value = "Invalid response from server";
     }
+  } catch (e: any) {
+    console.error("Login error:", e);
+
+    if (e.response) {
+      console.log("Error response:", e.response.data);
+      error.value =
+        e.response.data?.message || "Login failed. Please try again.";
+    } else if (e.request) {
+      error.value = "Network error. Please check your connection.";
+    } else {
+      error.value = "An unexpected error occurred.";
+    }
+  } finally {
+    isLoading.value = false;
   }
 };
 

@@ -37,6 +37,7 @@ declare module 'vue' {
     BFormRadio: typeof import('bootstrap-vue-next')['BFormRadio']
     BFormRadioGroup: typeof import('bootstrap-vue-next')['BFormRadioGroup']
     BFormSelect: typeof import('bootstrap-vue-next')['BFormSelect']
+    BFormSelectOption: typeof import('bootstrap-vue-next')['BFormSelectOption']
     BFormTextarea: typeof import('bootstrap-vue-next')['BFormTextarea']
     BFormValidFeedback: typeof import('bootstrap-vue-next')['BFormValidFeedback']
     BInputGroup: typeof import('bootstrap-vue-next')['BInputGroup']

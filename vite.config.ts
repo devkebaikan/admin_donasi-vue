@@ -14,6 +14,16 @@ export default defineConfig({
       resolvers: [BootstrapVueNextResolver()],
     }),
   ],
+  server: {
+    port: 3000,
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        quietDeps: true, // versi Vite-nya dari pengaturan itu
+      },
+    },
+  },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
