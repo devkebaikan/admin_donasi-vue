@@ -74,6 +74,7 @@ const dashboardRoutes = [
   },
 ];
 
+// Program Routes
 const programRoutes = [
   {
     path: "/programs",
@@ -103,6 +104,22 @@ const programRoutes = [
     component: () => import("@/views/programs/editProgram.vue"),
   },
 ];
+
+// Project Routes
+const projectRoutes = [
+  {
+    path: "/programs/project",
+    name: "project.list",
+    meta: {
+      title: setTitle("Projects"),
+      authRequired: true,
+    },
+    component: () => import("@/views/programs/projects/listProject.vue"),
+  },
+];
+
+// Mitra Routes
+const mitraRoutes = [{}];
 
 // ========================================================================== All Routes not use ==========================================================================
 const pagesRoutes = [
@@ -813,4 +830,6 @@ export const allRoutes = [
   ...iconsRoutes,
   ...mapsRoutes,
   ...programRoutes,
+  ...projectRoutes,
+  ...mitraRoutes,
 ];

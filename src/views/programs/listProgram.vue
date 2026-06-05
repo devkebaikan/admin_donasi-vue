@@ -4,25 +4,21 @@
     <b-card class="mb-3">
       <b-row>
         <!-- Search -->
-        <b-col cols="12" md="4" class="mb-3">
+        <b-col cols="12" md="3" class="mb-3">
           <label class="form-label fw-semibold">Search</label>
           <b-form-input
             v-model="searchQuery"
             type="text"
             placeholder="Cari judul atau link..."
             debounce="500"
-            @update:model-value="handleSearchChange"
+            @update:model-value="resetPage"
           />
         </b-col>
 
         <!-- Category Filter -->
-        <b-col cols="12" md="2" class="mb-3">
+        <b-col cols="12" md="3" class="mb-3">
           <label class="form-label fw-semibold">Category</label>
-          <b-form-select
-            v-model="selectedCategory"
-            :options="categoryOptions"
-            @change="handleCategoryChange"
-          >
+          <b-form-select v-model="selectedCategory" :options="categoryOptions">
             <template #first>
               <b-form-select-option value=""
                 >All Categories</b-form-select-option
@@ -103,10 +99,7 @@
                 Category: {{ getCategoryName(selectedCategory) }}
                 <i
                   class="bx bx-x cursor-pointer"
-                  @click="
-                    selectedCategory = '';
-                    resetPage();
-                  "
+                  @click="selectedCategory = ''"
                 ></i>
               </b-badge>
 
@@ -116,20 +109,14 @@
                 class="d-flex align-items-center gap-1"
               >
                 Search: "{{ searchQuery }}"
-                <i
-                  class="bx bx-x cursor-pointer"
-                  @click="
-                    searchQuery = '';
-                    resetPage();
-                  "
-                ></i>
+                <i class="bx bx-x cursor-pointer" @click="searchQuery = ''"></i>
               </b-badge>
             </div>
 
             <GridJsTable
               id="table-gridjs"
-              :key="`${selectedCategory}-${searchQuery}-${currentPage}-${sortOrder}-${sortDir}-${tableKey}`"
-              :options="basicTableOptions"
+              :key="tableKeyString"
+              :options="tableOptions"
             />
 
             <div class="d-flex justify-content-between align-items-center mt-3">
@@ -164,14 +151,10 @@ import { computed, onMounted, onBeforeUnmount } from "vue";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
-import { useBasicTableOptions } from "./components/data";
+import { useProgramsTable } from "./components/data";
 import router from "@/router";
-
-const categoryOptions = [
-  { value: "1", text: "Masjid & Pondok" },
-  { value: "6", text: "Bencana Alam" },
-  { value: "8", text: "Sosial & Kemanusiaan" },
-];
+import { useQuery } from "@tanstack/vue-query";
+import { getProgramCategories } from "@/services/programService";
 
 const sortOrderOptions = [
   { value: "id", text: "ID" },
@@ -186,7 +169,8 @@ const sortDirOptions = [
 ];
 
 const {
-  basicTableOptions,
+  tableOptions,
+  tableKeyString,
   isLoading,
   isError,
   error,
@@ -201,27 +185,37 @@ const {
   sortDir,
   resetPage,
   handleDelete,
-  tableKey,
-} = useBasicTableOptions();
+} = useProgramsTable();
 
 const hasActiveFilters = computed(
   () => !!(selectedCategory.value || searchQuery.value),
 );
 
-const handleCategoryChange = () => resetPage();
-const handleSearchChange = () => resetPage();
+const { data: dataCategories } = useQuery({
+  queryKey: ["programCategories"],
+  queryFn: getProgramCategories,
+});
+
+const categoryOptions = computed(() => {
+  if (!dataCategories.value) return [];
+  return dataCategories.value.map((category: any) => ({
+    value: category.id,
+    text: category.name,
+  }));
+});
 
 const clearFilters = () => {
   selectedCategory.value = "";
   searchQuery.value = "";
   sortOrder.value = "id";
-  sortDir.value = "desc";
+  sortDir.value = "asc";
   resetPage();
 };
 
-const getCategoryName = (value: string) => {
-  return categoryOptions.find((c) => c.value === value)?.text || value;
-};
+const getCategoryName = (value: string | number) =>
+  categoryOptions.value.find(
+    (c: { value: any; text: string }) => c.value === value,
+  )?.text ?? String(value);
 
 const handleGlobalClick = (event: Event) => {
   const target = event.target as HTMLElement;
@@ -238,9 +232,3 @@ const handleGlobalClick = (event: Event) => {
 onMounted(() => document.addEventListener("click", handleGlobalClick));
 onBeforeUnmount(() => document.removeEventListener("click", handleGlobalClick));
 </script>
-
-<style scoped>
-.cursor-pointer {
-  cursor: pointer;
-}
-</style>

@@ -1,6 +1,6 @@
 import HttpClient from "@/helpers/http-client";
 
-// Fetch all all programs
+// Fetch all programs
 export const getAllPrograms = async (params = {}) => {
   try {
     const res = await HttpClient.get("/programs", { params });
@@ -52,5 +52,38 @@ export const deleteProgram = async (id: number) => {
   } catch (error) {
     console.error(`Error deleting program with id ${id}:`, error);
     throw error;
+  }
+};
+
+// fetch all program categories
+export const getProgramCategories = async () => {
+  try {
+    const res = await HttpClient.get("/program-categories");
+    return res.data.data;
+  } catch (error) {
+    console.error("Error fetching program categories:", error);
+    return [];
+  }
+};
+
+// fetch all program types
+export const getProgramTypes = async () => {
+  try {
+    const res = await HttpClient.get("/program-types");
+    return res.data.data;
+  } catch (error) {
+    console.error("Error fetching program types:", error);
+    return [];
+  }
+};
+
+// fetch all program percentages
+export const getProgramPercentages = async (params = {}) => {
+  try {
+    const res = await HttpClient.get("/program-percentage", { params });
+    return res.data.data;
+  } catch (error) {
+    console.error("Error fetching program percentages:", error);
+    return [];
   }
 };
