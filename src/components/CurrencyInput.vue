@@ -3,9 +3,16 @@
     :id="id"
     :placeholder="placeholder"
     :state="state"
-    :value="internalValue"
+    v-model="internalValue"
     @input="onInput"
   />
+  <!-- <b-form-input
+    :id="id"
+    :placeholder="placeholder"
+    :state="state"
+    :value="internalValue"
+    @input="onInput"
+  /> -->
 </template>
 
 <script setup lang="ts">

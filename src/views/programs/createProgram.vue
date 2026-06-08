@@ -538,7 +538,7 @@ const imageWaPreview = ref<string | null>(null);
 const formState = reactive({
   mitra_id: null as number | null,
   tipe_id: null as number | null,
-  cateogry_id: null as number | null, // intentional typo matching API
+  cateogry_id: null as number | null,
   program_percentage_id: null as number | null,
   judul: "",
   link: "",

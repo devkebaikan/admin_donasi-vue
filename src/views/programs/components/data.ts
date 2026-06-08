@@ -95,24 +95,24 @@ export function useProgramsTable() {
         name: "Actions",
         width: "100px",
         sort: false,
-        formatter: (id: number) =>
+        formatter: (program: { id: number; link: string }) =>
           html(`
             <div class="d-flex gap-2 justify-content-center">
-              <a href="/programs/${id}/edit"
+              <a href="/programs/${program.link}/edit"
                 class="btn btn-sm btn-soft-warning"
                 title="Edit Program">
                 <i class="bx bx-edit fs-16"></i>
               </a>
             </div>
             <div class="d-flex gap-2 justify-content-center">
-              <a href="/programs/${id}/projects"
+              <a href="/programs/${program.id}/projects"
                 class="btn btn-sm btn-soft-success"
                 title="Projects">
                 <i class="bx bx-folder-open fs-16"></i>
               </a>
             </div>
             <div class="d-flex gap-2 justify-content-center">
-              <a href="/programs/${id}/news"
+              <a href="/programs/${program.id}/news"
                 class="btn btn-sm btn-soft-info"
                 title="News">
                 <i class="bx bx-news fs-16"></i>
@@ -132,7 +132,7 @@ export function useProgramsTable() {
       program.nominal_target,
       program.nominal_achieved,
       program.remaining_days,
-      program.id,
+      { id: program.id, link: program.link },
     ],
   });
 

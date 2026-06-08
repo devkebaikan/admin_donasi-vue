@@ -14,7 +14,7 @@ export const getAllPrograms = async (params = {}) => {
 // Fetch program by ID
 export const getProgramBylink = async (link: string) => {
   try {
-    const res = await HttpClient.get(`/programs/${link}`);
+    const res = await HttpClient.get(`/programs/link/${link}`);
     return res.data.data;
   } catch (error) {
     console.error(`Error fetching program with link ${link}:`, error);
