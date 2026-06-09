@@ -22,8 +22,14 @@ export const MENU_ITEMS: MenuItemType[] = [
     isTitle: true,
   },
   {
+    key: "data-mitra",
+    icon: "ooui:user-contributions-ltr",
+    label: "Mitra",
+    route: { name: "mitra.list" },
+  },
+  {
     key: "programs",
-    icon: "solar:calendar-broken",
+    icon: "tdesign:task-filled",
     label: "Programs",
     children: [
       {
@@ -37,6 +43,18 @@ export const MENU_ITEMS: MenuItemType[] = [
         label: "Projects",
         route: { name: "project.list" },
         parentKey: "programs",
+      },
+      {
+        key: "program-category",
+        label: "Categories",
+        route: { name: "category.list" },
+        parentKey: "category",
+      },
+      {
+        key: "program-percentage",
+        label: "Percentage",
+        route: { name: "percentage.list" },
+        parentKey: "percentage",
       },
       // {
       //   key: "program-projects",

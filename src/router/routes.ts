@@ -119,7 +119,97 @@ const projectRoutes = [
 ];
 
 // Mitra Routes
-const mitraRoutes = [{}];
+const mitraRoutes = [
+  {
+    path: "/mitra",
+    name: "mitra.list",
+    meta: {
+      title: setTitle("Mitra"),
+      authRequired: true,
+    },
+    component: () => import("@/views/mitra/listMitra.vue"),
+  },
+  {
+    path: "/mitra/create",
+    name: "mitra.create",
+    meta: {
+      title: setTitle("CreateMitra"),
+      authRequired: true,
+    },
+    component: () => import("@/views/mitra/createMitra.vue"),
+  },
+  {
+    path: "/mitra/:id/edit",
+    name: "mitra.edit",
+    meta: {
+      title: setTitle("Edit Mitra"),
+      authRequired: true,
+    },
+    component: () => import("@/views/mitra/editMitra.vue"),
+  },
+];
+
+// Category Routes
+const categoryRoutes = [
+  {
+    path: "/category",
+    name: "category.list",
+    meta: {
+      title: setTitle("Category"),
+      authRequired: true,
+    },
+    component: () => import("@/views/programs/categories/listCategory.vue"),
+  },
+  {
+    path: "/category/create",
+    name: "category.create",
+    meta: {
+      title: setTitle("Create Category"),
+      authRequired: true,
+    },
+    component: () => import("@/views/programs/categories/createCategory.vue"),
+  },
+  {
+    path: "/category/:id/edit",
+    name: "category.edit",
+    meta: {
+      title: setTitle("Edit Category"),
+      authRequired: true,
+    },
+    component: () => import("@/views/programs/categories/editCategory.vue"),
+  },
+];
+
+// Percentage Routes
+const percentageRoutes = [
+  {
+    path: "/percentage",
+    name: "percentage.list",
+    meta: {
+      title: setTitle("Percentage"),
+      authRequired: true,
+    },
+    component: () => import("@/views/programs/percentage/listPercentage.vue"),
+  },
+  {
+    path: "/percentage/create",
+    name: "percentage.create",
+    meta: {
+      title: setTitle("Create Percentage"),
+      authRequired: true,
+    },
+    component: () => import("@/views/programs/percentage/createPercentage.vue"),
+  },
+  {
+    path: "/percentage/:id/edit",
+    name: "percentage.edit",
+    meta: {
+      title: setTitle("Edit Percentage"),
+      authRequired: true,
+    },
+    component: () => import("@/views/programs/percentage/editPercentage.vue"),
+  },
+];
 
 // ========================================================================== All Routes not use ==========================================================================
 const pagesRoutes = [
@@ -832,4 +922,6 @@ export const allRoutes = [
   ...programRoutes,
   ...projectRoutes,
   ...mitraRoutes,
+  ...categoryRoutes,
+  ...percentageRoutes,
 ];

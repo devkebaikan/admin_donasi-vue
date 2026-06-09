@@ -18,7 +18,7 @@ export function useProgramsTable() {
     fetchFn: getAllPrograms,
     deleteFn: deleteProgram,
     defaultSort: "id",
-    defaultSortDir: "asc",
+    // defaultSortDir: "asc",
     extraFilters,
     deleteMessages: {
       text: "You won't be able to revert this!",

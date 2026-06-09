@@ -4,37 +4,39 @@
     <b-card class="mb-3">
       <b-row>
         <!-- Search -->
-        <b-col cols="12" md="3" class="mb-3">
+        <b-col cols="12" md="4" class="mb-3">
           <label class="form-label fw-semibold">Search</label>
           <b-form-input
             v-model="searchQuery"
             type="text"
-            placeholder="Cari judul atau link..."
+            placeholder="Cari nama kategori..."
             debounce="500"
             @update:model-value="resetPage"
           />
         </b-col>
 
-        <!-- Category Filter -->
-        <b-col cols="12" md="3" class="mb-3">
-          <label class="form-label fw-semibold">Category</label>
-          <b-form-select v-model="selectedCategory" :options="categoryOptions">
+        <!-- Is Utama Filter -->
+        <b-col cols="12" md="2" class="mb-3">
+          <label class="form-label fw-semibold">Utama</label>
+          <b-form-select v-model="selectedIsUtama" @change="resetPage">
             <template #first>
-              <b-form-select-option value=""
-                >All Categories</b-form-select-option
-              >
+              <b-form-select-option value="">Semua</b-form-select-option>
             </template>
+            <b-form-select-option value="1">Ya</b-form-select-option>
+            <b-form-select-option value="0">Tidak</b-form-select-option>
           </b-form-select>
         </b-col>
 
-        <!-- Sort Order -->
+        <!-- Is Active Filter -->
         <b-col cols="12" md="2" class="mb-3">
-          <label class="form-label fw-semibold">Sort By</label>
-          <b-form-select
-            v-model="sortOrder"
-            :options="sortOrderOptions"
-            @change="resetPage"
-          />
+          <label class="form-label fw-semibold">Status</label>
+          <b-form-select v-model="selectedIsActive" @change="resetPage">
+            <template #first>
+              <b-form-select-option value="">Semua</b-form-select-option>
+            </template>
+            <b-form-select-option value="1">Aktif</b-form-select-option>
+            <b-form-select-option value="0">Nonaktif</b-form-select-option>
+          </b-form-select>
         </b-col>
 
         <!-- Sort Direction -->
@@ -55,7 +57,7 @@
             class="w-100"
             @click="clearFilters"
           >
-            <i class="bx bx-x me-1"></i>Clear Filters
+            <i class="bx bx-x me-1"></i>Clear
           </b-button>
         </b-col>
       </b-row>
@@ -64,23 +66,23 @@
     <!-- Table -->
     <b-row>
       <b-col>
-        <UIComponentCard id="basic" title="Programs List">
+        <UIComponentCard id="basic" title="Daftar Kategori Program">
           <div class="d-flex justify-content-end mb-3">
             <b-button
               variant="primary"
-              @click="router.push('/programs/create')"
+              @click="router.push('/category/create')"
             >
-              <i class="bx bx-plus fs-16 me-1"></i>Create New Program
+              <i class="bx bx-plus fs-16 me-1"></i>Tambah Kategori
             </b-button>
           </div>
 
           <div v-if="isLoading" class="text-center p-4">
             <b-spinner variant="primary" />
-            <p class="mt-2">Loading programs...</p>
+            <p class="mt-2">Memuat data kategori...</p>
           </div>
 
           <div v-else-if="isError" class="alert alert-danger">
-            Error loading programs: {{ error?.message || "Please try again." }}
+            Error memuat data kategori: {{ error?.message || "Coba lagi." }}
           </div>
 
           <div v-else>
@@ -92,14 +94,26 @@
               <span class="text-muted small">Active filters:</span>
 
               <b-badge
-                v-if="selectedCategory"
+                v-if="selectedIsUtama !== ''"
                 variant="primary"
                 class="d-flex align-items-center gap-1"
               >
-                Category: {{ getCategoryName(selectedCategory) }}
+                Utama: {{ selectedIsUtama === "1" ? "Ya" : "Tidak" }}
                 <i
                   class="bx bx-x cursor-pointer"
-                  @click="selectedCategory = ''"
+                  @click="selectedIsUtama = ''"
+                ></i>
+              </b-badge>
+
+              <b-badge
+                v-if="selectedIsActive !== ''"
+                variant="primary"
+                class="d-flex align-items-center gap-1"
+              >
+                Status: {{ selectedIsActive === "1" ? "Aktif" : "Nonaktif" }}
+                <i
+                  class="bx bx-x cursor-pointer"
+                  @click="selectedIsActive = ''"
                 ></i>
               </b-badge>
 
@@ -121,22 +135,22 @@
 
             <div class="d-flex justify-content-between align-items-center mt-3">
               <div class="text-muted">
-                Showing page {{ currentPage }} of {{ totalPages }} (Total:
-                {{ totalRows }} programs)
+                Halaman {{ currentPage }} dari {{ totalPages }} (Total:
+                {{ totalRows }} kategori)
               </div>
               <b-pagination
                 v-model="currentPage"
                 :total-rows="totalRows"
                 :per-page="perPageItem"
-                prev-text="Previous"
-                next-text="Next"
+                prev-text="Sebelumnya"
+                next-text="Selanjutnya"
                 align="right"
               />
             </div>
 
             <div v-if="isFetching" class="text-center mt-2">
               <small class="text-muted">
-                <b-spinner small class="me-1" />Updating...
+                <b-spinner small class="me-1" />Memperbarui...
               </small>
             </div>
           </div>
@@ -151,21 +165,12 @@ import { computed, onMounted, onBeforeUnmount } from "vue";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
-import { useProgramsTable } from "./components/data";
+import { useCategoryTable } from "./data";
 import router from "@/router";
-import { useQuery } from "@tanstack/vue-query";
-import { getProgramCategories } from "@/services/programService";
-
-const sortOrderOptions = [
-  { value: "id", text: "ID" },
-  { value: "judul", text: "Title" },
-  { value: "created_at", text: "Created At" },
-  { value: "saldo", text: "Saldo" },
-];
 
 const sortDirOptions = [
-  { value: "desc", text: "Descending" },
   { value: "asc", text: "Ascending" },
+  { value: "desc", text: "Descending" },
 ];
 
 const {
@@ -175,47 +180,34 @@ const {
   isError,
   error,
   isFetching,
-  selectedCategory,
+  selectedIsActive,
+  selectedIsUtama,
   searchQuery,
   currentPage,
   perPageItem,
   totalRows,
   totalPages,
-  sortOrder,
   // sortDir,
   resetPage,
   handleDelete,
-} = useProgramsTable();
+} = useCategoryTable();
 
 const hasActiveFilters = computed(
-  () => !!(selectedCategory.value || searchQuery.value),
+  () =>
+    !!(
+      selectedIsActive.value !== "" ||
+      selectedIsUtama.value !== "" ||
+      searchQuery.value
+    ),
 );
 
-const { data: dataCategories } = useQuery({
-  queryKey: ["programCategories"],
-  queryFn: getProgramCategories,
-});
-
-const categoryOptions = computed(() => {
-  if (!dataCategories.value) return [];
-  return dataCategories.value.map((category: any) => ({
-    value: category.id,
-    text: category.name,
-  }));
-});
-
 const clearFilters = () => {
-  selectedCategory.value = "";
+  selectedIsActive.value = "";
+  selectedIsUtama.value = "";
   searchQuery.value = "";
-  sortOrder.value = "id";
   // sortDir.value = "asc";
   resetPage();
 };
-
-const getCategoryName = (value: string | number) =>
-  categoryOptions.value.find(
-    (c: { value: any; text: string }) => c.value === value,
-  )?.text ?? String(value);
 
 const handleGlobalClick = (event: Event) => {
   const target = event.target as HTMLElement;

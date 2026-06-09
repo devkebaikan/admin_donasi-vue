@@ -91,7 +91,7 @@ export function useDataTable<T = any>(options: UseDataTableOptions<T>) {
     rowMapper,
     deleteFn,
     defaultSort = "id",
-    defaultSortDir = "asc",
+    // defaultSortDir = "asc",
     defaultPerPage = 10,
     extraFilters,
     deleteMessages = {},
@@ -104,7 +104,7 @@ export function useDataTable<T = any>(options: UseDataTableOptions<T>) {
   const currentPage = ref(1);
   const perPageItem = ref(defaultPerPage);
   const sortOrder = ref(defaultSort);
-  const sortDir = ref<"asc" | "desc">(defaultSortDir);
+  // const sortDir = ref<"asc" | "desc">(defaultSortDir);
   const tableKey = ref(0); // incremented after mutations to force GridJS re-render
 
   const queryClient = useQueryClient();
@@ -119,7 +119,7 @@ export function useDataTable<T = any>(options: UseDataTableOptions<T>) {
       currentPage.value,
       perPageItem.value,
       sortOrder.value,
-      sortDir.value,
+      // sortDir.value,
       ...Object.values(extra),
     ];
   });
@@ -134,7 +134,7 @@ export function useDataTable<T = any>(options: UseDataTableOptions<T>) {
         mode: "pagination",
         page: currentPage.value,
         order: sortOrder.value,
-        sort: sortDir.value,
+        // sort: sortDir.value,
       };
 
       if (searchQuery.value) params.search = searchQuery.value;
@@ -183,7 +183,7 @@ export function useDataTable<T = any>(options: UseDataTableOptions<T>) {
       searchQuery.value,
       currentPage.value,
       sortOrder.value,
-      sortDir.value,
+      // sortDir.value,
       tableKey.value,
     ].join("-");
   });
@@ -263,7 +263,7 @@ export function useDataTable<T = any>(options: UseDataTableOptions<T>) {
     currentPage,
     perPageItem,
     sortOrder,
-    sortDir,
+    // sortDir,
     // Query state
     data,
     isLoading,
