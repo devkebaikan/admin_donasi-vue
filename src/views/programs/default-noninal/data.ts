@@ -1,21 +1,19 @@
 import { html } from "gridjs";
 import { useDataTable } from "@/composables/useDataTable";
-import {
-  getAllPercentage,
-  deletePercentage,
-} from "@/services/percentageService";
+import { getALlNominal, deleteNominal } from "@/services/nominalService";
+import { formatCurrency } from "@/helpers/format";
 
-export function usePercentageTable() {
+export function useDefaultNominalTable() {
   const table = useDataTable({
-    queryKey: "program-percentage",
-    fetchFn: getAllPercentage,
-    deleteFn: deletePercentage,
-    defaultSort: "name",
+    queryKey: "default-nominal",
+    fetchFn: getALlNominal,
+    deleteFn: deleteNominal,
+    defaultSort: "nominal",
     defaultSortDir: "asc",
     deleteMessages: {
-      text: "Data persentase tidak bisa dikembalikan!",
-      successText: "Persentase berhasil dihapus.",
-      cancelText: "Data persentase aman :)",
+      text: "Data nominal tidak bisa dikembalikan!",
+      successText: "Nominal berhasil dihapus.",
+      cancelText: "Data nominal aman :)",
     },
     columns: [
       {
@@ -25,20 +23,19 @@ export function usePercentageTable() {
           html(`<span class="text-muted small">${cell}</span>`),
       },
       {
-        name: "Nama",
-        width: "180px",
+        name: "Nama Pilihan",
+        width: "240px",
         formatter: (cell: string) =>
           html(`<span class="fw-semibold">${cell}</span>`),
       },
       {
-        name: "Percentage (Program % | Operasional % | Komisi %)",
-        width: "110px",
-        formatter: (cell: any) =>
+        name: "Nominal",
+        width: "180px",
+        formatter: (cell: number) =>
           html(
-            `<span class="font-monospace">( ${cell.program} | ${cell.operasional} | ${cell.komisi} )</span>`,
+            `<span class="font-monospace fw-semibold">${formatCurrency(cell)}</span>`,
           ),
       },
-
       {
         name: "Actions",
         width: "110px",
@@ -46,18 +43,18 @@ export function usePercentageTable() {
         formatter: (item: { id: number }) =>
           html(`
             <div class="d-flex gap-2 justify-content-center">
-              <button
+               <button
                 class="btn btn-sm btn-soft-warning edit-btn"
                 data-action="edit"
                 data-id="${item.id}"
-                title="Edit Persentase">
+                title="Edit Nominal">
                 <i class="bx bx-edit fs-16"></i>
               </button>
               <button
                 class="btn btn-sm btn-soft-danger delete-btn"
                 data-action="delete"
                 data-id="${item.id}"
-                title="Hapus Persentase">
+                title="Hapus Nominal">
                 <i class="bx bx-trash fs-16"></i>
               </button>
             </div>
@@ -67,12 +64,8 @@ export function usePercentageTable() {
 
     rowMapper: (item: any, index: number) => [
       index,
-      item.name,
-      {
-        program: item.program,
-        operasional: item.operasional,
-        komisi: item.komisi,
-      },
+      item.nama_pilihan,
+      item.nominal,
       { id: item.id },
     ],
   });

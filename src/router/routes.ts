@@ -211,6 +211,133 @@ const percentageRoutes = [
   },
 ];
 
+// Default Nominal Routes
+const defaultNominalRoutes = [
+  {
+    path: "/nominal",
+    name: "nominal.list",
+    meta: {
+      title: setTitle("Default Nominal"),
+      authRequired: true,
+    },
+    component: () =>
+      import("@/views/programs/default-noninal/listDafaultNominal.vue"),
+  },
+  {
+    path: "/nominal/create",
+    name: "nominal.create",
+    meta: {
+      title: setTitle("Create Default Nominal"),
+      authRequired: true,
+    },
+    component: () =>
+      import("@/views/programs/default-noninal/createDafaultNominal.vue"),
+  },
+  {
+    path: "/nominal/:id/edit",
+    name: "nominal.edit",
+    meta: {
+      title: setTitle("Edit Default Nominal"),
+      authRequired: true,
+    },
+    component: () =>
+      import("@/views/programs/default-noninal/editDafaultNominal.vue"),
+  },
+];
+
+// Setting Image Routes
+const settingImageRoutes = [
+  {
+    path: "/image",
+    name: "image.list",
+    meta: {
+      title: setTitle("Image"),
+      authRequired: true,
+    },
+    component: () => import("@/views/setting-image/listImage.vue"),
+  },
+  {
+    path: "/image/create",
+    name: "image.create",
+    meta: {
+      title: setTitle("Create Image"),
+      authRequired: true,
+    },
+    component: () => import("@/views/setting-image/createImage.vue"),
+  },
+  {
+    path: "/image/:id/edit",
+    name: "image.edit",
+    meta: {
+      title: setTitle("Edit Image"),
+      authRequired: true,
+    },
+    component: () => import("@/views/setting-image/editImage.vue"),
+  },
+];
+
+// Bank Reference Routes
+const bankReferenceRoutes = [
+  {
+    path: "/bank-reference",
+    name: "bank-reference.list",
+    meta: {
+      title: setTitle("Bank Reference"),
+      authRequired: true,
+    },
+    component: () => import("@/views/bank-reference/listBankReference.vue"),
+  },
+  {
+    path: "/bank-reference/create",
+    name: "bank-reference.create",
+    meta: {
+      title: setTitle("Create Bank Reference"),
+      authRequired: true,
+    },
+    component: () => import("@/views/bank-reference/createBankReference.vue"),
+  },
+  {
+    path: "/bank-reference/:id/edit",
+    name: "bank-reference.edit",
+    meta: {
+      title: setTitle("Edit Bank Reference"),
+      authRequired: true,
+    },
+    component: () => import("@/views/bank-reference/editBankReference.vue"),
+  },
+];
+
+// Lead Routes
+const LeadRoutes = [
+  {
+    path: "/leads",
+    name: "leads.list",
+    meta: {
+      title: setTitle("Leads"),
+      authRequired: true,
+    },
+    component: () => import("@/views/leads/listLead.vue"),
+  },
+  {
+    path: "/leads/create",
+    name: "leads.create",
+    meta: {
+      title: setTitle("Create Leads"),
+    },
+    authRequired: true,
+    component: () => import("@/views/leads/createLead.vue"),
+  },
+  {
+    path: "/leads/:id/edit",
+    name: "leads.edit",
+    meta: {
+      title: setTitle("Edit Leads"),
+      authRequired: true,
+    },
+    component: () => import("@/views/leads/editLead.vue"),
+  },
+];
+
 // ========================================================================== All Routes not use ==========================================================================
 const pagesRoutes = [
   {
@@ -924,4 +1051,8 @@ export const allRoutes = [
   ...mitraRoutes,
   ...categoryRoutes,
   ...percentageRoutes,
+  ...defaultNominalRoutes,
+  ...settingImageRoutes,
+  ...bankReferenceRoutes,
+  ...LeadRoutes,
 ];

@@ -93,30 +93,35 @@ export function useProgramsTable() {
       },
       {
         name: "Actions",
-        width: "100px",
+        width: "90px",
         sort: false,
         formatter: (program: { id: number; link: string }) =>
           html(`
-            <div class="d-flex gap-2 justify-content-center">
-              <a href="/programs/${program.link}/edit"
-                class="btn btn-sm btn-soft-warning"
+            <div class="d-flex flex-column gap-1 justify-content-center">
+              <button
+                class="btn btn-sm btn-soft-warning edit-btn"
+                data-action="edit"
+                data-link="${program.link}"
                 title="Edit Program">
                 <i class="bx bx-edit fs-16"></i>
-              </a>
-            </div>
-            <div class="d-flex gap-2 justify-content-center">
-              <a href="/programs/${program.id}/projects"
-                class="btn btn-sm btn-soft-success"
+              </button>
+
+              <button
+                class="btn btn-sm btn-soft-success projects-btn"
+                data-action="projects"
+                data-id="${program.id}"
                 title="Projects">
                 <i class="bx bx-folder-open fs-16"></i>
-              </a>
-            </div>
-            <div class="d-flex gap-2 justify-content-center">
-              <a href="/programs/${program.id}/news"
-                class="btn btn-sm btn-soft-info"
+              </button>
+
+              <button
+                class="btn btn-sm btn-soft-info news-btn"
+                data-action="news"
+                data-id="${program.id}"
                 title="News">
                 <i class="bx bx-news fs-16"></i>
-              </a>
+              </button>
+             
             </div>
           `),
       },

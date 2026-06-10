@@ -4,12 +4,12 @@
     <b-card class="mb-3">
       <b-row>
         <!-- Search -->
-        <b-col cols="12" md="3" class="mb-3">
+        <b-col cols="12" md="4" class="mb-3">
           <label class="form-label fw-semibold">Search</label>
           <b-form-input
             v-model="searchQuery"
             type="text"
-            placeholder="Cari nama persentase..."
+            placeholder="Cari nama, path gambar, atau link..."
             debounce="500"
             @update:model-value="resetPage"
           />
@@ -32,19 +32,16 @@
     <!-- Table -->
     <b-row>
       <b-col>
-        <UIComponentCard id="basic" title="Daftar Program Persentase">
+        <UIComponentCard id="basic" title="Daftar Page Setting Image">
           <div class="d-flex justify-content-end mb-3">
-            <b-button
-              variant="primary"
-              @click="router.push('/percentage/create')"
-            >
-              <i class="bx bx-plus fs-16 me-1"></i>Tambah Persentase
+            <b-button variant="primary" @click="router.push('/image/create')">
+              <i class="bx bx-plus fs-16 me-1"></i>Tambah Gambar
             </b-button>
           </div>
 
           <div v-if="isLoading" class="text-center p-4">
             <b-spinner variant="primary" />
-            <p class="mt-2">Memuat data persentase...</p>
+            <p class="mt-2">Memuat data gambar...</p>
           </div>
 
           <div v-else-if="isError" class="alert alert-danger">
@@ -76,7 +73,7 @@
             <div class="d-flex justify-content-between align-items-center mt-3">
               <div class="text-muted">
                 Halaman {{ currentPage }} dari {{ totalPages }} (Total:
-                {{ totalRows }} persentase)
+                {{ totalRows }} gambar)
               </div>
               <b-pagination
                 v-model="currentPage"
@@ -105,7 +102,7 @@ import { onMounted, onBeforeUnmount } from "vue";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
-import { usePercentageTable } from "./data";
+import { useSettingImageTable } from "./components/data";
 import router from "@/router";
 
 const {
@@ -122,7 +119,7 @@ const {
   totalPages,
   resetPage,
   handleDelete,
-} = usePercentageTable();
+} = useSettingImageTable();
 
 const clearFilters = () => {
   searchQuery.value = "";
@@ -141,7 +138,7 @@ const handleGlobalClick = (event: Event) => {
   if (editBtn) {
     event.preventDefault();
     const id = editBtn.getAttribute("data-id");
-    if (id) router.push(`/percentage/${id}/edit`);
+    if (id) router.push(`/image/${id}/edit`);
   }
   if (deleteBtn) {
     event.preventDefault();

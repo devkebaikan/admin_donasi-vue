@@ -92,11 +92,13 @@ export function useCategoryTable() {
         formatter: (category: { id: number }) =>
           html(`
             <div class="d-flex gap-2 justify-content-center">
-              <a href="/category/${category.id}/edit"
-                class="btn btn-sm btn-soft-warning"
-                title="Edit Kategori">
+             <button
+                class="btn btn-sm btn-soft-warning edit-btn"
+                data-action="edit"
+                data-id="${category.id}"
+                title="Edit Category">
                 <i class="bx bx-edit fs-16"></i>
-              </a>
+              </button>
               <button
                 class="btn btn-sm btn-soft-danger delete-btn"
                 data-action="delete"

@@ -55,7 +55,7 @@
             class="w-100"
             @click="clearFilters"
           >
-            <i class="bx bx-x me-1"></i>Clear Filters
+            <i class="bx bx-x me-1"></i>Clear
           </b-button>
         </b-col>
       </b-row>
@@ -163,10 +163,10 @@ const sortOrderOptions = [
   { value: "saldo", text: "Saldo" },
 ];
 
-const sortDirOptions = [
-  { value: "desc", text: "Descending" },
-  { value: "asc", text: "Ascending" },
-];
+// const sortDirOptions = [
+//   { value: "desc", text: "Descending" },
+//   { value: "asc", text: "Ascending" },
+// ];
 
 const {
   tableOptions,
@@ -219,13 +219,56 @@ const getCategoryName = (value: string | number) =>
 
 const handleGlobalClick = (event: Event) => {
   const target = event.target as HTMLElement;
+
+  const editBtn = target.closest<HTMLElement>(
+    '#table-gridjs .edit-btn[data-action="edit"]',
+  );
+
+  const projectsBtn = target.closest<HTMLElement>(
+    '#table-gridjs .projects-btn[data-action="projects"]',
+  );
+
+  const newsBtn = target.closest<HTMLElement>(
+    '#table-gridjs .news-btn[data-action="news"]',
+  );
+
   const deleteBtn = target.closest<HTMLElement>(
     '#table-gridjs .delete-btn[data-action="delete"]',
   );
+
+  if (editBtn) {
+    event.preventDefault();
+    const link = editBtn.getAttribute("data-link");
+    if (link) {
+      router.push(`/programs/${link}/edit`);
+    }
+    return;
+  }
+
+  if (projectsBtn) {
+    event.preventDefault();
+    const id = projectsBtn.getAttribute("data-id");
+    if (id) {
+      router.push(`/programs/${id}/projects`);
+    }
+    return;
+  }
+
+  if (newsBtn) {
+    event.preventDefault();
+    const id = newsBtn.getAttribute("data-id");
+    if (id) {
+      router.push(`/programs/${id}/news`);
+    }
+    return;
+  }
+
   if (deleteBtn) {
     event.preventDefault();
     const id = deleteBtn.getAttribute("data-id");
-    if (id) handleDelete(Number(id));
+    if (id) {
+      handleDelete(Number(id));
+    }
   }
 };
 

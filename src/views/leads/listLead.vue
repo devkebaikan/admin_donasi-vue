@@ -4,15 +4,25 @@
     <b-card class="mb-3">
       <b-row>
         <!-- Search -->
-        <b-col cols="12" md="3" class="mb-3">
+        <b-col cols="12" md="4" class="mb-3">
           <label class="form-label fw-semibold">Search</label>
           <b-form-input
             v-model="searchQuery"
             type="text"
-            placeholder="Cari nama persentase..."
+            placeholder="Cari nama atau kode lead..."
             debounce="500"
             @update:model-value="resetPage"
           />
+        </b-col>
+
+        <!-- Type Filter -->
+        <b-col cols="12" md="3" class="mb-3">
+          <label class="form-label fw-semibold">Tipe</label>
+          <b-form-select v-model="selectedType" :options="typeOptions">
+            <template #first>
+              <b-form-select-option value="">All Types</b-form-select-option>
+            </template>
+          </b-form-select>
         </b-col>
 
         <!-- Clear Filters -->
@@ -32,33 +42,44 @@
     <!-- Table -->
     <b-row>
       <b-col>
-        <UIComponentCard id="basic" title="Daftar Program Persentase">
+        <UIComponentCard id="basic" title="Daftar Lead">
           <div class="d-flex justify-content-end mb-3">
-            <b-button
-              variant="primary"
-              @click="router.push('/percentage/create')"
-            >
-              <i class="bx bx-plus fs-16 me-1"></i>Tambah Persentase
+            <b-button variant="primary" @click="router.push('/leads/create')">
+              <i class="bx bx-plus fs-16 me-1"></i>Tambah Lead
             </b-button>
           </div>
 
           <div v-if="isLoading" class="text-center p-4">
             <b-spinner variant="primary" />
-            <p class="mt-2">Memuat data persentase...</p>
+            <p class="mt-2">Memuat data lead...</p>
           </div>
 
           <div v-else-if="isError" class="alert alert-danger">
-            Error memuat data: {{ error?.message || "Coba lagi." }}
+            Error memuat data lead: {{ error?.message || "Coba lagi." }}
           </div>
 
           <div v-else>
             <!-- Active Filters -->
             <div
-              v-if="searchQuery"
+              v-if="hasActiveFilters"
               class="mb-3 d-flex flex-wrap gap-2 align-items-center"
             >
               <span class="text-muted small">Active filters:</span>
+
               <b-badge
+                v-if="selectedType !== ''"
+                variant="primary"
+                class="d-flex align-items-center gap-1"
+              >
+                Tipe: {{ typeLabel }}
+                <i
+                  class="bx bx-x cursor-pointer"
+                  @click="selectedType = ''"
+                ></i>
+              </b-badge>
+
+              <b-badge
+                v-if="searchQuery"
                 variant="primary"
                 class="d-flex align-items-center gap-1"
               >
@@ -76,7 +97,7 @@
             <div class="d-flex justify-content-between align-items-center mt-3">
               <div class="text-muted">
                 Halaman {{ currentPage }} dari {{ totalPages }} (Total:
-                {{ totalRows }} persentase)
+                {{ totalRows }} lead)
               </div>
               <b-pagination
                 v-model="currentPage"
@@ -101,11 +122,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount } from "vue";
+import { computed, onMounted, onBeforeUnmount } from "vue";
+import { useQuery } from "@tanstack/vue-query";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
-import { usePercentageTable } from "./data";
+import { useLeadTable } from "./components/data";
+import { getLeadTypes } from "@/services/leadService";
 import router from "@/router";
 
 const {
@@ -115,6 +138,7 @@ const {
   isError,
   error,
   isFetching,
+  selectedType,
   searchQuery,
   currentPage,
   perPageItem,
@@ -122,15 +146,39 @@ const {
   totalPages,
   resetPage,
   handleDelete,
-} = usePercentageTable();
+} = useLeadTable();
+
+const { data: leadTypes } = useQuery({
+  queryKey: ["lead-types"],
+  queryFn: getLeadTypes,
+});
+
+const typeOptions = computed(() => {
+  if (!leadTypes) return [];
+  return leadTypes.value?.map((lead: any) => ({
+    value: lead.value,
+    text: lead.label,
+  }));
+});
+
+const hasActiveFilters = computed(
+  () => !!(selectedType.value !== "" || searchQuery.value),
+);
+
+const typeLabel = computed(() => {
+  const found = leadTypes.value?.find((t) => t.value === selectedType.value);
+  return found?.label ?? selectedType.value;
+});
 
 const clearFilters = () => {
+  selectedType.value = "";
   searchQuery.value = "";
   resetPage();
 };
 
 const handleGlobalClick = (event: Event) => {
   const target = event.target as HTMLElement;
+
   const editBtn = target.closest<HTMLElement>(
     '#table-gridjs .edit-btn[data-action="edit"]',
   );
@@ -141,7 +189,7 @@ const handleGlobalClick = (event: Event) => {
   if (editBtn) {
     event.preventDefault();
     const id = editBtn.getAttribute("data-id");
-    if (id) router.push(`/percentage/${id}/edit`);
+    if (id) router.push(`/leads/${id}/edit`);
   }
   if (deleteBtn) {
     event.preventDefault();

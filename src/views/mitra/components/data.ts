@@ -82,11 +82,13 @@ export function useMitraTable() {
         formatter: (mitra: { id: number }) =>
           html(`
             <div class="d-flex gap-2 justify-content-center">
-              <a href="/mitra/${mitra.id}/edit"
-                class="btn btn-sm btn-soft-warning"
+               <button
+                class="btn btn-sm btn-soft-warning edit-btn"
+                data-action="edit"
+                data-id="${mitra.id}"
                 title="Edit Mitra">
                 <i class="bx bx-edit fs-16"></i>
-              </a>
+              </button>
               <button
                 class="btn btn-sm btn-soft-danger delete-btn"
                 data-action="delete"

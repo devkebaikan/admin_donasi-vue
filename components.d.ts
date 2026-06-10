@@ -72,6 +72,7 @@ declare module 'vue' {
     DropDown: typeof import('./src/components/DropDown.vue')['default']
     FlatPicker: typeof import('./src/components/FlatPicker.vue')['default']
     GridJsTable: typeof import('./src/components/GridJsTable.vue')['default']
+    ImageUpload: typeof import('./src/components/ImageUpload.vue')['default']
     InputMask: typeof import('./src/components/InputMask.vue')['default']
     JsVectorMap: typeof import('./src/components/JsVectorMap.vue')['default']
     LogoBox: typeof import('./src/components/LogoBox.vue')['default']

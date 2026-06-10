@@ -47,7 +47,7 @@
             class="w-100"
             @click="clearFilters"
           >
-            <i class="bx bx-x me-1"></i>Clear Filters
+            <i class="bx bx-x me-1"></i>Clear
           </b-button>
         </b-col>
       </b-row>
@@ -143,11 +143,6 @@ import GridJsTable from "@/components/GridJsTable.vue";
 import { useMitraTable } from "./components/data";
 import router from "@/router";
 
-const sortDirOptions = [
-  { value: "desc", text: "Descending" },
-  { value: "asc", text: "Ascending" },
-];
-
 const {
   tableOptions,
   tableKeyString,
@@ -179,9 +174,18 @@ const clearFilters = () => {
 
 const handleGlobalClick = (event: Event) => {
   const target = event.target as HTMLElement;
+  const editBtn = target.closest<HTMLElement>(
+    '#table-gridjs .edit-btn[data-action="edit"]',
+  );
   const deleteBtn = target.closest<HTMLElement>(
     '#table-gridjs .delete-btn[data-action="delete"]',
   );
+
+  if (editBtn) {
+    event.preventDefault();
+    const id = editBtn.getAttribute("data-id");
+    if (id) router.push(`/mitra/${id}/edit`);
+  }
   if (deleteBtn) {
     event.preventDefault();
     const id = deleteBtn.getAttribute("data-id");

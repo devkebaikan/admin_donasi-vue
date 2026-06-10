@@ -209,7 +209,7 @@ const handleSignIn = async () => {
       payload,
     );
 
-    console.log("Login response:", res);
+    // console.log("Login response:", res);
 
     // Validate response
     if (res.data?.access_token) {

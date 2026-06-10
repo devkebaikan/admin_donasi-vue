@@ -9,45 +9,37 @@
           <b-form-input
             v-model="searchQuery"
             type="text"
-            placeholder="Cari nama kategori..."
+            placeholder="Cari nama, kode, atau tipe..."
             debounce="500"
             @update:model-value="resetPage"
           />
         </b-col>
 
-        <!-- Is Utama Filter -->
+        <!-- Tipe Filter -->
         <b-col cols="12" md="2" class="mb-3">
-          <label class="form-label fw-semibold">Utama</label>
-          <b-form-select v-model="selectedIsUtama" @change="resetPage">
+          <label class="form-label fw-semibold">Tipe</label>
+          <b-form-select v-model="selectedType" @change="resetPage">
             <template #first>
-              <b-form-select-option value="">Semua</b-form-select-option>
+              <b-form-select-option value="">Semua Tipe</b-form-select-option>
             </template>
-            <b-form-select-option value="1">Ya</b-form-select-option>
-            <b-form-select-option value="0">Tidak</b-form-select-option>
+            <b-form-select-option value="bank">Bank</b-form-select-option>
+            <b-form-select-option value="e_wallet"
+              >E-Wallet</b-form-select-option
+            >
           </b-form-select>
         </b-col>
 
-        <!-- Is Active Filter -->
+        <!-- Status Filter -->
         <b-col cols="12" md="2" class="mb-3">
           <label class="form-label fw-semibold">Status</label>
           <b-form-select v-model="selectedIsActive" @change="resetPage">
             <template #first>
-              <b-form-select-option value="">Semua</b-form-select-option>
+              <b-form-select-option value="">Semua Status</b-form-select-option>
             </template>
-            <b-form-select-option value="1">Aktif</b-form-select-option>
-            <b-form-select-option value="0">Nonaktif</b-form-select-option>
+            <b-form-select-option value="true">Aktif</b-form-select-option>
+            <b-form-select-option value="false">Nonaktif</b-form-select-option>
           </b-form-select>
         </b-col>
-
-        <!-- Sort Direction -->
-        <!-- <b-col cols="12" md="2" class="mb-3">
-          <label class="form-label fw-semibold">Direction</label>
-          <b-form-select
-            v-model="sortDir"
-            :options="sortDirOptions"
-            @change="resetPage"
-          />
-        </b-col> -->
 
         <!-- Clear Filters -->
         <b-col cols="12" md="2" class="mb-3">
@@ -66,23 +58,23 @@
     <!-- Table -->
     <b-row>
       <b-col>
-        <UIComponentCard id="basic" title="Daftar Kategori Program">
+        <UIComponentCard id="basic" title="Daftar Bank Reference">
           <div class="d-flex justify-content-end mb-3">
             <b-button
               variant="primary"
-              @click="router.push('/category/create')"
+              @click="router.push('/bank-reference/create')"
             >
-              <i class="bx bx-plus fs-16 me-1"></i>Tambah Kategori
+              <i class="bx bx-plus fs-16 me-1"></i>Tambah Bank Reference
             </b-button>
           </div>
 
           <div v-if="isLoading" class="text-center p-4">
             <b-spinner variant="primary" />
-            <p class="mt-2">Memuat data kategori...</p>
+            <p class="mt-2">Memuat data bank reference...</p>
           </div>
 
           <div v-else-if="isError" class="alert alert-danger">
-            Error memuat data kategori: {{ error?.message || "Coba lagi." }}
+            Error memuat data: {{ error?.message || "Coba lagi." }}
           </div>
 
           <div v-else>
@@ -94,14 +86,23 @@
               <span class="text-muted small">Active filters:</span>
 
               <b-badge
-                v-if="selectedIsUtama !== ''"
+                v-if="searchQuery"
                 variant="primary"
                 class="d-flex align-items-center gap-1"
               >
-                Utama: {{ selectedIsUtama === "1" ? "Ya" : "Tidak" }}
+                Search: "{{ searchQuery }}"
+                <i class="bx bx-x cursor-pointer" @click="searchQuery = ''"></i>
+              </b-badge>
+
+              <b-badge
+                v-if="selectedType"
+                variant="primary"
+                class="d-flex align-items-center gap-1"
+              >
+                Tipe: {{ selectedType === "e_wallet" ? "E-Wallet" : "Bank" }}
                 <i
                   class="bx bx-x cursor-pointer"
-                  @click="selectedIsUtama = ''"
+                  @click="selectedType = ''"
                 ></i>
               </b-badge>
 
@@ -110,20 +111,11 @@
                 variant="primary"
                 class="d-flex align-items-center gap-1"
               >
-                Status: {{ selectedIsActive === "1" ? "Aktif" : "Nonaktif" }}
+                Status: {{ selectedIsActive === "true" ? "Aktif" : "Nonaktif" }}
                 <i
                   class="bx bx-x cursor-pointer"
                   @click="selectedIsActive = ''"
                 ></i>
-              </b-badge>
-
-              <b-badge
-                v-if="searchQuery"
-                variant="primary"
-                class="d-flex align-items-center gap-1"
-              >
-                Search: "{{ searchQuery }}"
-                <i class="bx bx-x cursor-pointer" @click="searchQuery = ''"></i>
               </b-badge>
             </div>
 
@@ -136,7 +128,7 @@
             <div class="d-flex justify-content-between align-items-center mt-3">
               <div class="text-muted">
                 Halaman {{ currentPage }} dari {{ totalPages }} (Total:
-                {{ totalRows }} kategori)
+                {{ totalRows }} bank reference)
               </div>
               <b-pagination
                 v-model="currentPage"
@@ -162,55 +154,92 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onBeforeUnmount } from "vue";
+import { useMutation, useQueryClient } from "@tanstack/vue-query";
+import Swal from "sweetalert2/dist/sweetalert2.js";
+import "sweetalert2/dist/sweetalert2.css";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
-import { useCategoryTable } from "./data";
+import { useBankReferenceTable } from "./components/data";
+import { toggleBankReferenceStatus } from "@/services/bankReferenceService";
 import router from "@/router";
 
-const sortDirOptions = [
-  { value: "asc", text: "Ascending" },
-  { value: "desc", text: "Descending" },
-];
+const queryClient = useQueryClient();
 
 const {
   tableOptions,
   tableKeyString,
+  tableKey,
   isLoading,
   isError,
   error,
   isFetching,
-  selectedIsActive,
-  selectedIsUtama,
   searchQuery,
+  selectedType,
+  selectedIsActive,
   currentPage,
   perPageItem,
   totalRows,
   totalPages,
-  // sortDir,
   resetPage,
   handleDelete,
-} = useCategoryTable();
+} = useBankReferenceTable();
 
 const hasActiveFilters = computed(
   () =>
     !!(
-      selectedIsActive.value !== "" ||
-      selectedIsUtama.value !== "" ||
-      searchQuery.value
+      searchQuery.value ||
+      selectedType.value ||
+      selectedIsActive.value !== ""
     ),
 );
 
 const clearFilters = () => {
-  selectedIsActive.value = "";
-  selectedIsUtama.value = "";
   searchQuery.value = "";
-  // sortDir.value = "asc";
+  selectedType.value = "";
+  selectedIsActive.value = "";
   resetPage();
+};
+
+const { mutate: doToggle } = useMutation({
+  mutationFn: (id: number) => toggleBankReferenceStatus(id),
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ["bank-references"] });
+    tableKey.value++;
+  },
+  onError: () => {
+    Swal.fire({
+      title: "Gagal",
+      text: "Terjadi kesalahan saat mengubah status.",
+      icon: "error",
+      confirmButtonColor: "#ff6c2f",
+    });
+  },
+});
+
+const handleToggle = (id: number, currentlyActive: boolean) => {
+  const willActivate = !currentlyActive;
+  Swal.fire({
+    title: willActivate
+      ? "Aktifkan bank reference?"
+      : "Nonaktifkan bank reference?",
+    text: willActivate
+      ? "Bank reference ini akan ditampilkan sebagai opsi pembayaran."
+      : "Bank reference ini akan disembunyikan dari opsi pembayaran.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: willActivate ? "Ya, aktifkan!" : "Ya, nonaktifkan!",
+    cancelButtonText: "Batal",
+    confirmButtonColor: willActivate ? "#0acf97" : "#6c757d",
+    cancelButtonColor: "#ef5f5f",
+  }).then((result: any) => {
+    if (result.isConfirmed) doToggle(id);
+  });
 };
 
 const handleGlobalClick = (event: Event) => {
   const target = event.target as HTMLElement;
+
   const editBtn = target.closest<HTMLElement>(
     '#table-gridjs .edit-btn[data-action="edit"]',
   );
@@ -221,12 +250,21 @@ const handleGlobalClick = (event: Event) => {
   if (editBtn) {
     event.preventDefault();
     const id = editBtn.getAttribute("data-id");
-    if (id) router.push(`/category/${id}/edit`);
+    if (id) router.push(`/bank-reference/${id}/edit`);
   }
   if (deleteBtn) {
     event.preventDefault();
     const id = deleteBtn.getAttribute("data-id");
     if (id) handleDelete(Number(id));
+    return;
+  }
+
+  const toggleEl = target.closest<HTMLElement>("#table-gridjs .toggle-status");
+  if (toggleEl) {
+    event.preventDefault();
+    const id = toggleEl.getAttribute("data-id");
+    const active = toggleEl.getAttribute("data-active");
+    if (id) handleToggle(Number(id), active === "true");
   }
 };
 
