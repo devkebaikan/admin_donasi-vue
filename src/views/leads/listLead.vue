@@ -2,17 +2,35 @@
   <VerticalLayout>
     <!-- Filter Section -->
     <b-card class="mb-3">
+      <template #header>
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bx bx-filter-alt me-1"></i>Filter</h5>
+          <b-button
+            v-if="hasActiveFilters"
+            size="sm"
+            variant="outline-danger"
+            @click="clearFilters"
+          >
+            <i class="bx bx-reset me-1"></i>Reset Filter
+          </b-button>
+        </div>
+      </template>
+
       <b-row>
         <!-- Search -->
         <b-col cols="12" md="4" class="mb-3">
           <label class="form-label fw-semibold">Search</label>
-          <b-form-input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Cari nama atau kode lead..."
-            debounce="500"
-            @update:model-value="resetPage"
-          />
+          <b-input-group>
+            <span class="input-group-text">
+              <i class="bx bx-search"></i>
+            </span>
+            <b-form-input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Cari nama atau kode lead..."
+              debounce="500"
+              @update:model-value="resetPage"
+          /></b-input-group>
         </b-col>
 
         <!-- Type Filter -->
@@ -23,18 +41,6 @@
               <b-form-select-option value="">All Types</b-form-select-option>
             </template>
           </b-form-select>
-        </b-col>
-
-        <!-- Clear Filters -->
-        <b-col cols="12" md="2" class="mb-3">
-          <label class="form-label fw-semibold d-block">&nbsp;</label>
-          <b-button
-            variant="outline-secondary"
-            class="w-100"
-            @click="clearFilters"
-          >
-            <i class="bx bx-x me-1"></i>Clear
-          </b-button>
         </b-col>
       </b-row>
     </b-card>

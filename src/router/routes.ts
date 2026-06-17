@@ -1,7 +1,7 @@
 const setTitle = (title: string) => {
   return title
-    ? `${title} | Rasket Vue - Responsive Admin Dashboard Template`
-    : "Rasket Vue - Responsive Admin Dashboard Template";
+    ? `${title} | Admin Beramalbersama.com`
+    : "Dashboard Beramalbersama.com";
 };
 
 const authRoutes = [
@@ -102,19 +102,6 @@ const programRoutes = [
       authRequired: true,
     },
     component: () => import("@/views/programs/editProgram.vue"),
-  },
-];
-
-// Project Routes
-const projectRoutes = [
-  {
-    path: "/programs/project",
-    name: "project.list",
-    meta: {
-      title: setTitle("Projects"),
-      authRequired: true,
-    },
-    component: () => import("@/views/programs/projects/listProject.vue"),
   },
 ];
 
@@ -335,6 +322,340 @@ const LeadRoutes = [
       authRequired: true,
     },
     component: () => import("@/views/leads/editLead.vue"),
+  },
+];
+
+// Blog Routes
+const blogRoutes = [
+  {
+    path: "/blog",
+    name: "blogs.list",
+    meta: {
+      title: setTitle("Blogs"),
+      authRequired: true,
+    },
+    component: () => import("@/views/blogs/listBlog.vue"),
+  },
+  {
+    path: "/blog/create",
+    name: "blogs.create",
+    meta: {
+      title: setTitle("Create Blogs"),
+      authRequired: true,
+    },
+    component: () => import("@/views/blogs/createBlog.vue"),
+  },
+  {
+    path: "/blog/:id/edit",
+    name: "blogs.edit",
+    meta: {
+      title: setTitle("Edit Blogs"),
+      authRequired: true,
+    },
+    component: () => import("@/views/blogs/editBlog.vue"),
+  },
+];
+
+// Program Show Routes
+const programShowRoutes = [
+  {
+    path: "/program-show",
+    name: "program-show.list",
+    meta: {
+      title: setTitle("Program Show"),
+      authRequired: true,
+    },
+    component: () => import("@/views/program-shows/listProgramShow.vue"),
+  },
+  {
+    path: "/program-show/create",
+    name: "program-show.create",
+    meta: {
+      title: setTitle("Create Program Show"),
+      authRequired: true,
+    },
+    component: () => import("@/views/program-shows/createProgramShow.vue"),
+  },
+  {
+    path: "/program-show/:id/edit",
+    name: "program-show.edit",
+    meta: {
+      title: setTitle("Edit Program Show"),
+      authRequired: true,
+    },
+    component: () => import("@/views/program-shows/editProgramShow.vue"),
+  },
+];
+
+// Setting Routes
+const settingRoutes = [
+  {
+    path: "/settings",
+    name: "setting.list",
+    meta: {
+      title: setTitle("Setting"),
+      authRequired: true,
+    },
+    component: () => import("@/views/settings/listSetting.vue"),
+  },
+];
+
+// Role Routes
+const roleRoutes = [
+  {
+    path: "/roles",
+    name: "role.list",
+    meta: {
+      title: setTitle("Role"),
+      authRequired: true,
+    },
+    component: () => import("@/views/roles/listRole.vue"),
+  },
+  {
+    path: "/roles/create",
+    name: "role.create",
+    meta: {
+      title: setTitle("Create Role"),
+      authRequired: true,
+    },
+    component: () => import("@/views/roles/createRole.vue"),
+  },
+  {
+    path: "/roles/:id/edit",
+    name: "role.edit",
+    meta: {
+      title: setTitle("Edit Role"),
+      authRequired: true,
+    },
+    component: () => import("@/views/roles/editRole.vue"),
+  },
+  {
+    path: "/roles/:id/users",
+    name: "role.users",
+    meta: {
+      title: setTitle("Users by Role"),
+      authRequired: true,
+    },
+    component: () => import("@/views/roles/usersByRole.vue"),
+  },
+];
+
+// Permissions Routes
+const permissionRoutes = [
+  {
+    path: "/permissions",
+    name: "permission.list",
+    meta: {
+      title: setTitle("Permission"),
+      authRequired: true,
+    },
+    component: () => import("@/views/permissions/listPermissions.vue"),
+  },
+  {
+    path: "/permissions/create",
+    name: "permission.create",
+    meta: {
+      title: setTitle("Create Permission"),
+      authRequired: true,
+    },
+    component: () => import("@/views/permissions/createPermissions.vue"),
+  },
+  {
+    path: "/permissions/:id/edit",
+    name: "permission.edit",
+    meta: {
+      title: setTitle("Edit Permission"),
+      authRequired: true,
+    },
+    component: () => import("@/views/permissions/editPermissions.vue"),
+  },
+];
+
+// Transaction Routes
+const transactionRoutes = [
+  {
+    path: "/transactions",
+    name: "transaction.list",
+    meta: {
+      title: setTitle("Transaksi"),
+      authRequired: true,
+    },
+    component: () => import("@/views/transactions/listTransaction.vue"),
+  },
+  {
+    path: "/transactions/create",
+    name: "transaction.create",
+    meta: {
+      title: setTitle("Tambah Transaksi"),
+      authRequired: true,
+    },
+    component: () => import("@/views/transactions/createTransaction.vue"),
+  },
+  {
+    path: "/transactions/:id",
+    name: "transaction.detail",
+    meta: {
+      title: setTitle("Detail Transaksi"),
+      authRequired: true,
+    },
+    component: () => import("@/views/transactions/detailTransaction.vue"),
+  },
+  {
+    path: "/transactions/:id/edit",
+    name: "transaction.edit",
+    meta: {
+      title: setTitle("Edit Transaksi"),
+      authRequired: true,
+    },
+    component: () => import("@/views/transactions/editTransaction.vue"),
+  },
+];
+
+// Project Routes
+const projectRoutes = [
+  {
+    path: "/projects",
+    name: "project.list",
+    meta: {
+      title: setTitle("Project"),
+      authRequired: true,
+    },
+    component: () => import("@/views/projects/listProject.vue"),
+  },
+  {
+    path: "/projects/create",
+    name: "project.create",
+    meta: {
+      title: setTitle("Create Project"),
+      authRequired: true,
+    },
+    component: () => import("@/views/projects/createProject.vue"),
+  },
+  {
+    path: "/projects/:id/edit",
+    name: "project.edit",
+    meta: {
+      title: setTitle("Edit Project"),
+      authRequired: true,
+    },
+    component: () => import("@/views/projects/editProject.vue"),
+  },
+];
+
+// Banner Routes
+const bannerRoutes = [
+  {
+    path: "/banners",
+    name: "banner.list",
+    meta: {
+      title: setTitle("Banner"),
+      authRequired: true,
+    },
+    component: () => import("@/views/setting-banner/listBanner.vue"),
+  },
+  {
+    path: "/banners/create",
+    name: "banner.create",
+    meta: {
+      title: setTitle("Create Banner"),
+      authRequired: true,
+    },
+    component: () => import("@/views/setting-banner/createBanner.vue"),
+  },
+  {
+    path: "/banners/:id/edit",
+    name: "banner.edit",
+    meta: {
+      title: setTitle("Edit Banner"),
+      authRequired: true,
+    },
+    component: () => import("@/views/setting-banner/editBanner.vue"),
+  },
+];
+
+// Event Routes
+const eventRoutes = [
+  {
+    path: "/events",
+    name: "event.list",
+    meta: {
+      title: setTitle("Event"),
+      authRequired: true,
+    },
+    component: () => import("@/views/event/listEvent.vue"),
+  },
+  {
+    path: "/events/create",
+    name: "event.create",
+    meta: {
+      title: setTitle("Create Event"),
+      authRequired: true,
+    },
+    component: () => import("@/views/event/createEvent.vue"),
+  },
+  {
+    path: "/events/:id/edit",
+    name: "event.edit",
+    meta: {
+      title: setTitle("Edit Event"),
+      authRequired: true,
+    },
+    component: () => import("@/views/event/editEvent.vue"),
+  },
+];
+
+// Finanace Account Routes
+const financeAccountRoutes = [
+  {
+    path: "/finance-account",
+    name: "finance-account.list",
+    meta: {
+      title: setTitle("Finance Account"),
+      authRequired: true,
+    },
+    component: () => import("@/views/finance-account/listAccount.vue"),
+  },
+  {
+    path: "/finance-account/create",
+    name: "finance-account.create",
+    meta: {
+      title: setTitle("Create Finance Account"),
+      authRequired: true,
+    },
+    component: () => import("@/views/finance-account/createAccount.vue"),
+  },
+  {
+    path: "/finance-account/:id/edit",
+    name: "finance-account.edit",
+    meta: {
+      title: setTitle("Edit Finance Account"),
+      authRequired: true,
+    },
+    component: () => import("@/views/finance-account/editAccount.vue"),
+  },
+];
+
+// Finance Account Master Routes
+const financeAccountMasterRoutes = [
+  {
+    path: "/finance-account-master",
+    name: "finance-account-master.list",
+    meta: {
+      title: setTitle("Finance Account Master"),
+      authRequired: true,
+    },
+    component: () =>
+      import("@/views/finance-account-master/listAccountMaster.vue"),
+  },
+  {
+    path: "/finance-account-master/:id/edit",
+    name: "finance-account-master.edit",
+    meta: {
+      title: setTitle("Edit Finance Account Master"),
+      authRequired: true,
+    },
+    component: () =>
+      import("@/views/finance-account-master/editAccountMaster.vue"),
   },
 ];
 
@@ -1055,4 +1376,14 @@ export const allRoutes = [
   ...settingImageRoutes,
   ...bankReferenceRoutes,
   ...LeadRoutes,
+  ...blogRoutes,
+  ...programShowRoutes,
+  ...settingRoutes,
+  ...roleRoutes,
+  ...permissionRoutes,
+  ...transactionRoutes,
+  ...bannerRoutes,
+  ...eventRoutes,
+  ...financeAccountRoutes,
+  ...financeAccountMasterRoutes,
 ];

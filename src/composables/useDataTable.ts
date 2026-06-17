@@ -133,7 +133,7 @@ export function useDataTable<T = any>(options: UseDataTableOptions<T>) {
         limit: perPageItem.value,
         mode: "pagination",
         page: currentPage.value,
-        order: sortOrder.value,
+        // order: sortOrder.value,
         // sort: sortDir.value,
       };
 

@@ -1,7 +1,9 @@
-// Format currency untuk Indonesia
+// Format currency
 const formatCurrency = (value: string | number) => {
   const num = Number(value);
+
   if (isNaN(num)) return "-";
+
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
@@ -22,4 +24,36 @@ const formatCurrencyExport = (value: number) => {
   return isNegative ? `(${formatted})` : formatted;
 };
 
-export { formatCurrency, formatCurrencyExport };
+// Format tanggal
+const formatDate = (value: string | Date | null | undefined) => {
+  if (!value) return "-";
+
+  const date = new Date(value);
+
+  if (isNaN(date.getTime())) return "-";
+
+  return date.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+// Format tanggal + waktu
+const formatDateTime = (value: string | Date | null | undefined) => {
+  if (!value) return "-";
+
+  const date = new Date(value);
+
+  if (isNaN(date.getTime())) return "-";
+
+  return date.toLocaleString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+export { formatCurrency, formatCurrencyExport, formatDate, formatDateTime };

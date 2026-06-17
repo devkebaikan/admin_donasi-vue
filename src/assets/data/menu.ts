@@ -17,6 +17,56 @@ export const MENU_ITEMS: MenuItemType[] = [
     route: { name: "dashboards.index" },
   },
   {
+    key: "admin",
+    label: "Admin",
+    isTitle: true,
+  },
+
+  {
+    key: "transactions",
+    icon: "mdi:bank-outline",
+    label: "Transactions",
+    route: { name: "transaction.list" },
+  },
+
+  {
+    key: "finance",
+    label: "Finance",
+    isTitle: true,
+  },
+
+  {
+    key: "finance-account",
+    icon: "material-symbols:finance",
+    label: "Finance Account",
+    route: { name: "finance-account.list" },
+  },
+  {
+    key: "finance-account-master",
+    icon: "material-symbols:finance",
+    label: "Finance Account Master",
+    route: { name: "finance-account-master.list" },
+  },
+
+  {
+    key: "rbac",
+    label: "RBAC",
+    isTitle: true,
+  },
+  {
+    key: "rbac-role",
+    icon: "carbon:user-role",
+    label: "Role",
+    route: { name: "role.list" },
+  },
+  {
+    key: "rbac-permission",
+    icon: "carbon:user-role",
+    label: "Permissions",
+    route: { name: "permission.list" },
+  },
+
+  {
     key: "data",
     label: "Data",
     isTitle: true,
@@ -66,6 +116,34 @@ export const MENU_ITEMS: MenuItemType[] = [
   },
 
   {
+    key: "blogs",
+    icon: "tdesign:task-filled",
+    label: "Blogs",
+    children: [
+      {
+        key: "blog-list",
+        label: "List",
+        route: { name: "blogs.list" },
+        parentKey: "blogs",
+      },
+    ],
+  },
+
+  {
+    key: "events",
+    icon: "tdesign:task-filled",
+    label: "Events",
+    children: [
+      {
+        key: "event-list",
+        label: "List",
+        route: { name: "event.list" },
+        parentKey: "events",
+      },
+    ],
+  },
+
+  {
     key: "setting",
     label: "Settings",
     isTitle: true,
@@ -75,6 +153,12 @@ export const MENU_ITEMS: MenuItemType[] = [
     icon: "ic:baseline-image",
     label: "Image",
     route: { name: "image.list" },
+  },
+  {
+    key: "setting-banner",
+    icon: "ic:baseline-image",
+    label: "Banner",
+    route: { name: "banner.list" },
   },
   {
     key: "setting-bank",
@@ -87,6 +171,19 @@ export const MENU_ITEMS: MenuItemType[] = [
     icon: "material-symbols:leaderboard-rounded",
     label: "Leads",
     route: { name: "leads.list" },
+  },
+  {
+    key: "setting-program-show",
+    icon: "tdesign:task-filled",
+    label: "Program Show",
+    route: { name: "program-show.list" },
+  },
+
+  {
+    key: "setting-setting",
+    icon: "uil:setting",
+    label: "Settings",
+    route: { name: "setting.list" },
   },
   //   {
   //     key: "apps-todo",
