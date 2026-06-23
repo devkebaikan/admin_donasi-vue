@@ -65,6 +65,12 @@ export const MENU_ITEMS: MenuItemType[] = [
     label: "Permissions",
     route: { name: "permission.list" },
   },
+  {
+    key: "rbac-user",
+    icon: "carbon:user-role",
+    label: "Users",
+    route: { name: "user.list" },
+  },
 
   {
     key: "data",
@@ -140,6 +146,18 @@ export const MENU_ITEMS: MenuItemType[] = [
         route: { name: "event.list" },
         parentKey: "events",
       },
+      // {
+      //   key: "event-types",
+      //   label: "Types",
+      //   route: { name: "event-type.list" },
+      //   parentKey: "events",
+      // },
+      // {
+      //   key: "event-attribute",
+      //   label: "Attribute",
+      //   route: { name: "event-attribute.list" },
+      //   parentKey: "events",
+      // },
     ],
   },
 
@@ -159,6 +177,12 @@ export const MENU_ITEMS: MenuItemType[] = [
     icon: "ic:baseline-image",
     label: "Banner",
     route: { name: "banner.list" },
+  },
+  {
+    key: "setting-ads",
+    icon: "cib:google-ads",
+    label: "Ads Script",
+    route: { name: "ads-script.list" },
   },
   {
     key: "setting-bank",

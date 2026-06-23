@@ -1,7 +1,7 @@
 <template>
   <VerticalLayout>
     <b-row>
-      <b-col cols="12" md="8" lg="6">
+      <b-col cols="12">
         <UIComponentCard title="Tambah Permission">
           <form @submit.prevent="handleSubmit">
             <!-- Nama Permission -->

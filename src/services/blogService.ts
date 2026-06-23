@@ -12,7 +12,7 @@ export const getAllBlogs = async (params = {}) => {
 
 export const getBlogById = async (id: number) => {
   try {
-    const res = await HttpClient.get(`/blogs/${id}`);
+    const res = await HttpClient.get(`/blogs/id/${id}`);
     return res.data.data;
   } catch (error) {
     console.error(`Error fetching blog with id ${id}:`, error);

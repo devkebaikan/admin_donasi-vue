@@ -948,8 +948,7 @@ const handleSubmit = async () => {
     });
   }
 
-  // updateProgramPayload(formData);
-  console.log(formState);
+  updateProgramPayload(formData);
 };
 
 // ── Quill toolbar ──────────────────────────────────────────────────────────

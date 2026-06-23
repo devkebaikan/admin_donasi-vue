@@ -21,7 +21,7 @@ class HttpClient {
       baseURL: API_BASE_URL,
       timeout: DEFAULT_TIMEOUT,
       headers: {
-        "Content-Type": "application/json",
+        // "Content-Type": "application/json",
         Accept: "application/json",
       },
     });

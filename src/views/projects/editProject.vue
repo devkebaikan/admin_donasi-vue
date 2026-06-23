@@ -171,10 +171,7 @@
               <b-row class="g-3">
                 <!-- Nominal Ajuan -->
                 <b-col md="6">
-                  <b-form-group
-                    label="Nominal Ajuan"
-                    label-for="nominal-ajuan"
-                  >
+                  <b-form-group label="Nominal Ajuan" label-for="nominal-ajuan">
                     <CurrencyInput
                       id="nominal-ajuan"
                       placeholder="0"
@@ -624,7 +621,7 @@ watch(
     formState.status = data.status ?? "draft";
     formState.activity = data.activity ?? "";
     formState.request = data.request ?? "nothing";
-    formState.mitra_id = data.mitra_id ?? null;
+    formState.mitra_id = data.mitras.id ?? null;
     formState.nominal_ajuan = data.nominal_ajuan ?? undefined;
     formState.nominal_acc = data.nominal_acc ?? undefined;
     formState.waktu_pelaksanaan = data.waktu_pelaksanaan ?? "";

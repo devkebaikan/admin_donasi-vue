@@ -5,19 +5,13 @@ import {
   getAllTransactions,
   deleteTransaction,
 } from "@/services/transactionService";
+import { formatCurrency } from "@/helpers/format";
 
 const STATUS_MAP: Record<string, { cls: string; label: string }> = {
   Paid: { cls: "bg-success", label: "Paid" },
   Pending: { cls: "bg-warning text-dark", label: "Pending" },
   Canceled: { cls: "bg-danger", label: "Canceled" },
 };
-
-const formatCurrency = (val: number) =>
-  new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  }).format(val ?? 0);
 
 export function useTransactionTable() {
   const selectedStatus = ref<string>("");
@@ -59,6 +53,7 @@ export function useTransactionTable() {
     fetchFn: getAllTransactions,
     deleteFn: deleteTransaction,
     extraFilters,
+    defaultPerPage: 5,
     deleteMessages: {
       text: "Data transaksi tidak bisa dikembalikan setelah dihapus!",
       successText: "Transaksi berhasil dihapus.",

@@ -43,26 +43,26 @@ export function useBankReferenceTable() {
         formatter: (cell: number) =>
           html(`<span class="text-muted small">${cell}</span>`),
       },
-      {
-        name: "Logo",
-        width: "72px",
-        sort: false,
-        formatter: (cell: string) => {
-          const url = buildImageUrl(cell);
-          return url
-            ? html(
-                `<img src="${url}" alt="logo" style="width:48px;height:32px;object-fit:contain;border-radius:4px;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-                 <div style="display:none;width:48px;height:32px;background:#f8f9fa;border-radius:4px;align-items:center;justify-content:center;">
-                   <i class="bx bx-image text-muted"></i>
-                 </div>`,
-              )
-            : html(
-                `<div style="width:48px;height:32px;background:#f8f9fa;border-radius:4px;display:flex;align-items:center;justify-content:center;">
-                   <i class="bx bx-image text-muted"></i>
-                 </div>`,
-              );
-        },
-      },
+      // {
+      //   name: "Logo",
+      //   width: "72px",
+      //   sort: false,
+      //   formatter: (cell: string) => {
+      //     const url = buildImageUrl(cell);
+      //     return url
+      //       ? html(
+      //           `<img src="${url}" alt="logo" style="width:48px;height:32px;object-fit:contain;border-radius:4px;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+      //            <div style="display:none;width:48px;height:32px;background:#f8f9fa;border-radius:4px;align-items:center;justify-content:center;">
+      //              <i class="bx bx-image text-muted"></i>
+      //            </div>`,
+      //         )
+      //       : html(
+      //           `<div style="width:48px;height:32px;background:#f8f9fa;border-radius:4px;display:flex;align-items:center;justify-content:center;">
+      //              <i class="bx bx-image text-muted"></i>
+      //            </div>`,
+      //         );
+      //   },
+      // },
       {
         name: "Nama",
         width: "240px",
@@ -136,7 +136,7 @@ export function useBankReferenceTable() {
 
     rowMapper: (item: any, index: number) => [
       index,
-      item.image,
+      // item.image,
       item.name,
       item.code,
       item.type,

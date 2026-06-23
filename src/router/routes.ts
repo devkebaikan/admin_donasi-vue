@@ -103,6 +103,15 @@ const programRoutes = [
     },
     component: () => import("@/views/programs/editProgram.vue"),
   },
+  {
+    path: "/programs/:id/projects",
+    name: "programs-projects.list",
+    meta: {
+      title: setTitle("Program Project"),
+      authRequired: true,
+    },
+    component: () => import("@/views/programs/editProgram.vue"),
+  },
 ];
 
 // Mitra Routes
@@ -471,6 +480,46 @@ const permissionRoutes = [
   },
 ];
 
+// User Routes
+const userRoutes = [
+  {
+    path: "/users",
+    name: "user.list",
+    meta: {
+      title: setTitle("User"),
+      authRequired: true,
+    },
+    component: () => import("@/views/users/listUsers.vue"),
+  },
+  {
+    path: "/users/create",
+    name: "user.create",
+    meta: {
+      title: setTitle("Tambah User"),
+      authRequired: true,
+    },
+    component: () => import("@/views/users/createUser.vue"),
+  },
+  {
+    path: "/users/:id",
+    name: "user.detail",
+    meta: {
+      title: setTitle("Detail User"),
+      authRequired: true,
+    },
+    component: () => import("@/views/users/detailUser.vue"),
+  },
+  {
+    path: "/users/:id/edit",
+    name: "user.edit",
+    meta: {
+      title: setTitle("Edit User"),
+      authRequired: true,
+    },
+    component: () => import("@/views/users/editUser.vue"),
+  },
+];
+
 // Transaction Routes
 const transactionRoutes = [
   {
@@ -604,6 +653,69 @@ const eventRoutes = [
   },
 ];
 
+// Event Types Routes
+const eventTypeRoutes = [
+  {
+    path: "/event-types",
+    name: "event-type.list",
+    meta: {
+      title: setTitle("Event Types"),
+      authRequired: true,
+    },
+    component: () => import("@/views/event/types/listEventTypes.vue"),
+  },
+  {
+    path: "/event-types/create",
+    name: "event-type.create",
+    meta: {
+      title: setTitle("Create Event Types"),
+      authRequired: true,
+    },
+    component: () => import("@/views/event/types/createEventTypes.vue"),
+  },
+  {
+    path: "/event-types/:id/edit",
+    name: "event-type.edit",
+    meta: {
+      title: setTitle("Edit Event Types"),
+      authRequired: true,
+    },
+    component: () => import("@/views/event/types/editEventTypes.vue"),
+  },
+];
+
+// Event Attribute Routes
+const eventAttributeRoutes = [
+  {
+    path: "/event-attribute",
+    name: "event-attribute.list",
+    meta: {
+      title: setTitle("Event Attributes"),
+      authRequired: true,
+    },
+    component: () => import("@/views/event/attributes/listEventAttribute.vue"),
+  },
+  {
+    path: "/event-attribute/create",
+    name: "event-attribute.create",
+    meta: {
+      title: setTitle("Create Event Attributes"),
+      authRequired: true,
+    },
+    component: () =>
+      import("@/views/event/attributes/createEventAttribute.vue"),
+  },
+  {
+    path: "/event-attribute/:id/edit",
+    name: "event-attribute.edit",
+    meta: {
+      title: setTitle("Edit Event Attributes"),
+      authRequired: true,
+    },
+    component: () => import("@/views/event/attributes/editEventAttribute.vue"),
+  },
+];
+
 // Finanace Account Routes
 const financeAccountRoutes = [
   {
@@ -656,6 +768,46 @@ const financeAccountMasterRoutes = [
     },
     component: () =>
       import("@/views/finance-account-master/editAccountMaster.vue"),
+  },
+];
+
+// Ads Script Routes
+const adsScriptRoutes = [
+  {
+    path: "/ads-scripts",
+    name: "ads-script.list",
+    meta: {
+      title: setTitle("Ads Scripts"),
+      authRequired: true,
+    },
+    component: () => import("@/views/setting-ads-scripts/listAdsScript.vue"),
+  },
+  {
+    path: "/ads-scripts/create",
+    name: "ads-script.create",
+    meta: {
+      title: setTitle("Tambah Ads Script"),
+      authRequired: true,
+    },
+    component: () => import("@/views/setting-ads-scripts/createAdsScript.vue"),
+  },
+  {
+    path: "/ads-scripts/:id",
+    name: "ads-script.detail",
+    meta: {
+      title: setTitle("Detail Ads Script"),
+      authRequired: true,
+    },
+    component: () => import("@/views/setting-ads-scripts/detailAdsScript.vue"),
+  },
+  {
+    path: "/ads-scripts/:id/edit",
+    name: "ads-script.edit",
+    meta: {
+      title: setTitle("Edit Ads Script"),
+      authRequired: true,
+    },
+    component: () => import("@/views/setting-ads-scripts/editAdsScript.vue"),
   },
 ];
 
@@ -1386,4 +1538,8 @@ export const allRoutes = [
   ...eventRoutes,
   ...financeAccountRoutes,
   ...financeAccountMasterRoutes,
+  ...eventTypeRoutes,
+  ...eventAttributeRoutes,
+  ...userRoutes,
+  ...adsScriptRoutes,
 ];

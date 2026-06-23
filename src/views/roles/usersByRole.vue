@@ -2,7 +2,9 @@
   <VerticalLayout>
     <!-- Header -->
     <b-card class="mb-3">
-      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <div
+        class="d-flex align-items-center justify-content-between flex-wrap gap-2"
+      >
         <div>
           <h5 class="mb-1 fw-bold">
             Users in Role:
@@ -12,7 +14,11 @@
             Total {{ meta?.total ?? 0 }} users
           </p>
         </div>
-        <b-button variant="outline-secondary" size="sm" @click="router.push('/roles')">
+        <b-button
+          variant="outline-secondary"
+          size="sm"
+          @click="router.push('/roles')"
+        >
           <i class="bx bx-arrow-back me-1"></i>Kembali ke Role
         </b-button>
       </div>
@@ -20,22 +26,40 @@
 
     <!-- Filter -->
     <b-card class="mb-3">
+      <template #header>
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="mb-0">
+              <i class="bx bx-filter-alt me-1"></i>
+              Filter
+            </h5>
+          </div>
+
+          <b-button
+            v-if="queryParams"
+            size="sm"
+            variant="outline-danger"
+            @click="clearSearch"
+          >
+            <i class="bx bx-reset me-1"></i>
+            Reset Filter
+          </b-button>
+        </div>
+      </template>
       <b-row>
         <b-col cols="12" md="5" class="mb-3 mb-md-0">
           <label class="form-label fw-semibold">Search</label>
-          <b-form-input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Cari nama, email, atau telepon..."
-            debounce="500"
-            @update:model-value="onSearch"
-          />
-        </b-col>
-        <b-col cols="12" md="2">
-          <label class="form-label fw-semibold d-block">&nbsp;</label>
-          <b-button variant="outline-secondary" class="w-100" @click="clearSearch">
-            <i class="bx bx-x me-1"></i>Clear
-          </b-button>
+          <b-input-group>
+            <span class="input-group-text">
+              <i class="bx bx-search"></i>
+            </span>
+            <b-form-input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Cari nama, email, atau telepon..."
+              debounce="500"
+              @update:model-value="onSearch"
+          /></b-input-group>
         </b-col>
       </b-row>
     </b-card>
@@ -58,12 +82,12 @@
               <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                   <tr>
-                    <th style="width:50px" class="text-muted small">No</th>
+                    <th style="width: 50px" class="text-muted small">No</th>
                     <th>Nama</th>
                     <th>Email</th>
                     <th>Telepon</th>
-                    <th style="width:110px">Verified</th>
-                    <th style="width:160px">Bergabung</th>
+                    <th style="width: 110px">Verified</th>
+                    <th style="width: 160px">Bergabung</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -81,7 +105,9 @@
                       <span class="small">{{ user.email || "-" }}</span>
                     </td>
                     <td>
-                      <span class="font-monospace small">{{ user.phone || "-" }}</span>
+                      <span class="font-monospace small">{{
+                        user.phone || "-"
+                      }}</span>
                     </td>
                     <td>
                       <span
@@ -89,7 +115,9 @@
                         class="badge bg-success"
                         >Verified</span
                       >
-                      <span v-else class="badge bg-light text-muted">Belum</span>
+                      <span v-else class="badge bg-light text-muted"
+                        >Belum</span
+                      >
                     </td>
                     <td class="small text-muted">
                       {{ formatDate(user.created_at) }}
@@ -100,10 +128,12 @@
             </div>
 
             <!-- Pagination -->
-            <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+            <div
+              class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2"
+            >
               <div class="text-muted small">
-                Halaman {{ currentPage }} dari {{ totalPages }}
-                (Total: {{ meta?.total ?? 0 }} users)
+                Halaman {{ currentPage }} dari {{ totalPages }} (Total:
+                {{ meta?.total ?? 0 }} users)
               </div>
               <b-pagination
                 v-model="currentPage"
@@ -165,9 +195,7 @@ const users = computed(() => data.value?.data?.data ?? []);
 const meta = computed(() => data.value?.data?.meta ?? null);
 const roleInfo = computed(() => data.value?.role ?? null);
 
-const totalPages = computed(() =>
-  meta.value ? meta.value.last_page : 1,
-);
+const totalPages = computed(() => (meta.value ? meta.value.last_page : 1));
 
 const onSearch = () => {
   currentPage.value = 1;
