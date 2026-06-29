@@ -117,6 +117,143 @@
       </div>
     </b-card>
 
+    <!-- ----------------------------------------------- Detail Offcanvas ----------------------------------------------- -->
+    <b-offcanvas
+      v-model="showDetailOffcanvas"
+      placement="end"
+      :bodyScrolling="true"
+      :backdrop="true"
+      style="--bs-offcanvas-width: 480px"
+      @hide="selectedUserId = 0"
+    >
+      <template #header="{ hide }">
+        <div
+          class="d-flex align-items-center justify-content-between w-100 gap-2"
+        >
+          <h5 class="mb-0 fw-semibold text-truncate">
+            <i class="bx bx-user me-1 text-primary"></i>Detail User
+          </h5>
+          <b-button size="sm" variant="outline-secondary" @click="hide">
+            <i class="bx bx-x fs-18"></i>
+          </b-button>
+        </div>
+      </template>
+
+      <div v-if="isDetailLoading" class="text-center py-5">
+        <b-spinner variant="primary" />
+        <p class="mt-2 text-muted">Memuat detail user...</p>
+      </div>
+
+      <div v-else-if="isDetailError" class="alert alert-danger m-0">
+        Gagal memuat detail user. Silakan coba lagi.
+      </div>
+
+      <div v-else-if="userDetail" class="pb-4">
+        <!-- Avatar + Name -->
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div
+            class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold fs-4"
+            style="width: 56px; height: 56px; flex-shrink: 0"
+          >
+            {{ userDetail.name?.charAt(0)?.toUpperCase() ?? "?" }}
+          </div>
+          <div>
+            <h5 class="mb-1 fw-bold">{{ userDetail.name ?? "-" }}</h5>
+            <span class="badge bg-primary"
+              >Role ID: {{ userDetail.role_id }}</span
+            >
+          </div>
+        </div>
+
+        <hr class="my-3" />
+
+        <!-- Kontak -->
+        <h6
+          class="fw-semibold text-muted mb-2 text-uppercase"
+          style="font-size: 11px; letter-spacing: 0.5px"
+        >
+          <i class="bx bx-phone me-1"></i>Kontak
+        </h6>
+        <div class="bg-light rounded p-2 mb-3">
+          <small class="text-muted d-block">Nomor Telepon</small>
+          <a
+            v-if="userDetail.phone"
+            :href="`https://wa.me/${userDetail.phone}`"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="fw-semibold"
+          >
+            <i class="bx bxl-whatsapp text-success me-1"></i
+            >{{ userDetail.phone }}
+          </a>
+          <span v-else class="fw-semibold text-muted">-</span>
+        </div>
+
+        <hr class="my-3" />
+
+        <!-- Info -->
+        <h6
+          class="fw-semibold text-muted mb-2 text-uppercase"
+          style="font-size: 11px; letter-spacing: 0.5px"
+        >
+          <i class="bx bx-info-circle me-1"></i>Informasi Akun
+        </h6>
+        <b-row class="g-2 mb-3">
+          <b-col cols="6">
+            <div class="bg-light rounded p-2">
+              <small class="text-muted d-block">Referral Code</small>
+              <span class="fw-semibold small font-monospace">
+                {{ userDetail.referral_code || "-" }}
+              </span>
+            </div>
+          </b-col>
+          <b-col cols="6">
+            <div class="bg-light rounded p-2">
+              <small class="text-muted d-block">Public Code</small>
+              <span class="fw-semibold small font-monospace">
+                {{ userDetail.public_code || "-" }}
+              </span>
+            </div>
+          </b-col>
+          <b-col cols="6">
+            <div class="bg-light rounded p-2">
+              <small class="text-muted d-block">Status Verified</small>
+              <span v-if="userDetail.verified" class="badge bg-success">{{
+                userDetail.verified
+              }}</span>
+              <span v-else class="badge bg-secondary">Belum Verified</span>
+            </div>
+          </b-col>
+          <b-col cols="6">
+            <div class="bg-light rounded p-2">
+              <small class="text-muted d-block">User ID</small>
+              <span class="fw-semibold small font-monospace"
+                >#{{ userDetail.id }}</span
+              >
+            </div>
+          </b-col>
+        </b-row>
+
+        <!-- Catatan -->
+        <div v-if="userDetail.note" class="mb-3">
+          <div class="bg-light rounded p-2">
+            <small class="text-muted d-block">Catatan</small>
+            <span class="small">{{ userDetail.note }}</span>
+          </div>
+        </div>
+
+        <hr class="my-3" />
+
+        <!-- Tanggal -->
+        <div class="mb-4">
+          <small class="text-muted d-block">Terakhir Diperbarui</small>
+          <small class="fw-semibold">{{
+            formatDateTime(userDetail.updated_at)
+          }}</small>
+        </div>
+      </div>
+    </b-offcanvas>
+
     <!-- Tabel -->
     <b-row>
       <b-col>
@@ -171,7 +308,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onBeforeUnmount } from "vue";
+import { computed, ref, onMounted, onBeforeUnmount } from "vue";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
@@ -179,6 +316,8 @@ import { useUsersTable } from "./components/data";
 import router from "@/router";
 import { useQuery } from "@tanstack/vue-query";
 import { getAllRoles } from "@/services/roleService";
+import { getUserById } from "@/services/userService";
+import { formatDateTime } from "@/helpers/format";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
 
 const {
@@ -232,6 +371,25 @@ const clearFilters = () => {
   resetPage();
 };
 
+// --- Detail Offcanvas ---
+const showDetailOffcanvas = ref(false);
+const selectedUserId = ref(0);
+
+const {
+  data: userDetail,
+  isLoading: isDetailLoading,
+  isError: isDetailError,
+} = useQuery({
+  queryKey: computed(() => ["user-detail", selectedUserId.value]),
+  queryFn: () => getUserById(selectedUserId.value),
+  enabled: computed(() => selectedUserId.value > 0),
+});
+
+const openDetail = (id: number) => {
+  selectedUserId.value = id;
+  showDetailOffcanvas.value = true;
+};
+
 const handleGlobalClick = (event: Event) => {
   const target = event.target as HTMLElement;
   const detailBtn = target.closest<HTMLElement>(
@@ -240,6 +398,9 @@ const handleGlobalClick = (event: Event) => {
   const editBtn = target.closest<HTMLElement>(
     '#table-gridjs .edit-btn[data-action="edit"]',
   );
+  const transactionsBtn = target.closest<HTMLElement>(
+    '#table-gridjs .transactions-btn[data-action="transactions"]',
+  );
   const deleteBtn = target.closest<HTMLElement>(
     '#table-gridjs .delete-btn[data-action="delete"]',
   );
@@ -247,12 +408,20 @@ const handleGlobalClick = (event: Event) => {
   if (detailBtn) {
     event.preventDefault();
     const id = detailBtn.getAttribute("data-id");
-    if (id) router.push(`/users/${id}`);
+    if (id) openDetail(Number(id));
+    return;
   }
   if (editBtn) {
     event.preventDefault();
     const id = editBtn.getAttribute("data-id");
     if (id) router.push(`/users/${id}/edit`);
+    return;
+  }
+  if (transactionsBtn) {
+    event.preventDefault();
+    const id = transactionsBtn.getAttribute("data-id");
+    if (id) router.push(`/users/${id}/transactions`);
+    return;
   }
   if (deleteBtn) {
     event.preventDefault();

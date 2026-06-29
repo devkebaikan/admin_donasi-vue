@@ -76,6 +76,7 @@ declare module 'vue' {
     InputMask: typeof import('./src/components/InputMask.vue')['default']
     JsVectorMap: typeof import('./src/components/JsVectorMap.vue')['default']
     LogoBox: typeof import('./src/components/LogoBox.vue')['default']
+    MapLocationPicker: typeof import('./src/components/MapLocationPicker.vue')['default']
     MenuItem: typeof import('./src/components/AppMenu/MenuItem.vue')['default']
     MenuItemLink: typeof import('./src/components/AppMenu/MenuItemLink.vue')['default']
     MenuItemWithChildren: typeof import('./src/components/AppMenu/MenuItemWithChildren.vue')['default']

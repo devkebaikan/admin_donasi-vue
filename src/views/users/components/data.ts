@@ -2,13 +2,13 @@ import { computed, ref } from "vue";
 import { html } from "gridjs";
 import { useDataTable } from "@/composables/useDataTable";
 import { getUsers, deleteUser } from "@/services/userService";
-import { useQuery } from "@tanstack/vue-query";
-import { getAllRoles } from "@/services/roleService";
+// import { useQuery } from "@tanstack/vue-query";
+// import { getAllRoles } from "@/services/roleService";
 
-const VERIFIED_BADGE: Record<string, string> = {
-  verified: "bg-success",
-  unverified: "bg-warning text-dark",
-};
+// const VERIFIED_BADGE: Record<string, string> = {
+//   verified: "bg-success",
+//   unverified: "bg-warning text-dark",
+// };
 
 export function useUsersTable() {
   const selectedRoleId = ref<string>("");
@@ -85,8 +85,8 @@ export function useUsersTable() {
         formatter: (id: number) =>
           html(`
             <div class="d-flex gap-1 justify-content-center">
-              <button
-                class="btn btn-sm btn-soft-info detail-btn"
+             <button
+                class="btn btn-sm btn-soft-primary detail-btn"
                 data-action="detail"
                 data-id="${id}"
                 title="Detail User">
@@ -100,16 +100,25 @@ export function useUsersTable() {
                 <i class="bx bx-edit fs-16"></i>
               </button>
               <button
-                class="btn btn-sm btn-soft-danger delete-btn"
-                data-action="delete"
+                class="btn btn-sm btn-soft-info transactions-btn"
+                data-action="transactions"
                 data-id="${id}"
-                title="Hapus User">
-                <i class="bx bx-trash fs-16"></i>
+                title="Lihat Transaksi">
+                <i class="bx bx-transfer fs-16"></i>
               </button>
+              
             </div>
           `),
       },
     ],
+
+    // <button
+    //   class="btn btn-sm btn-soft-danger delete-btn"
+    //   data-action="delete"
+    //   data-id="${id}"
+    //   title="Hapus User">
+    //   <i class="bx bx-trash fs-16"></i>
+    // </button>
     rowMapper: (item: any, index: number) => [
       index,
       item.name,

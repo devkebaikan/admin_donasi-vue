@@ -110,7 +110,8 @@ const programRoutes = [
       title: setTitle("Program Project"),
       authRequired: true,
     },
-    component: () => import("@/views/programs/editProgram.vue"),
+    component: () =>
+      import("@/views/programs/projectProgram/listProjectProgram.vue"),
   },
 ];
 
@@ -518,6 +519,16 @@ const userRoutes = [
     },
     component: () => import("@/views/users/editUser.vue"),
   },
+  {
+    path: "/users/:id/transactions",
+    name: "user.transactions",
+    meta: {
+      title: setTitle("User transactions"),
+      authRequired: true,
+    },
+    component: () =>
+      import("@/views/users/user-transactions/listUserTranscation.vue"),
+  },
 ];
 
 // Transaction Routes
@@ -808,6 +819,19 @@ const adsScriptRoutes = [
       authRequired: true,
     },
     component: () => import("@/views/setting-ads-scripts/editAdsScript.vue"),
+  },
+];
+
+// Funding Routes
+const fundingRoutes = [
+  {
+    path: "/funding",
+    name: "funding.index",
+    meta: {
+      title: setTitle("Pendanaan Proyek"),
+      authRequired: true,
+    },
+    component: () => import("@/views/funding/pendanaanProyek.vue"),
   },
 ];
 
@@ -1542,4 +1566,5 @@ export const allRoutes = [
   ...eventAttributeRoutes,
   ...userRoutes,
   ...adsScriptRoutes,
+  ...fundingRoutes,
 ];

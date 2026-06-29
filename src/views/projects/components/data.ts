@@ -109,6 +109,14 @@ export function useProjectsTable() {
         formatter: (id: number) =>
           html(`
             <div class="d-flex flex-column gap-1 justify-content-center align-items-center">
+               <button
+                class="btn btn-sm btn-soft-primary detail-btn"
+                style='width:48px'
+                data-action="detail"
+                data-id="${id}"
+                title="Lihat Detail">
+                <i class="bx bx-show fs-16"></i>
+              </button>             
               <button
                 class="btn btn-sm btn-soft-warning edit-btn"
                 style='width:48px'
@@ -118,7 +126,7 @@ export function useProjectsTable() {
                 <i class="bx bx-edit fs-16"></i>
               </button>
               <button
-                class="btn btn-sm btn-soft-primary manage-btn"
+                class="btn btn-sm btn-soft-success manage-btn"
                 style='width:48px'
                 data-action="manage"
                 data-id="${id}"

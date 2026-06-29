@@ -249,27 +249,20 @@
                 </div>
               </b-col>
             </b-row>
+            <!-- Actions -->
+            <div class="d-flex gap-2 mt-3">
+              <b-button type="submit" variant="primary" :disabled="isPending">
+                <b-spinner v-if="isPending" small class="me-1" />
+                {{ isPending ? "Menyimpan..." : "Simpan Perubahan" }}
+              </b-button>
+              <b-button
+                variant="outline-secondary"
+                @click="router.push('/transactions')"
+              >
+                Batal
+              </b-button>
+            </div>
           </UIComponentCard>
-
-          <!-- Actions -->
-          <div class="d-flex gap-2">
-            <b-button type="submit" variant="primary" :disabled="isPending">
-              <b-spinner v-if="isPending" small class="me-1" />
-              {{ isPending ? "Menyimpan..." : "Simpan Perubahan" }}
-            </b-button>
-            <b-button
-              variant="outline-info"
-              @click="router.push(`/transactions/${txId}`)"
-            >
-              <i class="bx bx-show me-1"></i>Detail
-            </b-button>
-            <b-button
-              variant="outline-secondary"
-              @click="router.push('/transactions')"
-            >
-              Batal
-            </b-button>
-          </div>
         </form>
       </b-col>
     </b-row>

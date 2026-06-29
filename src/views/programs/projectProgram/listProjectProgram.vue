@@ -65,7 +65,7 @@
         </b-col>
 
         <!-- Program Filter -->
-        <b-col cols="12" md="4">
+        <!-- <b-col cols="12" md="4">
           <label class="form-label fw-semibold"> Program </label>
 
           <ChoicesSelect
@@ -80,7 +80,7 @@
             :options="programOptions"
             :key="programOptions.length"
           />
-        </b-col>
+        </b-col> -->
 
         <!-- <b-col cols="12" md="3" class="mb-3">
           <label class="form-label fw-semibold">Program</label>
@@ -127,14 +127,14 @@
           <i class="bx bx-x cursor-pointer" @click="selectedActivity = ''"></i>
         </b-badge>
 
-        <b-badge
+        <!-- <b-badge
           v-if="selectedProgramId"
           variant="primary"
           class="d-flex align-items-center gap-1"
         >
           Program: {{ getProgramName(selectedProgramId) }}
           <i class="bx bx-x cursor-pointer" @click="selectedProgramId = ''"></i>
-        </b-badge>
+        </b-badge> -->
       </div>
     </b-card>
 
@@ -516,16 +516,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onBeforeUnmount } from "vue";
+import { computed, ref, onMounted, onBeforeUnmount, watch } from "vue";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
-import { useProjectsTable } from "./components/data";
+import { useProjectsTable } from "./data";
 import router from "@/router";
 import { useQuery } from "@tanstack/vue-query";
 import { getAllPrograms } from "@/services/programService";
 import { getProjectById } from "@/services/projectService";
 import { formatCurrency, formatDate, formatDateTime } from "@/helpers/format";
+import { useRoute } from "vue-router";
+
+const route = useRoute();
 
 const {
   tableOptions,
@@ -546,12 +549,21 @@ const {
   handleDelete,
 } = useProjectsTable();
 
+watch(
+  () => route.params.id,
+  (id) => {
+    selectedProgramId.value = Number(id);
+    resetPage();
+  },
+  { immediate: true },
+);
+
 const hasActiveFilters = computed(
   () =>
     !!(
       selectedStatus.value ||
       selectedActivity.value ||
-      selectedProgramId.value ||
+      //   selectedProgramId.value ||
       searchQuery.value
     ),
 );
@@ -575,14 +587,14 @@ const programOptions = computed(() => {
 const clearFilters = () => {
   selectedStatus.value = "";
   selectedActivity.value = "";
-  selectedProgramId.value = "";
+  //   selectedProgramId.value = "";
   searchQuery.value = "";
   resetPage();
 };
 
-const getProgramName = (id: string | number) =>
-  programOptions.value.find((p: any) => p.id === Number(id))?.title ??
-  String(id);
+// const getProgramName = (id: string | number) =>
+//   programOptions.value.find((p: any) => p.id === Number(id))?.title ??
+//   String(id);
 
 // --- Detail Offcanvas ---
 const showDetailOffcanvas = ref(false);

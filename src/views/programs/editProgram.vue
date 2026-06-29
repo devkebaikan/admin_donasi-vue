@@ -4,7 +4,7 @@
       <b-col>
         <UIComponentCard
           id="program-form-edit"
-          :title="`Edit Program${programData ? ': ' + programData.judul : ''}`"
+          :title="`Edit Program${programData ? ': ' + programData.title : ''}`"
         >
           <!-- Loading state -->
           <div v-if="isFetchingProgram" class="text-center py-5">
@@ -715,6 +715,7 @@ watch(
   (data) => {
     if (!data) return;
 
+    // console.log(data);
     formState.id = data.id ?? null;
     formState.mitra_id = data.mitra?.id ?? null;
     formState.tipe_id = data.tipe?.id ?? null;
@@ -743,7 +744,7 @@ watch(
     existingImageUrl.value = data.image_url ?? data.image ?? null;
     existingImageWaUrl.value = data.image_wa_url ?? data.image_wa ?? null;
 
-    console.log(formState.is_target_waktu, formState.target_nominal);
+    // console.log(formState.is_target_waktu, formState.target_nominal);
 
     // Nominal items existing
     if (Array.isArray(data.nominal_options)) {

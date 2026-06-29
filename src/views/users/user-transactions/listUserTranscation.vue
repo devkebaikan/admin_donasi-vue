@@ -128,7 +128,7 @@
             />
           </b-col>
 
-          <b-col cols="12" md="3">
+          <!-- <b-col cols="12" md="3">
             <label class="form-label fw-semibold"> User ID </label>
 
             <b-form-input
@@ -138,7 +138,7 @@
               debounce="500"
               @update:model-value="resetPage"
             />
-          </b-col>
+          </b-col> -->
 
           <b-col cols="12" md="3">
             <label class="form-label fw-semibold"> Source </label>
@@ -241,14 +241,14 @@
           <i class="bx bx-x cursor-pointer" @click="selectedSource = ''"></i>
         </b-badge>
 
-        <b-badge
+        <!-- <b-badge
           v-if="filterUserId"
           variant="secondary"
           class="d-flex align-items-center gap-1"
         >
           User ID: {{ filterUserId }}
           <i class="bx bx-x cursor-pointer" @click="filterUserId = ''"></i>
-        </b-badge>
+        </b-badge> -->
 
         <b-badge
           v-if="filterMinTotal"
@@ -621,12 +621,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onBeforeUnmount, ref } from "vue";
+import { computed, ref, onMounted, onBeforeUnmount, watch } from "vue";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
 import FlatPicker from "@/components/FlatPicker.vue";
-import { useTransactionTable } from "./components/data";
+import { useTransactionTable } from "./data";
 import router from "@/router";
 import { useQuery } from "@tanstack/vue-query";
 import {
@@ -634,7 +634,10 @@ import {
   getTransactionById,
 } from "@/services/transactionService";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
-import { formatCurrency, formatDateTime, formatDate } from "@/helpers/format";
+import { useRoute } from "vue-router";
+import { formatCurrency, formatDate, formatDateTime } from "@/helpers/format";
+
+const route = useRoute();
 
 // --- Detail Offcanvas ---
 const showDetailOffcanvas = ref(false);
@@ -710,6 +713,15 @@ const {
   handleDelete,
 } = useTransactionTable();
 
+watch(
+  () => route.params.id,
+  (id) => {
+    filterUserId.value = String(id);
+    resetPage();
+  },
+  { immediate: true },
+);
+
 const hasActiveFilters = computed(
   () =>
     !!(
@@ -718,7 +730,6 @@ const hasActiveFilters = computed(
       selectedStatus.value ||
       selectedSource.value ||
       dateRange.value ||
-      filterUserId.value ||
       filterPaymentMethodId.value ||
       filterMinTotal.value ||
       filterMaxTotal.value
@@ -731,7 +742,6 @@ const clearFilters = () => {
   selectedStatus.value = "";
   selectedSource.value = "";
   dateRange.value = "";
-  filterUserId.value = "";
   filterPaymentMethodId.value = "";
   filterMinTotal.value = "";
   filterMaxTotal.value = "";

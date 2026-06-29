@@ -18,7 +18,7 @@ const ACTIVITY_BADGE: Record<string, string> = {
   selesai: "bg-primary",
 };
 
-export function useProjectsProgramTable() {
+export function useProjectsTable() {
   const selectedStatus = ref<string>("");
   const selectedActivity = ref<string>("");
   const selectedMitraId = ref<string | number>("");
@@ -110,6 +110,14 @@ export function useProjectsProgramTable() {
           html(`
             <div class="d-flex flex-column gap-1 justify-content-center align-items-center">
               <button
+                class="btn btn-sm btn-soft-primary detail-btn"
+                style='width:48px'
+                data-action="detail"
+                data-id="${id}"
+                title="Lihat Detail">
+                <i class="bx bx-show fs-16"></i>
+              </button>
+              <button
                 class="btn btn-sm btn-soft-warning edit-btn"
                 style='width:48px'
                 data-action="edit"
@@ -118,7 +126,7 @@ export function useProjectsProgramTable() {
                 <i class="bx bx-edit fs-16"></i>
               </button>
               <button
-                class="btn btn-sm btn-soft-primary manage-btn"
+                class="btn btn-sm btn-soft-success manage-btn"
                 style='width:48px'
                 data-action="manage"
                 data-id="${id}"

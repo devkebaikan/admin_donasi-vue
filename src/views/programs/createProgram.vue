@@ -613,20 +613,21 @@ const { data: tipeData, isLoading: isTipeLoading } = useQuery({
   queryFn: getProgramTypes,
 });
 
-// const tipeList = computed(() => {
-//   if (!tipeData.value) return [{ value: 0, text: "Choose Tipe..." }];
-//   return [
-//     { value: 0, text: "Choose Tipe..." },
-//     ...tipeData.value.map((item: any) => ({ value: item.id, text: item.name })),
-//   ];
-// });
-const tipeList = [
-  { value: 0, text: "Choose Tipe..." },
-  { value: 1, text: "Zakat" },
-  { value: 2, text: "Infaq" },
-  { value: 3, text: "Sadaqah" },
-  { value: 4, text: "Wakaf" },
-];
+const tipeList = computed(() => {
+  if (!tipeData.value) return [{ value: 0, text: "Choose Tipe..." }];
+  return [
+    { value: 0, text: "Choose Tipe..." },
+    ...tipeData.value.map((item: any) => ({ value: item.id, text: item.name })),
+  ];
+});
+
+// const tipeList = [
+//   { value: 0, text: "Choose Tipe..." },
+//   { value: 1, text: "Zakat" },
+//   { value: 2, text: "Infaq" },
+//   { value: 3, text: "Sadaqah" },
+//   { value: 4, text: "Wakaf" },
+// ];
 
 const { data: categoryData, isLoading: isCategoryLoading } = useQuery({
   queryKey: ["program-categories"],

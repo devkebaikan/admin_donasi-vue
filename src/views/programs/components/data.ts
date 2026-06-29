@@ -99,6 +99,14 @@ export function useProgramsTable() {
           html(`
             <div class="d-flex flex-column gap-1 justify-content-center">
               <button
+                class="btn btn-sm btn-soft-primary detail-btn"
+                data-action="detail"
+                data-link="${program.link}"
+                title="Lihat Detail">
+                <i class="bx bx-show fs-16"></i>
+              </button>
+
+              <button
                 class="btn btn-sm btn-soft-warning edit-btn"
                 data-action="edit"
                 data-link="${program.link}"
@@ -114,18 +122,20 @@ export function useProgramsTable() {
                 <i class="bx bx-folder-open fs-16"></i>
               </button>
 
-              <button
-                class="btn btn-sm btn-soft-info news-btn"
-                data-action="news"
-                data-id="${program.id}"
-                title="News">
-                <i class="bx bx-news fs-16"></i>
-              </button>
-             
+              
+
             </div>
           `),
       },
     ],
+
+    // <button
+    //   class="btn btn-sm btn-soft-info news-btn"
+    //   data-action="news"
+    //   data-id="${program.id}"
+    //   title="News">
+    //   <i class="bx bx-news fs-16"></i>
+    // </button>
 
     rowMapper: (program: any, index: number) => [
       index,

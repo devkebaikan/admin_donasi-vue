@@ -291,30 +291,17 @@
                 </b-col>
 
                 <!-- Lokasi -->
-                <b-col md="6">
-                  <b-form-group label="Latitude" label-for="lat">
-                    <b-form-input
-                      id="lat"
-                      v-model="formState.lat"
-                      type="number"
-                      step="any"
-                      placeholder="e.g., -6.2088"
-                    />
-                    <small class="text-muted">Opsional</small>
-                  </b-form-group>
-                </b-col>
-
-                <b-col md="6">
-                  <b-form-group label="Longitude" label-for="lng">
-                    <b-form-input
-                      id="lng"
-                      v-model="formState.lng"
-                      type="number"
-                      step="any"
-                      placeholder="e.g., 106.8456"
-                    />
-                    <small class="text-muted">Opsional</small>
-                  </b-form-group>
+                <b-col cols="12">
+                  <hr class="my-1" />
+                  <h6 class="text-muted fw-semibold mb-3">
+                    <i class="bx bx-map-pin me-1"></i>Lokasi
+                  </h6>
+                  <MapLocationPicker
+                    :lat="formState.lat"
+                    :lng="formState.lng"
+                    @update:lat="(val) => (formState.lat = val)"
+                    @update:lng="(val) => (formState.lng = val)"
+                  />
                 </b-col>
 
                 <b-col md="6">
@@ -519,6 +506,7 @@ import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
 import CurrencyInput from "@/components/CurrencyInput.vue";
+import MapLocationPicker from "@/components/MapLocationPicker.vue";
 import { QuillEditor } from "@vueup/vue-quill";
 import { FormWizard, TabContent } from "vue3-form-wizard";
 import "vue3-form-wizard/dist/style.css";

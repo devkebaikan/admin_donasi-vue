@@ -285,30 +285,17 @@
                 </b-col>
 
                 <!-- Lokasi -->
-                <b-col md="6">
-                  <b-form-group label="Latitude" label-for="lat">
-                    <b-form-input
-                      id="lat"
-                      v-model="formState.lat"
-                      type="number"
-                      step="any"
-                      placeholder="e.g., -6.2088"
-                    />
-                    <small class="text-muted">Opsional</small>
-                  </b-form-group>
-                </b-col>
-
-                <b-col md="6">
-                  <b-form-group label="Longitude" label-for="lng">
-                    <b-form-input
-                      id="lng"
-                      v-model="formState.lng"
-                      type="number"
-                      step="any"
-                      placeholder="e.g., 106.8456"
-                    />
-                    <small class="text-muted">Opsional</small>
-                  </b-form-group>
+                <b-col cols="12">
+                  <hr class="my-1" />
+                  <h6 class="text-muted fw-semibold mb-3">
+                    <i class="bx bx-map-pin me-1"></i>Lokasi
+                  </h6>
+                  <MapLocationPicker
+                    :lat="formState.lat"
+                    :lng="formState.lng"
+                    @update:lat="(val) => (formState.lat = val)"
+                    @update:lng="(val) => (formState.lng = val)"
+                  />
                 </b-col>
 
                 <b-col md="6">
@@ -346,6 +333,7 @@
                       type="text"
                       placeholder="Nama pengaju..."
                       maxlength="255"
+                      disabled
                     />
                     <small class="text-muted">Opsional</small>
                   </b-form-group>
@@ -359,6 +347,7 @@
                       v-model="formState.email"
                       type="email"
                       placeholder="email@example.com"
+                      disabled
                     />
                     <small class="text-muted">Opsional</small>
                   </b-form-group>
@@ -373,6 +362,7 @@
                       type="text"
                       placeholder="e.g., 081234567890"
                       maxlength="30"
+                      disabled
                     />
                     <small class="text-muted">Opsional</small>
                   </b-form-group>
@@ -458,6 +448,7 @@ import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
 import CurrencyInput from "@/components/CurrencyInput.vue";
+import MapLocationPicker from "@/components/MapLocationPicker.vue";
 import { QuillEditor } from "@vueup/vue-quill";
 import { FormWizard, TabContent } from "vue3-form-wizard";
 import "vue3-form-wizard/dist/style.css";
@@ -498,9 +489,9 @@ const formState = reactive({
   lat: undefined as number | undefined,
   lng: undefined as number | undefined,
   kode_wilayah: "",
-  pengaju: "",
-  email: "",
-  wa: "",
+  pengaju: "Aksiberbagi",
+  email: "aksiberbagi.indonesia@gmail.com",
+  wa: "081215448698",
   marketing: "",
 });
 
@@ -655,7 +646,7 @@ const handleSubmit = async () => {
   });
 
   submitCreate(formData);
-  // console.log("program_ids:", formState.program_ids);
+  console.log(formState);
 };
 
 // ── Quill toolbar ─────────────────────────────────────────────────────────────
