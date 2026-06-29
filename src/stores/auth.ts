@@ -1,10 +1,10 @@
 import { defineStore } from "pinia";
 import router from "@/router";
-import { useSessionStorage } from "@vueuse/core";
+import { useSessionStorage, useStorage } from "@vueuse/core";
 import type { User } from "@/types/auth";
 
 export const useAuthStore = defineStore("auth_store", () => {
-  const user = useSessionStorage<string | null>("VUE_USER", null);
+  const user = useStorage<string | null>("VUE_USER", null);
 
   const saveSession = (newUser: User) => {
     user.value = JSON.stringify(newUser);
