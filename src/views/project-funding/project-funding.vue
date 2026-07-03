@@ -5,7 +5,7 @@
       class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4"
     >
       <div>
-        <h4 class="fw-bold mb-1">Funding</h4>
+        <h4 class="fw-bold mb-1">Funding {{ finance.project_name }}</h4>
         <p class="text-muted mb-0 small">
           Alokasikan donasi untuk menutupi kekurangan dana proyek
         </p>
@@ -151,14 +151,18 @@
               </label>
               <b-form-select
                 v-model="selectedProgramId"
+                :disabled="isProjectLoading || !programs.length"
                 @change="onProgramChange"
               >
+                <b-form-select-option :value="0" disabled>
+                  {{ isProjectLoading ? "Memuat program..." : "Pilih program" }}
+                </b-form-select-option>
                 <b-form-select-option
-                  v-for="p in MOCK_PROGRAMS"
+                  v-for="p in programs"
                   :key="p.id"
                   :value="p.id"
                 >
-                  {{ p.name }}
+                  {{ p.description ?? p.title ?? p.name }}
                 </b-form-select-option>
               </b-form-select>
             </b-col>
@@ -263,297 +267,60 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { useQuery } from "@tanstack/vue-query";
+import { ref, computed, watch } from "vue";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/vue-query";
+import { useRoute } from "vue-router";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
-import { getAllTransactions } from "@/services/transactionService";
+import { getProjectById } from "@/services/projectService";
+import {
+  checkFundingProject,
+  getClaimableDonationsByProjectId,
+  claimFunding,
+} from "@/services/fundingService";
 import { formatCurrency, formatDate } from "@/helpers/format";
 import { toast as showToast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
-import { checkFundingProject } from "@/services/fundingService";
-import { useRoute } from "vue-router";
-
-// ──────────────────────────────────────────────────────────────────────────────
-// Mock data — replace with real API responses when backend is ready
-// ──────────────────────────────────────────────────────────────────────────────
 
 const route = useRoute();
+const queryClient = useQueryClient();
 const projectId = Number(route.params.id);
 
-const { data: dataFund, isLoading: isLoadFund } = useQuery({
-  queryKey: ["data-funding"],
+// State
+
+const selectedProgramId = ref<number>(0);
+const checkedIds = ref<Set<number>>(new Set());
+const saldoPakai = ref<number>(0);
+
+// Project detail — provides related programs + project nominal
+
+const { data: projectDetail, isLoading: isProjectLoading } = useQuery({
+  queryKey: ["project-detail", projectId],
+  queryFn: () => getProjectById(projectId),
+});
+
+const programs = computed<any[]>(() => projectDetail.value?.programs ?? []);
+
+watch(programs, (list) => {
+  if (list.length && !list.some((p) => p.id === selectedProgramId.value)) {
+    selectedProgramId.value = list[0].id;
+  }
+});
+
+// Fund check — project-level allocation summary
+
+const { data: fundCheck, isLoading: isFundCheckLoading } = useQuery({
+  queryKey: ["fund-check", projectId],
   queryFn: () => checkFundingProject(projectId),
 });
 
-const MOCK_PROGRAMS = [
-  { id: 1, name: "Program Utama" },
-  { id: 2, name: "Program Zakat" },
-  { id: 3, name: "Program Infak Sedekah" },
-];
-
-type FinanceSummary = {
-  nominal_proyek: number;
-  nominal_terkumpul: number;
-  sisa_saldo_sebelumnya: number;
-  dana_dicairkan: number;
-};
-
-// Project-level financials — same regardless of which program is selected.
-// Replace with a real API call when backend is ready.
-const PROJECT_FINANCE: FinanceSummary = {
-  nominal_proyek: 5_000_000,
-  nominal_terkumpul: 2_000_000,
-  sisa_saldo_sebelumnya: 100_000,
-  dana_dicairkan: 500_000,
-};
-
-type MockTrx = {
-  id: number;
-  owner: string;
-  phone: string;
-  nominal: number;
-  date: string;
-};
-
-const MOCK_TRANSACTIONS: Record<number, MockTrx[]> = {
-  1: [
-    {
-      id: 101,
-      owner: "Hamba Allah",
-      phone: "083895203060",
-      nominal: 100_000,
-      date: "2026-01-15",
-    },
-    {
-      id: 102,
-      owner: "Yoyok Hari Pambudi",
-      phone: "085752598259",
-      nominal: 75_000,
-      date: "2026-01-28",
-    },
-    {
-      id: 103,
-      owner: "Siti Aminah",
-      phone: "082134567890",
-      nominal: 50_000,
-      date: "2026-02-10",
-    },
-    {
-      id: 104,
-      owner: "Muhammadnurdin",
-      phone: "081276431550",
-      nominal: 25_000,
-      date: "2026-02-25",
-    },
-    {
-      id: 105,
-      owner: "Hamba Allah",
-      phone: "083895203060",
-      nominal: 150_000,
-      date: "2026-03-08",
-    },
-    {
-      id: 106,
-      owner: "Budi Santoso",
-      phone: "089876543210",
-      nominal: 200_000,
-      date: "2026-04-02",
-    },
-    {
-      id: 107,
-      owner: "Ahmad Fauzi",
-      phone: "087654321098",
-      nominal: 300_000,
-      date: "2026-04-20",
-    },
-    {
-      id: 108,
-      owner: "Dewi Rahayu",
-      phone: "081234567890",
-      nominal: 500_000,
-      date: "2026-05-10",
-    },
-    {
-      id: 109,
-      owner: "Hamba Allah",
-      phone: "083895203060",
-      nominal: 600_000,
-      date: "2026-06-01",
-    },
-  ],
-  2: [
-    {
-      id: 201,
-      owner: "Rizal Mahmud",
-      phone: "085678901234",
-      nominal: 150_000,
-      date: "2026-02-05",
-    },
-    {
-      id: 202,
-      owner: "Nurul Hidayah",
-      phone: "081345678901",
-      nominal: 200_000,
-      date: "2026-02-20",
-    },
-    {
-      id: 203,
-      owner: "Hamba Allah",
-      phone: "083456789012",
-      nominal: 300_000,
-      date: "2026-03-10",
-    },
-    {
-      id: 204,
-      owner: "Agus Priyatno",
-      phone: "087234567890",
-      nominal: 500_000,
-      date: "2026-03-25",
-    },
-    {
-      id: 205,
-      owner: "Fitriani",
-      phone: "082345678901",
-      nominal: 600_000,
-      date: "2026-04-08",
-    },
-    {
-      id: 206,
-      owner: "Hamba Allah",
-      phone: "089012345678",
-      nominal: 250_000,
-      date: "2026-04-22",
-    },
-    {
-      id: 207,
-      owner: "Eko Prasetyo",
-      phone: "081456789012",
-      nominal: 400_000,
-      date: "2026-05-05",
-    },
-    {
-      id: 208,
-      owner: "Lestari Wulandari",
-      phone: "085901234567",
-      nominal: 350_000,
-      date: "2026-05-18",
-    },
-    {
-      id: 209,
-      owner: "Hamba Allah",
-      phone: "082567890123",
-      nominal: 450_000,
-      date: "2026-06-02",
-    },
-    {
-      id: 210,
-      owner: "Dimas Kurniawan",
-      phone: "087890123456",
-      nominal: 300_000,
-      date: "2026-06-15",
-    },
-  ],
-  3: [
-    {
-      id: 301,
-      owner: "Hamba Allah",
-      phone: "083901234567",
-      nominal: 50_000,
-      date: "2026-03-05",
-    },
-    {
-      id: 302,
-      owner: "Rahmat Hidayat",
-      phone: "081567890123",
-      nominal: 100_000,
-      date: "2026-03-20",
-    },
-    {
-      id: 303,
-      owner: "Sulistyowati",
-      phone: "085234567890",
-      nominal: 150_000,
-      date: "2026-04-10",
-    },
-    {
-      id: 304,
-      owner: "Hamba Allah",
-      phone: "082890123456",
-      nominal: 200_000,
-      date: "2026-04-28",
-    },
-    {
-      id: 305,
-      owner: "Farid Mustofa",
-      phone: "089123456789",
-      nominal: 250_000,
-      date: "2026-05-15",
-    },
-    {
-      id: 306,
-      owner: "Hamba Allah",
-      phone: "081678901234",
-      nominal: 300_000,
-      date: "2026-05-30",
-    },
-    {
-      id: 307,
-      owner: "Indah Permata",
-      phone: "085012345678",
-      nominal: 150_000,
-      date: "2026-06-10",
-    },
-  ],
-};
-
-// ──────────────────────────────────────────────────────────────────────────────
-// State
-// ──────────────────────────────────────────────────────────────────────────────
-
-const selectedProgramId = ref<number>(1);
-const checkedIds = ref<Set<number>>(new Set());
-const saldoPakai = ref<number>(0);
-const isAllocating = ref(false);
-
-// ──────────────────────────────────────────────────────────────────────────────
-// Data fetching — falls back to mock data when API returns empty
-// ──────────────────────────────────────────────────────────────────────────────
-
-const { data: rawData, isLoading } = useQuery({
-  queryKey: computed(() => ["funding-transactions", selectedProgramId.value]),
-  queryFn: () =>
-    getAllTransactions({
-      program_id: selectedProgramId.value,
-      limit: 50,
-      status: "Paid",
-      sort: "date",
-      sort_dir: "asc",
-    }),
-  staleTime: 30_000,
-});
-
-const transactions = computed<MockTrx[]>(() => {
-  if (isLoading.value) return [];
-  const apiItems: any[] = rawData.value?.data ?? [];
-  if (apiItems.length > 0) {
-    return [...apiItems]
-      .map((item) => ({
-        id: item.id,
-        owner: item.user?.name ?? item.owner_name ?? "Hamba Allah",
-        phone: item.user?.phone ?? item.phone ?? "",
-        nominal: Number(item.total ?? item.nominal ?? 0),
-        date: item.date ?? item.created_at ?? "",
-      }))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }
-  return MOCK_TRANSACTIONS[selectedProgramId.value] ?? [];
-});
-
-// ──────────────────────────────────────────────────────────────────────────────
-// Financial computations
-// ──────────────────────────────────────────────────────────────────────────────
-
-const finance = ref<FinanceSummary>(PROJECT_FINANCE);
+const finance = computed(() => ({
+  nominal_proyek:
+    projectDetail.value?.nominal_acc || projectDetail.value?.nominal_ajuan || 0,
+  nominal_terkumpul: fundCheck.value?.total_allocated ?? 0,
+  sisa_saldo_sebelumnya: fundCheck.value?.available_amount ?? 0,
+  dana_dicairkan: fundCheck.value?.total_disbursed ?? 0,
+  project_name: fundCheck.value?.project_name ?? "Proyek",
+}));
 
 const kekuranganDana = computed(() =>
   Math.max(0, finance.value.nominal_proyek - finance.value.nominal_terkumpul),
@@ -562,6 +329,47 @@ const kekuranganDana = computed(() =>
 const danaBelumDicairkan = computed(() =>
   Math.max(0, finance.value.nominal_terkumpul - finance.value.dana_dicairkan),
 );
+
+// Claimable donations for the selected program
+
+type Trx = {
+  id: number;
+  owner: string;
+  phone: string;
+  nominal: number;
+  date: string;
+};
+
+const { data: claimableData, isLoading } = useQuery({
+  queryKey: computed(() => [
+    "claimable-donations",
+    projectId,
+    selectedProgramId.value,
+    kekuranganDana.value,
+  ]),
+  queryFn: () =>
+    getClaimableDonationsByProjectId(projectId, {
+      programs: [
+        { program_id: selectedProgramId.value, nominal: kekuranganDana.value },
+      ],
+    }),
+  enabled: computed(
+    () => selectedProgramId.value > 0 && kekuranganDana.value > 0,
+  ),
+});
+
+const transactions = computed<Trx[]>(() => {
+  const donations: any[] = claimableData.value?.programs?.[0]?.donations ?? [];
+  return donations.map((d) => ({
+    id: d.id,
+    owner: d.user?.name ?? d.owner_name ?? d.donor_name ?? "Hamba Allah",
+    phone: d.user?.phone ?? d.phone ?? d.donor_phone ?? "",
+    nominal: Number(d.nominal ?? d.amount ?? d.total ?? 0),
+    date: d.date ?? d.created_at ?? "",
+  }));
+});
+
+// Financial computations
 
 const nominalTercentang = computed(() =>
   transactions.value
@@ -578,9 +386,7 @@ const coveragePercent = computed(() => {
   return Math.min(100, (totalAlokasi.value / kekuranganDana.value) * 100);
 });
 
-// ──────────────────────────────────────────────────────────────────────────────
 // Checkbox helpers
-// ──────────────────────────────────────────────────────────────────────────────
 
 const isAllChecked = computed(
   () =>
@@ -608,9 +414,7 @@ const clearAll = () => {
   checkedIds.value = new Set();
 };
 
-// ──────────────────────────────────────────────────────────────────────────────
 // Actions
-// ──────────────────────────────────────────────────────────────────────────────
 
 const pakaiSaldoMax = () => {
   saldoPakai.value = finance.value.sisa_saldo_sebelumnya;
@@ -647,15 +451,42 @@ const onProgramChange = () => {
   saldoPakai.value = 0;
 };
 
-const handleAlokasikan = async () => {
-  isAllocating.value = true;
-  await new Promise((r) => setTimeout(r, 1000));
-  showToast(
-    `Berhasil mengalokasikan ${formatCurrency(totalAlokasi.value)} (${checkedIds.value.size} donasi + saldo ${formatCurrency(saldoPakai.value || 0)})`,
-    { type: "success", position: "top-center" },
-  );
-  checkedIds.value = new Set();
-  saldoPakai.value = 0;
-  isAllocating.value = false;
+const { mutate: mutateClaim, isPending: isAllocating } = useMutation({
+  mutationFn: () =>
+    claimFunding(projectId, {
+      programs: [
+        {
+          program_id: selectedProgramId.value,
+          donation_ids: Array.from(checkedIds.value),
+        },
+      ],
+    }),
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ["fund-check", projectId] });
+    queryClient.invalidateQueries({ queryKey: ["claimable-donations"] });
+    showToast(
+      `Berhasil mengalokasikan ${formatCurrency(totalAlokasi.value)} (${checkedIds.value.size} donasi)`,
+      { type: "success", position: "top-center" },
+    );
+    checkedIds.value = new Set();
+    saldoPakai.value = 0;
+  },
+  onError: (err: any) => {
+    showToast(err?.response?.data?.message ?? "Gagal mengalokasikan dana", {
+      type: "error",
+      position: "top-center",
+    });
+  },
+});
+
+const handleAlokasikan = () => {
+  if (!checkedIds.value.size) {
+    showToast("Pilih minimal satu donasi untuk dialokasikan.", {
+      type: "warning",
+      position: "top-center",
+    });
+    return;
+  }
+  mutateClaim();
 };
 </script>
