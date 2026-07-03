@@ -1,100 +1,65 @@
 <template>
   <VerticalLayout>
-    <!-- Header + Program Selector -->
-    <b-card class="mb-3">
-      <b-row class="align-items-center g-3">
-        <b-col cols="12" md="6">
-          <h4 class="fw-bold mb-1 d-flex align-items-center gap-2">
-            <i class="bx bx-donate-heart text-primary fs-4"></i>Pendanaan Proyek
-          </h4>
-          <p class="text-muted mb-0 small">
-            Alokasikan donasi untuk menutupi kekurangan dana proyek
-          </p>
+    <!-- Header -->
+    <div
+      class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4"
+    >
+      <div>
+        <h4 class="fw-bold mb-1">Funding</h4>
+        <p class="text-muted mb-0 small">
+          Alokasikan donasi untuk menutupi kekurangan dana proyek
+        </p>
+      </div>
+    </div>
+
+    <!-- Financial Summary -->
+    <b-card class="mb-3" body-class="p-0">
+      <b-row class="g-0 text-center text-md-start">
+        <b-col cols="6" md="4" class="p-3 border-end border-bottom">
+          <div class="small text-muted mb-1">Nominal Proyek</div>
+          <div class="fs-5 fw-semibold">
+            {{ formatCurrency(finance.nominal_proyek) }}
+          </div>
+        </b-col>
+        <b-col cols="6" md="4" class="p-3 border-end border-bottom">
+          <div class="small text-muted mb-1">Terkumpul</div>
+          <div class="fs-5 fw-semibold text-success">
+            {{ formatCurrency(finance.nominal_terkumpul) }}
+          </div>
+        </b-col>
+        <b-col cols="6" md="4" class="p-3 border-bottom">
+          <div class="small text-muted mb-1">Kekurangan Dana</div>
+          <div class="fs-5 fw-semibold text-danger">
+            {{ formatCurrency(kekuranganDana) }}
+          </div>
+        </b-col>
+        <b-col cols="6" md="4" class="p-3 border-end">
+          <div class="small text-muted mb-1">Saldo Sebelumnya</div>
+          <div class="fs-5 fw-semibold">
+            {{ formatCurrency(finance.sisa_saldo_sebelumnya) }}
+          </div>
+        </b-col>
+        <b-col cols="6" md="4" class="p-3 border-end">
+          <div class="small text-muted mb-1">Dicairkan ke Mitra</div>
+          <div class="fs-5 fw-semibold">
+            {{ formatCurrency(finance.dana_dicairkan) }}
+          </div>
+        </b-col>
+        <b-col cols="6" md="4" class="p-3">
+          <div class="small text-muted mb-1">Belum Dicairkan</div>
+          <div class="fs-5 fw-semibold text-warning">
+            {{ formatCurrency(danaBelumDicairkan) }}
+          </div>
         </b-col>
       </b-row>
     </b-card>
 
-    <!-- Financial Summary Cards -->
-    <b-row class="g-3 mb-3">
-      <b-col cols="12" sm="6" xl="4">
-        <div class="fcard fcard-blue">
-          <div class="fcard-icon"><i class="bx bx-target-lock"></i></div>
-          <div class="fcard-body">
-            <div class="fcard-label">Nominal Proyek (CEO)</div>
-            <div class="fcard-value">
-              {{ formatCurrency(finance.nominal_proyek) }}
-            </div>
-            <div class="fcard-sub">Target pendanaan proyek</div>
-          </div>
-        </div>
-      </b-col>
-      <b-col cols="12" sm="6" xl="4">
-        <div class="fcard fcard-green">
-          <div class="fcard-icon"><i class="bx bx-collection"></i></div>
-          <div class="fcard-body">
-            <div class="fcard-label">Nominal Terkumpul</div>
-            <div class="fcard-value">
-              {{ formatCurrency(finance.nominal_terkumpul) }}
-            </div>
-            <div class="fcard-sub">Total donasi program ini</div>
-          </div>
-        </div>
-      </b-col>
-      <b-col cols="12" sm="6" xl="4">
-        <div class="fcard fcard-red">
-          <div class="fcard-icon"><i class="bx bx-error-alt"></i></div>
-          <div class="fcard-body">
-            <div class="fcard-label">Kekurangan Dana Proyek</div>
-            <div class="fcard-value">{{ formatCurrency(kekuranganDana) }}</div>
-            <div class="fcard-sub">Nominal − Terkumpul</div>
-          </div>
-        </div>
-      </b-col>
-      <b-col cols="12" sm="6" xl="4">
-        <div class="fcard fcard-cyan">
-          <div class="fcard-icon"><i class="bx bx-history"></i></div>
-          <div class="fcard-body">
-            <div class="fcard-label">Sisa Saldo Proyek Utama</div>
-            <div class="fcard-value">
-              {{ formatCurrency(finance.sisa_saldo_sebelumnya) }}
-            </div>
-            <div class="fcard-sub">Pengembalian proyek sebelumnya</div>
-          </div>
-        </div>
-      </b-col>
-      <b-col cols="12" sm="6" xl="4">
-        <div class="fcard fcard-purple">
-          <div class="fcard-icon"><i class="bx bx-transfer-alt"></i></div>
-          <div class="fcard-body">
-            <div class="fcard-label">Dana Dicairkan ke Mitra</div>
-            <div class="fcard-value">
-              {{ formatCurrency(finance.dana_dicairkan) }}
-            </div>
-            <div class="fcard-sub">Sudah dicairkan</div>
-          </div>
-        </div>
-      </b-col>
-      <b-col cols="12" sm="6" xl="4">
-        <div class="fcard fcard-orange">
-          <div class="fcard-icon"><i class="bx bx-wallet"></i></div>
-          <div class="fcard-body">
-            <div class="fcard-label">Dana Belum Dicairkan</div>
-            <div class="fcard-value">
-              {{ formatCurrency(danaBelumDicairkan) }}
-            </div>
-            <div class="fcard-sub">Terkumpul − Dicairkan</div>
-          </div>
-        </div>
-      </b-col>
-    </b-row>
-
-    <!-- Saldo Sebelumnya + Progress + Actions -->
+    <!-- Allocation controls -->
     <b-card class="mb-3">
-      <b-row class="g-3 align-items-center">
-        <!-- Pakai Saldo -->
+      <b-row class="g-4 align-items-center">
         <b-col cols="12" md="4">
-          <label class="form-label fw-semibold small mb-1">
-            <i class="bx bx-history me-1 text-info"></i>Pakai Saldo Sebelumnya
+          <label class="form-label fw-semibold small text-muted mb-1">
+            Pakai Saldo Sebelumnya
           </label>
           <b-input-group>
             <b-form-input
@@ -104,151 +69,134 @@
               :max="finance.sisa_saldo_sebelumnya"
               min="0"
             />
-            <b-button variant="outline-info" @click="pakaiSaldoMax"
-              >Pakai Max</b-button
-            >
+            <b-button variant="outline-secondary" @click="pakaiSaldoMax">
+              Max
+            </b-button>
           </b-input-group>
           <small class="text-muted">
-            Tersedia:
-            <strong>{{ formatCurrency(finance.sisa_saldo_sebelumnya) }}</strong>
+            Tersedia {{ formatCurrency(finance.sisa_saldo_sebelumnya) }}
           </small>
         </b-col>
 
-        <!-- Progress -->
         <b-col cols="12" md="5">
-          <div class="d-flex justify-content-between mb-1">
-            <span class="small fw-semibold">Cakupan Kekurangan Dana</span>
+          <div class="d-flex justify-content-between mb-2">
+            <span class="small fw-semibold text-muted"
+              >Cakupan Kekurangan Dana</span
+            >
             <span
               class="small fw-bold"
-              :class="coveragePercent >= 100 ? 'text-success' : 'text-primary'"
+              :class="coveragePercent >= 100 ? 'text-success' : 'text-body'"
             >
               {{ formatCurrency(totalAlokasi) }}
-              <span class="fw-normal text-muted"
-                >({{ coveragePercent.toFixed(1) }}%)</span
-              >
+              <span class="fw-normal text-muted">
+                ({{ coveragePercent.toFixed(1) }}%)
+              </span>
             </span>
           </div>
           <b-progress
             :max="kekuranganDana || 1"
-            height="14px"
+            height="8px"
             class="rounded-pill"
           >
             <b-progress-bar
               :value="Math.min(totalAlokasi, kekuranganDana || 1)"
-              :variant="
-                coveragePercent >= 100
-                  ? 'success'
-                  : coveragePercent >= 50
-                    ? 'primary'
-                    : 'warning'
-              "
-              animated
+              :variant="coveragePercent >= 100 ? 'success' : 'primary'"
             />
           </b-progress>
-          <div class="d-flex justify-content-between mt-1">
-            <small class="text-muted">
-              Centang: {{ formatCurrency(nominalTercentang) }} + Saldo:
-              {{ formatCurrency(saldoPakai || 0) }}
-            </small>
+          <div class="mt-2">
             <small
               :class="
                 coveragePercent >= 100
                   ? 'text-success fw-semibold'
-                  : 'text-danger'
+                  : 'text-muted'
               "
             >
               {{
                 coveragePercent >= 100
-                  ? "✓ Kekurangan terpenuhi"
-                  : `Masih kurang: ${formatCurrency(Math.max(0, kekuranganDana - totalAlokasi))}`
+                  ? "Kekurangan dana terpenuhi"
+                  : `Masih kurang ${formatCurrency(Math.max(0, kekuranganDana - totalAlokasi))}`
               }}
             </small>
           </div>
         </b-col>
 
-        <!-- Action Buttons -->
         <b-col cols="12" md="3" class="d-flex flex-column gap-2">
           <b-button
-            variant="primary"
+            variant="outline-primary"
             @click="doAutoCheck"
             :disabled="!transactions.length || isLoading"
           >
-            <i class="bx bx-magic-wand me-1"></i>Auto Centang
+            Auto Centang
           </b-button>
           <b-button
-            variant="success"
+            variant="primary"
             :disabled="(!checkedIds.size && !saldoPakai) || isAllocating"
             @click="handleAlokasikan"
           >
             <b-spinner v-if="isAllocating" small class="me-1" />
-            <i v-else class="bx bx-check-double me-1"></i>Alokasikan
+            Alokasikan
           </b-button>
         </b-col>
       </b-row>
     </b-card>
 
     <!-- Donor Table -->
-    <b-card>
+    <b-card no-body>
       <template #header>
-        <b-row class="g-3 mb-3">
-          <b-col cols="12" md="4">
-            <label class="form-label fw-semibold small mb-1"
-              >Pilih Program</label
-            >
-            <b-form-select
-              v-model="selectedProgramId"
-              @change="onProgramChange"
-            >
-              <b-form-select-option
-                v-for="p in MOCK_PROGRAMS"
-                :key="p.id"
-                :value="p.id"
+        <div class="p-3 pb-0">
+          <b-row class="g-3 mb-3">
+            <b-col cols="12" md="4">
+              <label class="form-label fw-semibold small text-muted mb-1">
+                Pilih Program
+              </label>
+              <b-form-select
+                v-model="selectedProgramId"
+                @change="onProgramChange"
               >
-                {{ p.name }}
-              </b-form-select-option>
-            </b-form-select>
-          </b-col>
-        </b-row>
+                <b-form-select-option
+                  v-for="p in MOCK_PROGRAMS"
+                  :key="p.id"
+                  :value="p.id"
+                >
+                  {{ p.name }}
+                </b-form-select-option>
+              </b-form-select>
+            </b-col>
+          </b-row>
+        </div>
         <div
-          class="d-flex align-items-center justify-content-between flex-wrap gap-2"
+          class="d-flex align-items-center justify-content-between flex-wrap gap-2 px-3 pb-3"
         >
-          <h5 class="mb-0 fw-semibold">
-            <i class="bx bx-list-check me-1 text-primary"></i>
+          <h6 class="mb-0 fw-semibold text-muted">
             Daftar Donatur
-            <span class="badge bg-secondary ms-1">{{
-              transactions.length
-            }}</span>
-          </h5>
+            <span class="text-body">{{ transactions.length }}</span>
+          </h6>
 
           <div class="d-flex align-items-center gap-2">
-            <span v-if="checkedIds.size" class="badge bg-success py-2 px-3">
-              <i class="bx bx-check-circle me-1"></i>
-              {{ checkedIds.size }} dipilih &middot;
+            <span v-if="checkedIds.size" class="small text-success fw-semibold">
+              {{ checkedIds.size }} dipilih ·
               {{ formatCurrency(nominalTercentang) }}
             </span>
             <b-button
               v-if="checkedIds.size"
               size="sm"
-              variant="outline-danger"
+              variant="link"
+              class="text-danger p-0"
               @click="clearAll"
             >
-              <i class="bx bx-x me-1"></i>Reset
+              Reset
             </b-button>
           </div>
         </div>
       </template>
 
       <div v-if="isLoading" class="text-center py-5">
-        <b-spinner variant="primary" style="width: 2.5rem; height: 2.5rem" />
-        <p class="mt-2 text-muted">Memuat data donatur...</p>
+        <b-spinner variant="primary" style="width: 2rem; height: 2rem" />
+        <p class="mt-3 text-muted small">Memuat data donatur...</p>
       </div>
 
       <div v-else-if="!transactions.length" class="text-center py-5">
-        <i
-          class="bx bx-inbox d-block mb-2"
-          style="font-size: 3rem; color: #adb5bd"
-        ></i>
-        <p class="text-muted">Belum ada donasi untuk program ini.</p>
+        <p class="text-muted small mb-0">Belum ada donasi untuk program ini.</p>
       </div>
 
       <template v-else>
@@ -256,14 +204,13 @@
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
               <tr>
-                <th style="width: 48px" class="text-center">
+                <th style="width: 44px" class="text-center">
                   <b-form-checkbox
                     :model-value="isAllChecked"
                     :indeterminate="isIndeterminate"
                     @change="toggleAll"
                   />
                 </th>
-                <th style="width: 40px" class="text-muted small">#</th>
                 <th class="text-muted small">Donatur</th>
                 <th class="text-muted small text-end">Nominal</th>
                 <th class="text-muted small">Tanggal</th>
@@ -271,10 +218,10 @@
             </thead>
             <tbody>
               <tr
-                v-for="(trx, idx) in transactions"
+                v-for="trx in transactions"
                 :key="trx.id"
                 :class="{ 'table-success': checkedIds.has(trx.id) }"
-                style="cursor: pointer"
+                role="button"
                 @click="toggleCheck(trx.id)"
               >
                 <td class="text-center" @click.stop>
@@ -283,19 +230,14 @@
                     @change="toggleCheck(trx.id)"
                   />
                 </td>
-                <td class="text-muted small">{{ idx + 1 }}</td>
                 <td>
-                  <div class="fw-semibold small">{{ trx.owner }}</div>
-                  <div
-                    v-if="trx.phone"
-                    class="text-muted"
-                    style="font-size: 11px"
-                  >
+                  <div class="fw-medium small">{{ trx.owner }}</div>
+                  <div v-if="trx.phone" class="text-muted small">
                     {{ trx.phone }}
                   </div>
                 </td>
                 <td class="text-end">
-                  <span class="fw-bold text-success small">{{
+                  <span class="fw-semibold small">{{
                     formatCurrency(trx.nominal)
                   }}</span>
                 </td>
@@ -304,10 +246,10 @@
             </tbody>
             <tfoot class="table-light">
               <tr>
-                <td colspan="3" class="text-end fw-semibold small text-muted">
-                  Total Dipilih ({{ checkedIds.size }} donasi):
+                <td colspan="2" class="text-end fw-semibold small text-muted">
+                  Total Dipilih ({{ checkedIds.size }})
                 </td>
-                <td class="text-end fw-bold text-success small">
+                <td class="text-end fw-bold small">
                   {{ formatCurrency(nominalTercentang) }}
                 </td>
                 <td></td>
@@ -328,10 +270,20 @@ import { getAllTransactions } from "@/services/transactionService";
 import { formatCurrency, formatDate } from "@/helpers/format";
 import { toast as showToast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { checkFundingProject } from "@/services/fundingService";
+import { useRoute } from "vue-router";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Mock data — replace with real API responses when backend is ready
 // ──────────────────────────────────────────────────────────────────────────────
+
+const route = useRoute();
+const projectId = Number(route.params.id);
+
+const { data: dataFund, isLoading: isLoadFund } = useQuery({
+  queryKey: ["data-funding"],
+  queryFn: () => checkFundingProject(projectId),
+});
 
 const MOCK_PROGRAMS = [
   { id: 1, name: "Program Utama" },
@@ -707,104 +659,3 @@ const handleAlokasikan = async () => {
   isAllocating.value = false;
 };
 </script>
-
-<style scoped>
-.fcard {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  background: #fff;
-  border-radius: 10px;
-  padding: 16px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
-  height: 100%;
-  border-left: 4px solid transparent;
-}
-.fcard-icon {
-  font-size: 28px;
-  line-height: 1;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-.fcard-body {
-  min-width: 0;
-}
-.fcard-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #6c757d;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  margin-bottom: 4px;
-}
-.fcard-value {
-  font-size: 1.15rem;
-  font-weight: 700;
-  line-height: 1.2;
-}
-.fcard-sub {
-  font-size: 11px;
-  color: #adb5bd;
-  margin-top: 2px;
-}
-
-.fcard-blue {
-  border-left-color: #0d6efd;
-}
-.fcard-blue .fcard-icon {
-  color: #0d6efd;
-}
-.fcard-blue .fcard-value {
-  color: #0d6efd;
-}
-
-.fcard-green {
-  border-left-color: #198754;
-}
-.fcard-green .fcard-icon {
-  color: #198754;
-}
-.fcard-green .fcard-value {
-  color: #198754;
-}
-
-.fcard-red {
-  border-left-color: #dc3545;
-}
-.fcard-red .fcard-icon {
-  color: #dc3545;
-}
-.fcard-red .fcard-value {
-  color: #dc3545;
-}
-
-.fcard-cyan {
-  border-left-color: #0dcaf0;
-}
-.fcard-cyan .fcard-icon {
-  color: #0dcaf0;
-}
-.fcard-cyan .fcard-value {
-  color: #0aa8c7;
-}
-
-.fcard-purple {
-  border-left-color: #6f42c1;
-}
-.fcard-purple .fcard-icon {
-  color: #6f42c1;
-}
-.fcard-purple .fcard-value {
-  color: #6f42c1;
-}
-
-.fcard-orange {
-  border-left-color: #fd7e14;
-}
-.fcard-orange .fcard-icon {
-  color: #fd7e14;
-}
-.fcard-orange .fcard-value {
-  color: #fd7e14;
-}
-</style>

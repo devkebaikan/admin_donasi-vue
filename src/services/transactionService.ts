@@ -52,13 +52,3 @@ export const deleteTransaction = async (id: number) => {
     throw error;
   }
 };
-
-export const getPaymentMethod = async () => {
-  try {
-    const res = HttpClient.get("/payment/payment-method");
-    return (await res).data.data;
-  } catch (error) {
-    console.log("Error fetching payment method", error);
-    return [];
-  }
-};

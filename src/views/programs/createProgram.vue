@@ -308,6 +308,7 @@
                       placeholder="0"
                       v-model="formState.target_nominal"
                       :disabled="formState.is_target_nominal === 'BEBAS'"
+                      :state="null"
                     />
                     <small class="text-muted">
                       {{
@@ -491,7 +492,7 @@ import { useRouter } from "vue-router";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
-import CurrencyInput from "@/components/CurrencyInput.vue";
+// import CurrencyInput from "@/components/CurrencyInput.vue";
 import { QuillEditor } from "@vueup/vue-quill";
 import { FormWizard, TabContent } from "vue3-form-wizard";
 
@@ -617,17 +618,9 @@ const tipeList = computed(() => {
   if (!tipeData.value) return [{ value: 0, text: "Choose Tipe..." }];
   return [
     { value: 0, text: "Choose Tipe..." },
-    ...tipeData.value.map((item: any) => ({ value: item.id, text: item.name })),
+    ...tipeData.value.map((item: any) => ({ value: item.id, text: item.nama })),
   ];
 });
-
-// const tipeList = [
-//   { value: 0, text: "Choose Tipe..." },
-//   { value: 1, text: "Zakat" },
-//   { value: 2, text: "Infaq" },
-//   { value: 3, text: "Sadaqah" },
-//   { value: 4, text: "Wakaf" },
-// ];
 
 const { data: categoryData, isLoading: isCategoryLoading } = useQuery({
   queryKey: ["program-categories"],

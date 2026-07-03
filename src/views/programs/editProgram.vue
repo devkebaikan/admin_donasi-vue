@@ -334,6 +334,7 @@
                       v-model="formState.target_nominal"
                       :key="`${formState.is_target_nominal}-${formState.target_nominal}`"
                       :disabled="formState.is_target_nominal === 'BEBAS'"
+                      :state="null"
                     />
                     <small class="text-muted">
                       {{
@@ -417,6 +418,7 @@
                         v-model="item.nominal"
                         placeholder="Nominal"
                         style="flex: 1; min-width: 140px"
+                        :state="null"
                       />
                       <b-button
                         variant="outline-danger"
@@ -582,7 +584,7 @@ import { useRouter, useRoute } from "vue-router";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
-import CurrencyInput from "@/components/CurrencyInput.vue";
+// import CurrencyInput from "@/components/CurrencyInput.vue";
 import { QuillEditor } from "@vueup/vue-quill";
 import { FormWizard, TabContent } from "vue3-form-wizard";
 

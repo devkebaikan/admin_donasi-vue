@@ -47,6 +47,12 @@ export const MENU_ITEMS: MenuItemType[] = [
     label: "Finance Account Master",
     route: { name: "finance-account-master.list" },
   },
+  {
+    key: "finance-journal",
+    icon: "material-symbols:finance",
+    label: "Finance Journal",
+    route: { name: "finance-journal.list" },
+  },
 
   {
     key: "rbac",
@@ -71,6 +77,12 @@ export const MENU_ITEMS: MenuItemType[] = [
     label: "Users",
     route: { name: "user.list" },
   },
+  {
+    key: "rbac-user-donatur",
+    icon: "carbon:user-role",
+    label: "Donatur",
+    route: { name: "user.donatur" },
+  },
 
   {
     key: "data",
@@ -88,17 +100,23 @@ export const MENU_ITEMS: MenuItemType[] = [
         route: { name: "programs.list" },
         parentKey: "programs",
       },
-      {
-        key: "program-project",
-        label: "Projects",
-        route: { name: "project.list" },
-        parentKey: "programs",
-      },
+      // {
+      //   key: "program-project",
+      //   label: "Projects",
+      //   route: { name: "project.list" },
+      //   parentKey: "programs",
+      // },
       {
         key: "program-category",
         label: "Categories",
         route: { name: "category.list" },
         parentKey: "category",
+      },
+      {
+        key: "program-type",
+        label: "Type",
+        route: { name: "program-type.list" },
+        parentKey: "type",
       },
       {
         key: "program-percentage",
@@ -111,6 +129,38 @@ export const MENU_ITEMS: MenuItemType[] = [
         label: "Set up Nominal",
         route: { name: "nominal.list" },
         parentKey: "default-nominal ",
+      },
+    ],
+  },
+
+  {
+    key: "projects",
+    icon: "eos-icons:project-outlined",
+    label: "Projects",
+    children: [
+      {
+        key: "project-list",
+        label: "List",
+        route: { name: "project.list" },
+        parentKey: "projects",
+      },
+      {
+        key: "project-kegiatan",
+        label: "Kegiatan",
+        route: { name: "kegiatan.list" },
+        parentKey: "projects",
+      },
+      {
+        key: "project-keuangan",
+        label: "keuangan",
+        route: { name: "keuangan.list" },
+        parentKey: "projects",
+      },
+      {
+        key: "project-ajuan",
+        label: "Ajuan",
+        route: { name: "ajuan.list" },
+        parentKey: "projects",
       },
     ],
   },

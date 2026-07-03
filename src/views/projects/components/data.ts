@@ -106,41 +106,75 @@ export function useProjectsTable() {
         name: "Actions",
         width: "40px",
         sort: false,
-        formatter: (id: number) =>
+        formatter: (item: { activity: string; id: number }) =>
           html(`
-            <div class="d-flex flex-column gap-1 justify-content-center align-items-center">
-               <button
-                class="btn btn-sm btn-soft-primary detail-btn"
-                style='width:48px'
-                data-action="detail"
-                data-id="${id}"
-                title="Lihat Detail">
-                <i class="bx bx-show fs-16"></i>
-              </button>             
+            <div
+              class="d-grid gap-0 justify-content-center"
+              style="grid-template-columns: repeat(2, auto);"
+            >
               <button
-                class="btn btn-sm btn-soft-warning edit-btn"
-                style='width:48px'
-                data-action="edit"
-                data-id="${id}"
-                title="Edit Project">
-                <i class="bx bx-edit fs-16"></i>
-              </button>
-              <button
-                class="btn btn-sm btn-soft-success manage-btn"
-                style='width:48px'
-                data-action="manage"
-                data-id="${id}"
-                title="Manage Project">
-                <i class="bx bx-cog fs-16"></i>
-              </button>
-              <button
-                class="btn btn-sm btn-soft-green report-btn"
-                style='width:48px'
-                data-action="report"
-                data-id="${id}"
-                title="Report Project">
-                <i class="bx bxs-report fs-16"></i>
-              </button>
+                  class="btn btn-sm btn-soft-primary detail-btn"
+                  style='width:48px'
+                  data-action="detail"
+                  data-id="${item.id}"
+                  title="Lihat Detail">
+                  <i class="bx bx-show fs-16"></i>
+                </button>             
+
+                <button
+                  class="btn btn-sm btn-soft-warning edit-btn"
+                  style='width:48px'
+                  data-action="edit"
+                  data-id="${item.id}"
+                  title="Edit Project">
+                  <i class="bx bx-edit-alt fs-16"></i>
+                </button>
+                
+                ${
+                  item.activity === "active open"
+                    ? `
+                    <button
+                      class="btn btn-sm btn-soft-success funding-btn"
+                      style="width:48px"
+                      data-action="funding"
+                      data-id="${item.id}"
+                      title="Funding Project"
+                    >
+                      <i class="bx bx-dollar-circle fs-16"></i>
+                    </button>
+                  `
+                    : ""
+                }
+
+                <button
+                  class="btn btn-sm btn-soft-info kegiatan-btn"
+                  style='width:48px'
+                  data-action="kegiatan"
+                  data-id="${item.id}"
+                  title="Kegiatan Project">
+                  <!-- Mengubah ikon ke task/list yang lebih dinamis -->
+                  <i class="bx bx-task fs-16"></i>
+                </button>
+
+                <button
+                  class="btn btn-sm btn-soft-secondary manage-btn" 
+                  style='width:48px'
+                  data-action="manage"
+                  data-id="${item.id}"
+                  title="Manage Project">
+                  <!-- Mengubah warna ke secondary/dark agar tidak kembar hijau dengan funding -->
+                  <i class="bx bx-cog fs-16"></i>
+                </button>
+
+                <button
+                  class="btn btn-sm btn-soft-danger report-btn"
+                  style='width:48px'
+                  data-action="report"
+                  data-id="${item.id}"
+                  title="Report Project">
+                  <!-- Mengubah kelas warna menjadi danger (merah soft) agar stand out -->
+                  <i class="bx bxs-report fs-16"></i>
+                </button>
               </div>
               `),
       },
@@ -149,7 +183,7 @@ export function useProjectsTable() {
     // <button
     //   class="btn btn-sm btn-soft-danger delete-btn"
     //   data-action="delete"
-    //   data-id="${id}"
+    //   data-id="${item.id}"
     //   title="Hapus Project">
     //   <i class="bx bx-trash fs-16"></i>
     // </button>
@@ -161,7 +195,7 @@ export function useProjectsTable() {
       project.activity,
       { ajuan: project.nominal_ajuan, acc: project.nominal_acc },
       project.waktu_pelaksanaan,
-      project.id,
+      { activity: project.activity, id: project.id },
     ],
   });
 

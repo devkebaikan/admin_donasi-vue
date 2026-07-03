@@ -631,8 +631,14 @@ const handleGlobalClick = (event: Event) => {
   const editBtn = target.closest<HTMLElement>(
     '#table-gridjs .edit-btn[data-action="edit"]',
   );
+  const kegiatanBtn = target.closest<HTMLElement>(
+    '#table-gridjs .kegiatan-btn[data-action="kegiatan"]',
+  );
   const manageBtn = target.closest<HTMLElement>(
     '#table-gridjs .manage-btn[data-action="manage"]',
+  );
+  const fundingBtn = target.closest<HTMLElement>(
+    '#table-gridjs .funding-btn[data-action="funding"]',
   );
   const reportBtn = target.closest<HTMLElement>(
     '#table-gridjs .report-btn[data-action="report"]',
@@ -655,17 +661,31 @@ const handleGlobalClick = (event: Event) => {
     return;
   }
 
+  if (kegiatanBtn) {
+    event.preventDefault();
+    const id = kegiatanBtn.getAttribute("data-id");
+    if (id) router.push(`/projects/kegiatan/${id}`);
+    return;
+  }
+
   if (manageBtn) {
     event.preventDefault();
     const id = manageBtn.getAttribute("data-id");
-    if (id) router.push(`/projects/${id}/edit`);
+    if (id) router.push(`/projects/manage/${id}`);
+    return;
+  }
+
+  if (fundingBtn) {
+    event.preventDefault();
+    const id = fundingBtn.getAttribute("data-id");
+    if (id) router.push(`/projects/funding/${id}`);
     return;
   }
 
   if (reportBtn) {
     event.preventDefault();
     const id = reportBtn.getAttribute("data-id");
-    if (id) router.push(`/projects/${id}/edit`);
+    if (id) router.push(`/projects/report/${id}`);
     return;
   }
 

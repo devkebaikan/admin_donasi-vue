@@ -26,7 +26,9 @@
               <span class="badge bg-light text-dark border">{{
                 tx.source
               }}</span>
-              <span class="text-muted small">{{ formatDate(tx.date) }}</span>
+              <span class="text-muted small">{{
+                formatDateTime(tx.date)
+              }}</span>
             </div>
           </div>
           <div class="d-flex gap-2">
@@ -65,11 +67,11 @@
                 </tr>
                 <tr>
                   <td class="text-muted fw-semibold">Tanggal</td>
-                  <td>{{ formatDate(tx.date) }}</td>
+                  <td>{{ formatDateTime(tx.date) }}</td>
                 </tr>
                 <tr>
                   <td class="text-muted fw-semibold">Waktu</td>
-                  <td>{{ formatTime(tx.time) }}</td>
+                  <td>{{ formatDateTime(tx.time) }}</td>
                 </tr>
                 <tr>
                   <td class="text-muted fw-semibold">Status</td>
@@ -300,6 +302,7 @@ import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import { getTransactionById } from "@/services/transactionService";
 import router from "@/router";
+import { formatCurrency, formatDateTime } from "@/helpers/format";
 
 const route = useRoute();
 const txId = computed(() => Number(route.params.id));
@@ -309,41 +312,6 @@ const { data: tx, isLoading } = useQuery({
   queryFn: () => getTransactionById(txId.value),
   enabled: computed(() => !!txId.value),
 });
-
-const formatCurrency = (val: number) =>
-  new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  }).format(val ?? 0);
-
-const formatDate = (str: string) => {
-  if (!str) return "-";
-  return new Date(str).toLocaleDateString("id-ID", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-};
-
-const formatTime = (str: string) => {
-  if (!str) return "-";
-  return new Date(str).toLocaleTimeString("id-ID", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
-const formatDateTime = (str: string) => {
-  if (!str) return "-";
-  return new Date(str).toLocaleString("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
 
 const statusClass = (status: string) =>
   ({

@@ -67,13 +67,56 @@ export const getProgramCategories = async () => {
 };
 
 // fetch all program types
-export const getProgramTypes = async () => {
+export const getProgramTypes = async (params = {}) => {
   try {
-    const res = await HttpClient.get("/program-types");
+    const res = await HttpClient.get("/program/tipe", { params });
     return res.data.data;
   } catch (error) {
     console.error("Error fetching program types:", error);
     return [];
+  }
+};
+
+export const getProgramTypeById = async (id: number) => {
+  try {
+    const res = await HttpClient.get(`/program/tipe/${id}`);
+    return res.data.data;
+  } catch (error) {
+    console.error(`Error fetching program type with id ${id}:`, error);
+    return null;
+  }
+};
+
+export const createProgramType = async (data: Record<string, any>) => {
+  try {
+    const res = await HttpClient.post("/program/tipe", data);
+    return res.data.data;
+  } catch (error) {
+    console.error("Error creating program type:", error);
+    throw error;
+  }
+};
+
+export const updateProgramType = async (
+  id: number,
+  data: Record<string, any>,
+) => {
+  try {
+    const res = await HttpClient.put(`/program/tipe/${id}`, data);
+    return res.data.data;
+  } catch (error) {
+    console.error(`Error updating program type with id ${id}:`, error);
+    throw error;
+  }
+};
+
+export const deleteProgramType = async (id: number) => {
+  try {
+    await HttpClient.delete(`/program/tipe/${id}`);
+    return true;
+  } catch (error) {
+    console.error(`Error deleting program type with id ${id}:`, error);
+    throw error;
   }
 };
 

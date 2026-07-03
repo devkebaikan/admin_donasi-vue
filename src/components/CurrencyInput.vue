@@ -6,13 +6,6 @@
     v-model="internalValue"
     @input="onInput"
   />
-  <!-- <b-form-input
-    :id="id"
-    :placeholder="placeholder"
-    :state="state"
-    :value="internalValue"
-    @input="onInput"
-  /> -->
 </template>
 
 <script setup lang="ts">
@@ -22,7 +15,7 @@ const props = defineProps({
   modelValue: [String, Number],
   id: String,
   placeholder: String,
-  state: Boolean,
+  state: Boolean || undefined,
 });
 
 const emit = defineEmits(["update:modelValue"]);

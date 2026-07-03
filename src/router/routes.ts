@@ -242,6 +242,37 @@ const defaultNominalRoutes = [
   },
 ];
 
+// Program type routes
+const programTypeRoutes = [
+  {
+    path: "/program-type",
+    name: "program-type.list",
+    meta: {
+      title: setTitle("Program Type"),
+      authRequired: true,
+    },
+    component: () => import("@/views/programs/type/listType.vue"),
+  },
+  {
+    path: "/program-type/create",
+    name: "program-type.create",
+    meta: {
+      title: setTitle("Create Program Type"),
+      authRequired: true,
+    },
+    component: () => import("@/views/programs/type/createType.vue"),
+  },
+  {
+    path: "/program-type/:id/edit",
+    name: "program-type.edit",
+    meta: {
+      title: setTitle("Edit Program Type"),
+      authRequired: true,
+    },
+    component: () => import("@/views/programs/type/edit.vue"),
+  },
+];
+
 // Setting Image Routes
 const settingImageRoutes = [
   {
@@ -502,15 +533,6 @@ const userRoutes = [
     component: () => import("@/views/users/createUser.vue"),
   },
   {
-    path: "/users/:id",
-    name: "user.detail",
-    meta: {
-      title: setTitle("Detail User"),
-      authRequired: true,
-    },
-    component: () => import("@/views/users/detailUser.vue"),
-  },
-  {
     path: "/users/:id/edit",
     name: "user.edit",
     meta: {
@@ -528,6 +550,15 @@ const userRoutes = [
     },
     component: () =>
       import("@/views/users/user-transactions/listUserTranscation.vue"),
+  },
+  {
+    path: "/users/donatur",
+    name: "user.donatur",
+    meta: {
+      title: setTitle("User Donatur"),
+      authRequired: true,
+    },
+    component: () => import("@/views/users/listDonatur.vue"),
   },
 ];
 
@@ -599,6 +630,34 @@ const projectRoutes = [
       authRequired: true,
     },
     component: () => import("@/views/projects/editProject.vue"),
+  },
+  {
+    path: "/projects/kegiatan/:id",
+    name: "project-kegiatan.list",
+    meta: {
+      title: setTitle("Project Kegiatan"),
+      authRequired: true,
+    },
+    component: () =>
+      import("@/views/projects/kegiatan/listKegiatanProject.vue"),
+  },
+  {
+    path: "/projects/keuangan/:id",
+    name: "project-keuangan.list",
+    meta: {
+      title: setTitle("Project keuangan"),
+      authRequired: true,
+    },
+    component: () => import("@/views/projects/keuangan/listKeuangan.vue"),
+  },
+  {
+    path: "/projects/funding/:id",
+    name: "project-funding.index",
+    meta: {
+      title: setTitle("Project Funding"),
+      authRequired: true,
+    },
+    component: () => import("@/views/project-funding/project-funding.vue"),
   },
 ];
 
@@ -782,6 +841,19 @@ const financeAccountMasterRoutes = [
   },
 ];
 
+// Finance Journal Routes
+const financeJournalRoutes = [
+  {
+    path: "/finance-journal",
+    name: "finance-journal.list",
+    meta: {
+      title: setTitle("Finance Journal"),
+      authRequired: true,
+    },
+    component: () => import("@/views/finanace-journal/listFinanceJournal.vue"),
+  },
+];
+
 // Ads Script Routes
 const adsScriptRoutes = [
   {
@@ -822,16 +894,127 @@ const adsScriptRoutes = [
   },
 ];
 
-// Funding Routes
-const fundingRoutes = [
+// Kegiatan Routes
+const kegiatanRoutes = [
   {
-    path: "/funding",
-    name: "funding.index",
+    path: "/kegiatan",
+    name: "kegiatan.list",
     meta: {
-      title: setTitle("Pendanaan Proyek"),
+      title: setTitle("Program Kegiatan"),
       authRequired: true,
     },
-    component: () => import("@/views/funding/pendanaanProyek.vue"),
+    component: () => import("@/views/program-kegiatan/listKegiatan.vue"),
+  },
+  {
+    path: "/kegiatan/create",
+    name: "kegiatan.create",
+    meta: {
+      title: setTitle("Create Program Kegiatan"),
+      authRequired: true,
+    },
+    component: () => import("@/views/program-kegiatan/createKegiatan.vue"),
+  },
+  {
+    path: "/kegiatan/:id/edit",
+    name: "kegiatan.edit",
+    meta: {
+      title: setTitle("Edit Program Kegiatan"),
+      authRequired: true,
+    },
+    component: () => import("@/views/program-kegiatan/editKegiatan.vue"),
+  },
+];
+
+// Project Ajuan Routes
+const projectAjuanRoutes = [
+  {
+    path: "/ajuan",
+    name: "ajuan.list",
+    meta: {
+      title: setTitle("Project Ajuan"),
+      authRequired: true,
+    },
+    component: () => import("@/views/project-ajuan/listAjuan.vue"),
+  },
+  {
+    path: "/ajuan/create",
+    name: "ajuan.create",
+    meta: {
+      title: setTitle("Create Project Ajuan"),
+      authRequired: true,
+    },
+    component: () => import("@/views/project-ajuan/createAjuan.vue"),
+  },
+  {
+    path: "/ajuan/:id/edit",
+    name: "ajuan.edit",
+    meta: {
+      title: setTitle("Edit Project Ajuan"),
+      authRequired: true,
+    },
+    component: () => import("@/views/project-ajuan/editAjuan.vue"),
+  },
+];
+
+// Project Keuangan Routes
+const projectKeuanganRoutes = [
+  {
+    path: "/keuangan",
+    name: "keuangan.list",
+    meta: {
+      title: setTitle("Project Keuangan"),
+      authRequired: true,
+    },
+    component: () => import("@/views/project-keuangan/listKeuangan.vue"),
+  },
+  {
+    path: "/keuangan/create",
+    name: "keuangan.create",
+    meta: {
+      title: setTitle("Create Project Keuangan"),
+      authRequired: true,
+    },
+    component: () => import("@/views/project-keuangan/createKeuangan.vue"),
+  },
+  {
+    path: "/keuangan/:id/edit",
+    name: "keuangan.edit",
+    meta: {
+      title: setTitle("Edit Project Keuangan"),
+      authRequired: true,
+    },
+    component: () => import("@/views/project-keuangan/editKeuangan.vue"),
+  },
+];
+
+// Payment Method Routes
+const paymentMethodRoutes = [
+  {
+    path: "/payment-methods",
+    name: "payment-method.list",
+    meta: {
+      title: setTitle("Payment Methods"),
+      authRequired: true,
+    },
+    component: () => import("@/views/payment-methods/listPaymentMethod.vue"),
+  },
+  {
+    path: "/payment-methods/create",
+    name: "payment-method.create",
+    meta: {
+      title: setTitle("Create Payment Methods"),
+      authRequired: true,
+    },
+    component: () => import("@/views/payment-methods/createPaymentMethod.vue"),
+  },
+  {
+    path: "/payment-methods/:id/edit",
+    name: "payment-method.edit",
+    meta: {
+      title: setTitle("Edit Payment Methods"),
+      authRequired: true,
+    },
+    component: () => import("@/views/payment-methods/editPaymentMethod.vue"),
   },
 ];
 
@@ -1562,9 +1745,14 @@ export const allRoutes = [
   ...eventRoutes,
   ...financeAccountRoutes,
   ...financeAccountMasterRoutes,
+  ...financeJournalRoutes,
   ...eventTypeRoutes,
   ...eventAttributeRoutes,
   ...userRoutes,
   ...adsScriptRoutes,
-  ...fundingRoutes,
+  ...programTypeRoutes,
+  ...kegiatanRoutes,
+  ...projectAjuanRoutes,
+  ...projectKeuanganRoutes,
+  ...paymentMethodRoutes,
 ];

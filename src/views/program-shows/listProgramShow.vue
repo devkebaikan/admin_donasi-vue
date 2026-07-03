@@ -18,7 +18,7 @@
 
       <b-row>
         <!-- Search -->
-        <b-col cols="12" md="3" class="mb-3">
+        <b-col cols="12" md="4" class="mb-3">
           <label class="form-label fw-semibold">Search</label>
           <b-input-group>
             <span class="input-group-text">
