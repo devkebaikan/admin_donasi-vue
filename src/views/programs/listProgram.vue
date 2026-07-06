@@ -665,7 +665,7 @@ const handleGlobalClick = (event: Event) => {
   if (projectsBtn) {
     event.preventDefault();
     const id = projectsBtn.getAttribute("data-id");
-    if (id) router.push(`/programs/${id}/projects`);
+    if (id) router.push(`/projects?program_id=${id}`);
     return;
   }
 

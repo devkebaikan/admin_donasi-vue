@@ -162,6 +162,12 @@ export const MENU_ITEMS: MenuItemType[] = [
         route: { name: "ajuan.list" },
         parentKey: "projects",
       },
+      {
+        key: "project-report",
+        label: "Reports ",
+        route: { name: "project-report.list" },
+        parentKey: "projects",
+      },
     ],
   },
   {
@@ -239,6 +245,12 @@ export const MENU_ITEMS: MenuItemType[] = [
     icon: "mdi:bank",
     label: "Bank References",
     route: { name: "bank-reference.list" },
+  },
+  {
+    key: "setting-payment-method",
+    icon: "mdi:bank",
+    label: "Payment Methods",
+    route: { name: "payment-method.list" },
   },
   {
     key: "setting-lead",

@@ -629,13 +629,11 @@ import FlatPicker from "@/components/FlatPicker.vue";
 import { useTransactionTable } from "./data";
 import router from "@/router";
 import { useQuery } from "@tanstack/vue-query";
-import {
-  getPaymentMethod,
-  getTransactionById,
-} from "@/services/transactionService";
+import { getTransactionById } from "@/services/transactionService";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
 import { useRoute } from "vue-router";
 import { formatCurrency, formatDate, formatDateTime } from "@/helpers/format";
+import { getAllPaymentMethods } from "@/services/paymentMethodService";
 
 const route = useRoute();
 
@@ -675,7 +673,7 @@ const openDetail = (id: number) => {
 
 const { data: paymentMethod, isLoading: loadingPaymentMethod } = useQuery({
   queryKey: ["payment-method"],
-  queryFn: getPaymentMethod,
+  queryFn: getAllPaymentMethods,
 });
 
 const paymentList = computed(() => {

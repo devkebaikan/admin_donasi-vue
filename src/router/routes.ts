@@ -1018,6 +1018,37 @@ const paymentMethodRoutes = [
   },
 ];
 
+// Project Report Routes
+const projectReportRoutes = [
+  {
+    path: "/project-report",
+    name: "project-report.list",
+    meta: {
+      title: setTitle("Project Report"),
+      authRequired: true,
+    },
+    component: () => import("@/views/project-report/listReport.vue"),
+  },
+  {
+    path: "/project-report/create",
+    name: "project-report.create",
+    meta: {
+      title: setTitle("Create Project Report"),
+      authRequired: true,
+    },
+    component: () => import("@/views/project-report/createReport.vue"),
+  },
+  {
+    path: "/project-report/:id/edit",
+    name: "project-report.edit",
+    meta: {
+      title: setTitle("Edit Project Report"),
+      authRequired: true,
+    },
+    component: () => import("@/views/project-report/editReport.vue"),
+  },
+];
+
 // ========================================================================== All Routes not use ==========================================================================
 const pagesRoutes = [
   {
@@ -1755,4 +1786,5 @@ export const allRoutes = [
   ...projectAjuanRoutes,
   ...projectKeuanganRoutes,
   ...paymentMethodRoutes,
+  ...projectReportRoutes,
 ];

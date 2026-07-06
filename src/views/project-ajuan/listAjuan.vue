@@ -639,7 +639,7 @@ import { getAllMitra } from "@/services/mitraService";
 
 import { formatCurrency, formatDateTime } from "@/helpers/format";
 import router from "@/router";
-import { getPaymentMethod } from "@/services/paymentMethodService";
+import { getAllPaymentMethods } from "@/services/paymentMethodService";
 
 const showToast = (message: string, options: ToastOptions) =>
   toast(message, options);
@@ -780,7 +780,7 @@ const acceptForm = reactive({
 const { data: paymentMethodData, isLoading: isPaymentMethodLoading } = useQuery(
   {
     queryKey: ["payment-methods"],
-    queryFn: () => getPaymentMethod({ is_active: true }),
+    queryFn: () => getAllPaymentMethods({ mode: "list", is_active: true }),
   },
 );
 

@@ -147,16 +147,6 @@ export function useProjectsTable() {
                 }
 
                 <button
-                  class="btn btn-sm btn-soft-info kegiatan-btn"
-                  style='width:48px'
-                  data-action="kegiatan"
-                  data-id="${item.id}"
-                  title="Kegiatan Project">
-                  <!-- Mengubah ikon ke task/list yang lebih dinamis -->
-                  <i class="bx bx-task fs-16"></i>
-                </button>
-
-                <button
                   class="btn btn-sm btn-soft-secondary manage-btn" 
                   style='width:48px'
                   data-action="manage"
@@ -166,15 +156,7 @@ export function useProjectsTable() {
                   <i class="bx bx-cog fs-16"></i>
                 </button>
 
-                <button
-                  class="btn btn-sm btn-soft-danger report-btn"
-                  style='width:48px'
-                  data-action="report"
-                  data-id="${item.id}"
-                  title="Report Project">
-                  <!-- Mengubah kelas warna menjadi danger (merah soft) agar stand out -->
-                  <i class="bx bxs-report fs-16"></i>
-                </button>
+              
               </div>
               `),
       },
@@ -186,6 +168,26 @@ export function useProjectsTable() {
     //   data-id="${item.id}"
     //   title="Hapus Project">
     //   <i class="bx bx-trash fs-16"></i>
+    // </button>
+
+    // <button
+    //   class="btn btn-sm btn-soft-info kegiatan-btn"
+    //   style='width:48px'
+    //   data-action="kegiatan"
+    //   data-id="${item.id}"
+    //   title="Kegiatan Project">
+    //   <!-- Mengubah ikon ke task/list yang lebih dinamis -->
+    //   <i class="bx bx-task fs-16"></i>
+    // </button>
+
+    // <button
+    //   class="btn btn-sm btn-soft-danger report-btn"
+    //   style='width:48px'
+    //   data-action="report"
+    //   data-id="${item.id}"
+    //   title="Report Project">
+    //   <!-- Mengubah kelas warna menjadi danger (merah soft) agar stand out -->
+    //   <i class="bx bxs-report fs-16"></i>
     // </button>
 
     rowMapper: (project: any, index: number) => [

@@ -1,143 +1,5 @@
 <template>
   <VerticalLayout>
-    <!-- Filter Section -->
-    <b-card class="mb-3">
-      <template #header>
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <h5 class="mb-0">
-              <i class="bx bx-filter-alt me-1"></i>
-              Filter
-            </h5>
-          </div>
-          <b-button
-            v-if="hasActiveFilters"
-            size="sm"
-            variant="outline-danger"
-            @click="clearFilters"
-          >
-            <i class="bx bx-reset me-1"></i>
-            Reset Filter
-          </b-button>
-        </div>
-      </template>
-
-      <b-row>
-        <!-- Search -->
-        <b-col cols="12" md="4" class="mb-3">
-          <label class="form-label fw-semibold">Search</label>
-          <b-input-group>
-            <span class="input-group-text">
-              <i class="bx bx-search"></i>
-            </span>
-            <b-form-input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Cari judul, deskripsi, atau pengaju..."
-              debounce="500"
-              @update:model-value="resetPage"
-            />
-          </b-input-group>
-        </b-col>
-
-        <!-- Status Filter -->
-        <b-col cols="12" md="2" class="mb-3">
-          <label class="form-label fw-semibold">Status</label>
-          <b-form-select v-model="selectedStatus" @change="resetPage">
-            <option value="">Semua Status</option>
-            <option value="draft">Draft</option>
-            <option value="diajukan">Diajukan</option>
-            <option value="diterima">Diterima</option>
-            <option value="ditolak">Ditolak</option>
-          </b-form-select>
-        </b-col>
-
-        <!-- Activity Filter -->
-        <b-col cols="12" md="2" class="mb-3">
-          <label class="form-label fw-semibold">Activity</label>
-          <b-form-select v-model="selectedActivity" @change="resetPage">
-            <option value="">Semua Activity</option>
-            <option value="inactive">Inactive</option>
-            <option value="active open">Active Open</option>
-            <option value="active close">Active Close</option>
-            <option value="selesai">Selesai</option>
-          </b-form-select>
-        </b-col>
-
-        <!-- Program Filter -->
-        <b-col cols="12" md="4">
-          <label class="form-label fw-semibold"> Program </label>
-
-          <ChoicesSelect
-            id="program"
-            :modelValue="selectedProgramId"
-            @update:modelValue="
-              (val: number) => {
-                selectedProgramId = val;
-                resetPage();
-              }
-            "
-            :options="programOptions"
-            :key="programOptions.length"
-          />
-        </b-col>
-
-        <!-- <b-col cols="12" md="3" class="mb-3">
-          <label class="form-label fw-semibold">Program</label>
-          <b-form-select v-model="selectedProgramId" @change="resetPage">
-            <option value="">Semua Program</option>
-            <option v-for="p in programOptions" :key="p.id" :value="p.id">
-              {{ p.title }}
-            </option>
-          </b-form-select>
-        </b-col> -->
-      </b-row>
-
-      <!-- Active Filters -->
-      <div
-        v-if="hasActiveFilters"
-        class="d-flex flex-wrap gap-2 align-items-center"
-      >
-        <span class="text-muted small">Active filters:</span>
-
-        <b-badge
-          v-if="searchQuery"
-          variant="primary"
-          class="d-flex align-items-center gap-1"
-        >
-          Search: "{{ searchQuery }}"
-          <i class="bx bx-x cursor-pointer" @click="searchQuery = ''"></i>
-        </b-badge>
-
-        <b-badge
-          v-if="selectedStatus"
-          variant="primary"
-          class="d-flex align-items-center gap-1"
-        >
-          Status: {{ selectedStatus }}
-          <i class="bx bx-x cursor-pointer" @click="selectedStatus = ''"></i>
-        </b-badge>
-
-        <b-badge
-          v-if="selectedActivity"
-          variant="primary"
-          class="d-flex align-items-center gap-1"
-        >
-          Activity: {{ selectedActivity }}
-          <i class="bx bx-x cursor-pointer" @click="selectedActivity = ''"></i>
-        </b-badge>
-
-        <b-badge
-          v-if="selectedProgramId"
-          variant="primary"
-          class="d-flex align-items-center gap-1"
-        >
-          Program: {{ getProgramName(selectedProgramId) }}
-          <i class="bx bx-x cursor-pointer" @click="selectedProgramId = ''"></i>
-        </b-badge>
-      </div>
-    </b-card>
-
     <!-- ---------------------------------------------------------- Detail Offcanvas ---------------------------------------------------------- -->
     <b-offcanvas
       v-model="showDetailOffcanvas"
@@ -443,6 +305,26 @@
 
         <hr class="my-3" />
 
+        <!-- button actions -->
+        <div class="d-flex gap-2 mb-3">
+          <b-button
+            variant="soft-primary"
+            size="sm"
+            class="flex-fill"
+            @click="router.push(`/projects/kegiatan/${projectDetail.id}`)"
+          >
+            <i class="bx bx-task fs-16 me-1"></i>Kegiatan
+          </b-button>
+          <b-button
+            variant="soft-info"
+            size="sm"
+            class="flex-fill"
+            @click="router.push(`/projects/report/${projectDetail.id}`)"
+          >
+            <i class="bx bxs-report fs-16 me-1"></i>Report
+          </b-button>
+        </div>
+
         <!-- Deskripsi HTML -->
         <!-- <h6
           class="fw-semibold text-muted mb-2 text-uppercase"
@@ -458,6 +340,144 @@
         <p v-else class="text-muted small fst-italic">Tidak ada deskripsi.</p> -->
       </div>
     </b-offcanvas>
+
+    <!-- Filter Section -->
+    <b-card class="mb-3">
+      <template #header>
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="mb-0">
+              <i class="bx bx-filter-alt me-1"></i>
+              Filter
+            </h5>
+          </div>
+          <b-button
+            v-if="hasActiveFilters"
+            size="sm"
+            variant="outline-danger"
+            @click="clearFilters"
+          >
+            <i class="bx bx-reset me-1"></i>
+            Reset Filter
+          </b-button>
+        </div>
+      </template>
+
+      <b-row>
+        <!-- Search -->
+        <b-col cols="12" md="4" class="mb-3">
+          <label class="form-label fw-semibold">Search</label>
+          <b-input-group>
+            <span class="input-group-text">
+              <i class="bx bx-search"></i>
+            </span>
+            <b-form-input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Cari judul, deskripsi, atau pengaju..."
+              debounce="500"
+              @update:model-value="resetPage"
+            />
+          </b-input-group>
+        </b-col>
+
+        <!-- Status Filter -->
+        <b-col cols="12" md="2" class="mb-3">
+          <label class="form-label fw-semibold">Status</label>
+          <b-form-select v-model="selectedStatus" @change="resetPage">
+            <option value="">Semua Status</option>
+            <option value="draft">Draft</option>
+            <option value="diajukan">Diajukan</option>
+            <option value="diterima">Diterima</option>
+            <option value="ditolak">Ditolak</option>
+          </b-form-select>
+        </b-col>
+
+        <!-- Activity Filter -->
+        <b-col cols="12" md="2" class="mb-3">
+          <label class="form-label fw-semibold">Activity</label>
+          <b-form-select v-model="selectedActivity" @change="resetPage">
+            <option value="">Semua Activity</option>
+            <option value="inactive">Inactive</option>
+            <option value="active open">Active Open</option>
+            <option value="active close">Active Close</option>
+            <option value="selesai">Selesai</option>
+          </b-form-select>
+        </b-col>
+
+        <!-- Program Filter -->
+        <b-col cols="12" md="4">
+          <label class="form-label fw-semibold"> Program </label>
+
+          <ChoicesSelect
+            id="program"
+            :modelValue="selectedProgramId"
+            @update:modelValue="
+              (val: number) => {
+                selectedProgramId = val;
+                resetPage();
+              }
+            "
+            :options="programOptions"
+            :key="programOptions.length"
+          />
+        </b-col>
+
+        <!-- <b-col cols="12" md="3" class="mb-3">
+          <label class="form-label fw-semibold">Program</label>
+          <b-form-select v-model="selectedProgramId" @change="resetPage">
+            <option value="">Semua Program</option>
+            <option v-for="p in programOptions" :key="p.id" :value="p.id">
+              {{ p.title }}
+            </option>
+          </b-form-select>
+        </b-col> -->
+      </b-row>
+
+      <!-- Active Filters -->
+      <div
+        v-if="hasActiveFilters"
+        class="d-flex flex-wrap gap-2 align-items-center"
+      >
+        <span class="text-muted small">Active filters:</span>
+
+        <b-badge
+          v-if="searchQuery"
+          variant="primary"
+          class="d-flex align-items-center gap-1"
+        >
+          Search: "{{ searchQuery }}"
+          <i class="bx bx-x cursor-pointer" @click="searchQuery = ''"></i>
+        </b-badge>
+
+        <b-badge
+          v-if="selectedStatus"
+          variant="primary"
+          class="d-flex align-items-center gap-1"
+        >
+          Status: {{ selectedStatus }}
+          <i class="bx bx-x cursor-pointer" @click="selectedStatus = ''"></i>
+        </b-badge>
+
+        <b-badge
+          v-if="selectedActivity"
+          variant="primary"
+          class="d-flex align-items-center gap-1"
+        >
+          Activity: {{ selectedActivity }}
+          <i class="bx bx-x cursor-pointer" @click="selectedActivity = ''"></i>
+        </b-badge>
+
+        <b-badge
+          v-if="selectedProgramId"
+          variant="primary"
+          class="d-flex align-items-center gap-1"
+        >
+          Program: {{ getProgramName(selectedProgramId) }}
+          <i class="bx bx-x cursor-pointer" @click="selectedProgramId = ''"></i>
+        </b-badge>
+      </div>
+    </b-card>
 
     <!-- Table -->
     <b-row>
@@ -516,7 +536,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onBeforeUnmount } from "vue";
+import { computed, ref, onMounted, onBeforeUnmount, watch } from "vue";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
@@ -526,6 +546,7 @@ import { useQuery } from "@tanstack/vue-query";
 import { getAllPrograms } from "@/services/programService";
 import { getProjectById } from "@/services/projectService";
 import { formatCurrency, formatDate, formatDateTime } from "@/helpers/format";
+import { useRoute } from "vue-router";
 
 const {
   tableOptions,
@@ -545,6 +566,15 @@ const {
   resetPage,
   handleDelete,
 } = useProjectsTable();
+
+const route = useRoute();
+watch(
+  () => route.query.program_id,
+  (id) => {
+    selectedProgramId.value = id ? String(id) : "";
+  },
+  { immediate: true },
+);
 
 const hasActiveFilters = computed(
   () =>
