@@ -661,20 +661,8 @@ const handleGlobalClick = (event: Event) => {
   const editBtn = target.closest<HTMLElement>(
     '#table-gridjs .edit-btn[data-action="edit"]',
   );
-  const kegiatanBtn = target.closest<HTMLElement>(
-    '#table-gridjs .kegiatan-btn[data-action="kegiatan"]',
-  );
-  const manageBtn = target.closest<HTMLElement>(
-    '#table-gridjs .manage-btn[data-action="manage"]',
-  );
   const fundingBtn = target.closest<HTMLElement>(
     '#table-gridjs .funding-btn[data-action="funding"]',
-  );
-  const reportBtn = target.closest<HTMLElement>(
-    '#table-gridjs .report-btn[data-action="report"]',
-  );
-  const deleteBtn = target.closest<HTMLElement>(
-    '#table-gridjs .delete-btn[data-action="delete"]',
   );
 
   if (detailBtn) {
@@ -691,20 +679,6 @@ const handleGlobalClick = (event: Event) => {
     return;
   }
 
-  if (kegiatanBtn) {
-    event.preventDefault();
-    const id = kegiatanBtn.getAttribute("data-id");
-    if (id) router.push(`/projects/kegiatan/${id}`);
-    return;
-  }
-
-  if (manageBtn) {
-    event.preventDefault();
-    const id = manageBtn.getAttribute("data-id");
-    if (id) router.push(`/projects/manage/${id}`);
-    return;
-  }
-
   if (fundingBtn) {
     event.preventDefault();
     const id = fundingBtn.getAttribute("data-id");
@@ -712,18 +686,45 @@ const handleGlobalClick = (event: Event) => {
     return;
   }
 
-  if (reportBtn) {
-    event.preventDefault();
-    const id = reportBtn.getAttribute("data-id");
-    if (id) router.push(`/projects/report/${id}`);
-    return;
-  }
+  // const kegiatanBtn = target.closest<HTMLElement>(
+  //   '#table-gridjs .kegiatan-btn[data-action="kegiatan"]',
+  // );
+  // const manageBtn = target.closest<HTMLElement>(
+  //   '#table-gridjs .manage-btn[data-action="manage"]',
+  // );
+  // const reportBtn = target.closest<HTMLElement>(
+  //   '#table-gridjs .report-btn[data-action="report"]',
+  // );
+  // const deleteBtn = target.closest<HTMLElement>(
+  //   '#table-gridjs .delete-btn[data-action="delete"]',
+  // );
 
-  if (deleteBtn) {
-    event.preventDefault();
-    const id = deleteBtn.getAttribute("data-id");
-    if (id) handleDelete(Number(id));
-  }
+  // if (kegiatanBtn) {
+  //   event.preventDefault();
+  //   const id = kegiatanBtn.getAttribute("data-id");
+  //   if (id) router.push(`/projects/kegiatan/${id}`);
+  //   return;
+  // }
+
+  // if (manageBtn) {
+  //   event.preventDefault();
+  //   const id = manageBtn.getAttribute("data-id");
+  //   if (id) router.push(`/projects/manage/${id}`);
+  //   return;
+  // }
+
+  // if (reportBtn) {
+  //   event.preventDefault();
+  //   const id = reportBtn.getAttribute("data-id");
+  //   if (id) router.push(`/projects/report/${id}`);
+  //   return;
+  // }
+
+  // if (deleteBtn) {
+  //   event.preventDefault();
+  //   const id = deleteBtn.getAttribute("data-id");
+  //   if (id) handleDelete(Number(id));
+  // }
 };
 
 onMounted(() => document.addEventListener("click", handleGlobalClick));

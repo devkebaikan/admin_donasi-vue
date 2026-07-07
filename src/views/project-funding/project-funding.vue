@@ -167,6 +167,24 @@
               </b-form-select>
             </b-col>
           </b-row>
+          <b-row class="g-3 mb-3">
+            <b-col cols="12" md="4">
+              <b-input-group prepend="Rp">
+                <CurrencyInput
+                  id="nominal-claim"
+                  placeholder="0"
+                  v-model="nominalClaim"
+                  :state="null"
+                />
+              </b-input-group>
+            </b-col>
+            <b-col>
+              <b-button @click="handleLihatDonatur" :disabled="isLoading">
+                <b-spinner v-if="isLoading" small class="me-1" />
+                Lihat Donatur
+              </b-button>
+            </b-col>
+          </b-row>
         </div>
         <div
           class="d-flex align-items-center justify-content-between flex-wrap gap-2 px-3 pb-3"
@@ -286,13 +304,12 @@ const queryClient = useQueryClient();
 const projectId = Number(route.params.id);
 
 // State
-
 const selectedProgramId = ref<number>(0);
 const checkedIds = ref<Set<number>>(new Set());
 const saldoPakai = ref<number>(0);
+const nominalClaim = ref<number>(0);
 
 // Project detail — provides related programs + project nominal
-
 const { data: projectDetail, isLoading: isProjectLoading } = useQuery({
   queryKey: ["project-detail", projectId],
   queryFn: () => getProjectById(projectId),
@@ -307,7 +324,6 @@ watch(programs, (list) => {
 });
 
 // Fund check — project-level allocation summary
-
 const { data: fundCheck, isLoading: isFundCheckLoading } = useQuery({
   queryKey: ["fund-check", projectId],
   queryFn: () => checkFundingProject(projectId),
@@ -340,7 +356,11 @@ type Trx = {
   date: string;
 };
 
-const { data: claimableData, isLoading } = useQuery({
+const {
+  data: claimableData,
+  isLoading,
+  refetch: fetchClaimableDonations,
+} = useQuery({
   queryKey: computed(() => [
     "claimable-donations",
     projectId,
@@ -350,13 +370,33 @@ const { data: claimableData, isLoading } = useQuery({
   queryFn: () =>
     getClaimableDonationsByProjectId(projectId, {
       programs: [
-        { program_id: selectedProgramId.value, nominal: kekuranganDana.value },
+        { program_id: selectedProgramId.value, nominal: nominalClaim.value },
       ],
     }),
-  enabled: computed(
-    () => selectedProgramId.value > 0 && kekuranganDana.value > 0,
-  ),
+  enabled: false,
 });
+
+const handleLihatDonatur = async () => {
+  if (!selectedProgramId.value) {
+    showToast("Pilih program terlebih dahulu.", {
+      type: "warning",
+      position: "top-center",
+    });
+    return;
+  }
+
+  if (!nominalClaim.value || nominalClaim.value <= 0) {
+    showToast("Masukkan nominal terlebih dahulu.", {
+      type: "warning",
+      position: "top-center",
+    });
+    return;
+  }
+
+  checkedIds.value = new Set();
+
+  await fetchClaimableDonations();
+};
 
 const transactions = computed<Trx[]>(() => {
   const donations: any[] = claimableData.value?.programs?.[0]?.donations ?? [];
@@ -370,7 +410,6 @@ const transactions = computed<Trx[]>(() => {
 });
 
 // Financial computations
-
 const nominalTercentang = computed(() =>
   transactions.value
     .filter((t) => checkedIds.value.has(t.id))
@@ -387,7 +426,6 @@ const coveragePercent = computed(() => {
 });
 
 // Checkbox helpers
-
 const isAllChecked = computed(
   () =>
     transactions.value.length > 0 &&
@@ -415,7 +453,6 @@ const clearAll = () => {
 };
 
 // Actions
-
 const pakaiSaldoMax = () => {
   saldoPakai.value = finance.value.sisa_saldo_sebelumnya;
 };
@@ -449,6 +486,7 @@ const doAutoCheck = () => {
 const onProgramChange = () => {
   checkedIds.value = new Set();
   saldoPakai.value = 0;
+  nominalClaim.value = 0;
 };
 
 const { mutate: mutateClaim, isPending: isAllocating } = useMutation({

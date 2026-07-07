@@ -145,18 +145,6 @@ export function useProjectsTable() {
                   `
                     : ""
                 }
-
-                <button
-                  class="btn btn-sm btn-soft-secondary manage-btn" 
-                  style='width:48px'
-                  data-action="manage"
-                  data-id="${item.id}"
-                  title="Manage Project">
-                  <!-- Mengubah warna ke secondary/dark agar tidak kembar hijau dengan funding -->
-                  <i class="bx bx-cog fs-16"></i>
-                </button>
-
-              
               </div>
               `),
       },
@@ -178,6 +166,16 @@ export function useProjectsTable() {
     //   title="Kegiatan Project">
     //   <!-- Mengubah ikon ke task/list yang lebih dinamis -->
     //   <i class="bx bx-task fs-16"></i>
+    // </button>
+
+    // <button
+    //   class="btn btn-sm btn-soft-secondary manage-btn"
+    //   style='width:48px'
+    //   data-action="manage"
+    //   data-id="${item.id}"
+    //   title="Manage Project">
+    //   <!-- Mengubah warna ke secondary/dark agar tidak kembar hijau dengan funding -->
+    //   <i class="bx bx-cog fs-16"></i>
     // </button>
 
     // <button
