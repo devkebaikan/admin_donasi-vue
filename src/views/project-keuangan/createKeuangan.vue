@@ -4,20 +4,24 @@
       <b-col>
         <UIComponentCard title="Tambah Project Keuangan">
           <b-row class="g-3">
-            <!-- project -->
+            <!-- Project -->
             <b-col md="6">
               <b-form-group label="Project" label-for="project-id">
-                <ChoicesSelect
+                <SearchSelect
                   id="project-id"
                   :modelValue="String(formState.project_id || 0)"
                   @update:modelValue="
-                    (val) => {
+                    (val: string) => {
                       formState.project_id = val === '0' ? 0 : Number(val);
+                    }
+                  "
+                  @search="
+                    (query: string) => {
+                      projectSearchQuery = query;
                     }
                   "
                   :options="projectList"
                   :isLoading="isProjectLoading"
-                  :key="projectList.length"
                 />
                 <div
                   v-if="v$.project_id.$error"
@@ -26,6 +30,11 @@
                   {{ v$.project_id.$errors[0].$message }}
                 </div>
               </b-form-group>
+
+              <small v-if="formState.mitra_name"
+                >Mitra : {{ formState.mitra_name }} -
+                {{ formState.mitra_id }}</small
+              >
             </b-col>
 
             <!-- Kegiatan -->
@@ -53,7 +62,7 @@
             </b-col>
 
             <!-- Mitra -->
-            <b-col md="6">
+            <!-- <b-col md="6">
               <b-form-group label="Mitra" label-for="mitra-id">
                 <ChoicesSelect
                   id="mitra-id"
@@ -71,7 +80,7 @@
                   {{ v$.mitra_id.$errors[0].$message }}
                 </div>
               </b-form-group>
-            </b-col>
+            </b-col> -->
 
             <!-- Items -->
             <b-col md="8">
@@ -158,7 +167,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive } from "vue";
+import { computed, reactive, watch } from "vue";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { useVuelidate } from "@vuelidate/core";
 import { required, minValue, helpers } from "@vuelidate/validators";
@@ -170,8 +179,9 @@ import ChoicesSelect from "@/components/ChoicesSelect.vue";
 import { createKeuangan } from "@/services/projectKeuanganService";
 import { getAllMitra } from "@/services/mitraService";
 import router from "@/router";
-import { getProjects } from "@/services/projectService";
+import { getProjectById, getProjects } from "@/services/projectService";
 import { getAllKegiatan } from "@/services/kegiatanService";
+import { useSearchSelect } from "@/composables/useSearchSelect";
 
 const showToast = (message: string, options: ToastOptions) =>
   toast(message, options);
@@ -180,10 +190,11 @@ const queryClient = useQueryClient();
 const formState = reactive({
   kegiatan_id: 0,
   project_id: 0,
-  mitra_id: 0,
+  mitra_id: "",
   items: "",
   nominal: 0,
   nota: "",
+  mitra_name: "",
 });
 
 const rules = {
@@ -209,18 +220,40 @@ const rules = {
 };
 
 const v$ = useVuelidate(rules, formState);
+// project search select
+const {
+  searchQuery: projectSearchQuery,
+  options: projectList,
+  isLoading: isProjectLoading,
+} = useSearchSelect({
+  queryKey: "projects",
+  fetchFn: getProjects,
+  optionsMapper: (project: any) => ({
+    value: project.id,
+    text: project.judul ?? project.title ?? project.name,
+  }),
+  placeholder: "Cari project...",
+  limit: 10,
+});
 
-const { data: projectData, isLoading: isProjectLoading } = useQuery({
-  queryKey: ["projects-list"],
-  queryFn: () => getProjects({ mode: "list" }),
-});
-const projectList = computed(() => {
-  const list = Array.isArray(projectData.value) ? projectData.value : [];
-  return [
-    { value: 0, text: "-- Pilih Project --" },
-    ...list.map((k: any) => ({ value: k.id, text: k.nama ?? k.judul })),
-  ];
-});
+watch(
+  () => formState.project_id,
+  async (projectId) => {
+    if (projectId && projectId > 0) {
+      const project = await getProjectById(projectId);
+      if (project) {
+        if (project.mitra_utama !== null) {
+          formState.mitra_id = project.mitra_utama.id;
+          formState.mitra_name = project.mitra_utama.nama;
+        } else {
+          formState.mitra_id = "";
+          formState.mitra_name = "";
+        }
+      }
+    }
+  },
+  { immediate: true },
+);
 
 const { data: kegiatanData, isLoading: isKegiatanLoading } = useQuery({
   queryKey: ["kegiatans-list"],

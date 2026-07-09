@@ -7,17 +7,21 @@
             <!-- Project -->
             <b-col md="6">
               <b-form-group label="Project" label-for="project-id">
-                <ChoicesSelect
+                <SearchSelect
                   id="project-id"
                   :modelValue="String(formState.project_id || 0)"
                   @update:modelValue="
-                    (val) => {
+                    (val: string) => {
                       formState.project_id = val === '0' ? 0 : Number(val);
+                    }
+                  "
+                  @search="
+                    (query: string) => {
+                      projectSearchQuery = query;
                     }
                   "
                   :options="projectList"
                   :isLoading="isProjectLoading"
-                  :key="projectList.length"
                 />
                 <div
                   v-if="v$.project_id.$error"
@@ -26,27 +30,11 @@
                   {{ v$.project_id.$errors[0].$message }}
                 </div>
               </b-form-group>
-            </b-col>
 
-            <!-- Mitra -->
-            <b-col md="6">
-              <b-form-group label="Mitra" label-for="mitra-id">
-                <ChoicesSelect
-                  id="mitra-id"
-                  :modelValue="String(formState.mitra_id || 0)"
-                  @update:modelValue="
-                    (val) => {
-                      formState.mitra_id = val === '0' ? 0 : Number(val);
-                    }
-                  "
-                  :options="mitraList"
-                  :isLoading="isMitraLoading"
-                  :key="mitraList.length"
-                />
-                <div v-if="v$.mitra_id.$error" class="invalid-feedback d-block">
-                  {{ v$.mitra_id.$errors[0].$message }}
-                </div>
-              </b-form-group>
+              <small v-if="formState.mitra_name"
+                >Mitra : {{ formState.mitra_name }} -
+                {{ formState.mitra_id }}</small
+              >
             </b-col>
 
             <!-- Tipe -->
@@ -80,14 +68,6 @@
             <b-col md="4">
               <b-form-group label="Nominal Ajuan" label-for="nominal-ajuan">
                 <b-input-group prepend="Rp">
-                  <!-- <b-form-input
-                    id="nominal-ajuan"
-                    v-model="v$.nominal_ajuan.$model"
-                    type="number"
-                    min="0"
-                    placeholder="0"
-                    :state="v$.nominal_ajuan.$error ? false : null"
-                  /> -->
                   <CurrencyInput
                     id="nominal-ajuan"
                     placeholder="0"
@@ -217,7 +197,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive } from "vue";
+import { computed, reactive, watch } from "vue";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { useVuelidate } from "@vuelidate/core";
 import { required, minValue, helpers } from "@vuelidate/validators";
@@ -227,10 +207,10 @@ import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
 import { createAjuan } from "@/services/ajuanService";
-import { getProjects } from "@/services/projectService";
-import { getAllMitra } from "@/services/mitraService";
+import { getProjectById, getProjects } from "@/services/projectService";
 import { getAllBankReferences } from "@/services/bankReferenceService";
 import router from "@/router";
+import { useSearchSelect } from "@/composables/useSearchSelect";
 
 const showToast = (message: string, options: ToastOptions) =>
   toast(message, options);
@@ -238,13 +218,14 @@ const queryClient = useQueryClient();
 
 const formState = reactive({
   project_id: 0,
-  mitra_id: 0,
+  mitra_id: "",
   bank_reference_id: 0,
   account_behalf: "",
   account_number: "",
   nominal_ajuan: 0,
   biaya: 0,
   type: "",
+  mitra_name: "",
 });
 
 const rules = {
@@ -277,31 +258,39 @@ const rules = {
 
 const v$ = useVuelidate(rules, formState);
 
-const { data: projectData, isLoading: isProjectLoading } = useQuery({
-  queryKey: ["projects-list"],
-  queryFn: () => getProjects({ mode: "list" }),
-});
-const projectList = computed(() => {
-  const list = Array.isArray(projectData.value) ? projectData.value : [];
-  return [
-    { value: 0, text: "-- Pilih Project --" },
-    ...list.map((p: any) => ({
-      value: p.id,
-      text: p.judul ?? p.name ?? p.title,
-    })),
-  ];
-});
+watch(
+  () => formState.project_id,
+  async (projectId) => {
+    if (projectId && projectId > 0) {
+      const project = await getProjectById(projectId);
+      if (project) {
+        if (project.mitra_utama !== null) {
+          formState.mitra_id = project.mitra_utama.id;
+          formState.mitra_name = project.mitra_utama.nama;
+        } else {
+          formState.mitra_id = "";
+          formState.mitra_name = "";
+        }
+      }
+    }
+  },
+  { immediate: true },
+);
 
-const { data: mitraData, isLoading: isMitraLoading } = useQuery({
-  queryKey: ["mitras-list"],
-  queryFn: () => getAllMitra({ mode: "list" }),
-});
-const mitraList = computed(() => {
-  const list = Array.isArray(mitraData.value) ? mitraData.value : [];
-  return [
-    { value: 0, text: "-- Pilih Mitra --" },
-    ...list.map((m: any) => ({ value: m.id, text: m.nama ?? m.name })),
-  ];
+// project search select
+const {
+  searchQuery: projectSearchQuery,
+  options: projectList,
+  isLoading: isProjectLoading,
+} = useSearchSelect({
+  queryKey: "projects",
+  fetchFn: getProjects,
+  optionsMapper: (project: any) => ({
+    value: project.id,
+    text: project.judul ?? project.title ?? project.name,
+  }),
+  placeholder: "Cari project...",
+  limit: 10,
 });
 
 const { data: bankData, isLoading: isBankLoading } = useQuery({
