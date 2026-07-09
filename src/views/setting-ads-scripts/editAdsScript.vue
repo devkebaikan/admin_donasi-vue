@@ -10,11 +10,12 @@
 
           <div v-else-if="!scriptData" class="alert alert-warning">
             Data tidak ditemukan.
-            <b-button variant="link" @click="router.push('/ads-scripts')">Kembali ke daftar</b-button>
+            <b-button variant="link" @click="router.push('/ads-scripts')"
+              >Kembali ke daftar</b-button
+            >
           </div>
 
           <b-row v-else class="g-3">
-
             <!-- Nama -->
             <b-col md="6">
               <b-form-group label="Nama" label-for="name">
@@ -43,6 +44,7 @@
                   <option value="google">Google</option>
                   <option value="meta">Meta</option>
                   <option value="tiktok">TikTok</option>
+                  <option value="ads">Google Ads</option>
                 </b-form-select>
                 <b-form-invalid-feedback v-if="v$.type.$error">
                   {{ v$.type.$errors[0].$message }}
@@ -69,7 +71,12 @@
             <!-- Web -->
             <b-col md="6">
               <b-form-group label="Web / Domain" label-for="web">
-                <b-form-input id="web" v-model="formState.web" type="text" placeholder="e.g., aksiberbagi.com" />
+                <b-form-input
+                  id="web"
+                  v-model="formState.web"
+                  type="text"
+                  placeholder="e.g., aksiberbagi.com"
+                />
                 <small class="text-muted">Opsional</small>
               </b-form-group>
             </b-col>
@@ -77,7 +84,12 @@
             <!-- Script Token -->
             <b-col md="12">
               <b-form-group label="Script Token" label-for="script-token">
-                <b-form-textarea id="script-token" v-model="formState.script_token" placeholder="Token / access token..." rows="3" />
+                <b-form-textarea
+                  id="script-token"
+                  v-model="formState.script_token"
+                  placeholder="Token / access token..."
+                  rows="3"
+                />
                 <small class="text-muted">Opsional</small>
               </b-form-group>
             </b-col>
@@ -85,55 +97,113 @@
             <!-- Test Code -->
             <b-col md="6">
               <b-form-group label="Test Code" label-for="test-code">
-                <b-form-input id="test-code" v-model="formState.test_code" type="text" placeholder="e.g., TEST12345" />
+                <b-form-input
+                  id="test-code"
+                  v-model="formState.test_code"
+                  type="text"
+                  placeholder="e.g., TEST12345"
+                />
                 <small class="text-muted">Opsional</small>
               </b-form-group>
             </b-col>
+          </b-row>
 
+          <!-- Jika tipe Google ads -->
+          <b-row v-if="formState.type === 'ads'">
             <!-- Google Ads -->
             <b-col cols="12">
               <hr class="my-1" />
               <h6 class="text-muted fw-semibold mb-3">
                 Konfigurasi Google Ads
-                <small class="fw-normal">(Opsional — isi jika tipe Google)</small>
+                <small class="fw-normal"
+                  >(Opsional — isi jika tipe Google)</small
+                >
               </h6>
             </b-col>
 
             <b-col md="6">
               <b-form-group label="Customer ID" label-for="google-customer-id">
-                <b-form-input id="google-customer-id" v-model="formState.google_customer_id" type="text" placeholder="e.g., 1234567890" maxlength="20" />
+                <b-form-input
+                  id="google-customer-id"
+                  v-model="formState.google_customer_id"
+                  type="text"
+                  placeholder="e.g., 1234567890"
+                  maxlength="20"
+                />
               </b-form-group>
             </b-col>
 
             <b-col md="6">
-              <b-form-group label="Login Customer ID" label-for="google-login-customer-id">
-                <b-form-input id="google-login-customer-id" v-model="formState.google_login_customer_id" type="text" placeholder="e.g., 1234567890" maxlength="20" />
+              <b-form-group
+                label="Login Customer ID"
+                label-for="google-login-customer-id"
+              >
+                <b-form-input
+                  id="google-login-customer-id"
+                  v-model="formState.google_login_customer_id"
+                  type="text"
+                  placeholder="e.g., 1234567890"
+                  maxlength="20"
+                />
               </b-form-group>
             </b-col>
 
             <b-col md="6">
-              <b-form-group label="Developer Token" label-for="google-developer-token">
-                <b-form-input id="google-developer-token" v-model="formState.google_developer_token" type="text" placeholder="Developer token..." />
+              <b-form-group
+                label="Developer Token"
+                label-for="google-developer-token"
+              >
+                <b-form-input
+                  id="google-developer-token"
+                  v-model="formState.google_developer_token"
+                  type="text"
+                  placeholder="Developer token..."
+                />
               </b-form-group>
             </b-col>
 
             <b-col md="6">
               <b-form-group label="Client ID" label-for="google-client-id">
-                <b-form-input id="google-client-id" v-model="formState.google_client_id" type="text" placeholder="Client ID..." />
+                <b-form-input
+                  id="google-client-id"
+                  v-model="formState.google_client_id"
+                  type="text"
+                  placeholder="Client ID..."
+                />
               </b-form-group>
             </b-col>
 
             <b-col md="6">
-              <b-form-group label="Client Secret" label-for="google-client-secret">
-                <b-form-input id="google-client-secret" v-model="formState.google_client_secret" type="password" placeholder="Kosongkan jika tidak ingin mengubah" />
-                <small class="text-muted">Opsional — kosongkan jika tidak diubah</small>
+              <b-form-group
+                label="Client Secret"
+                label-for="google-client-secret"
+              >
+                <b-form-input
+                  id="google-client-secret"
+                  v-model="formState.google_client_secret"
+                  type="password"
+                  placeholder="Kosongkan jika tidak ingin mengubah"
+                />
+                <small class="text-muted"
+                  >Opsional — kosongkan jika tidak diubah</small
+                >
               </b-form-group>
             </b-col>
 
             <b-col md="6">
-              <b-form-group label="Refresh Token" label-for="google-refresh-token">
-                <b-form-input id="google-refresh-token" v-model="formState.google_refresh_token" type="password" placeholder="Kosongkan jika tidak ingin mengubah" />
-                <small class="text-muted">Opsional — kosongkan jika tidak diubah</small>
+              <b-form-group
+                label="Refresh Token"
+                label-for="google-refresh-token"
+              >
+                <b-form-input
+                  id="google-refresh-token"
+                  v-model="formState.google_refresh_token"
+                  type="password"
+                  placeholder="Kosongkan jika tidak ingin mengubah"
+                />
+                <small class="text-muted"
+                  >Opsional — kosongkan jika tidak diubah</small
+                >
               </b-form-group>
             </b-col>
 
@@ -148,25 +218,52 @@
 
             <b-col md="6">
               <b-form-group label="Purchase" label-for="conversion-purchase">
-                <b-form-input id="conversion-purchase" v-model="formState.conversion_action_purchase" type="text" placeholder="Conversion action purchase..." maxlength="50" />
+                <b-form-input
+                  id="conversion-purchase"
+                  v-model="formState.conversion_action_purchase"
+                  type="text"
+                  placeholder="Conversion action purchase..."
+                  maxlength="50"
+                />
               </b-form-group>
             </b-col>
 
             <b-col md="6">
               <b-form-group label="Checkout" label-for="conversion-checkout">
-                <b-form-input id="conversion-checkout" v-model="formState.conversion_action_checkout" type="text" placeholder="Conversion action checkout..." maxlength="50" />
+                <b-form-input
+                  id="conversion-checkout"
+                  v-model="formState.conversion_action_checkout"
+                  type="text"
+                  placeholder="Conversion action checkout..."
+                  maxlength="50"
+                />
               </b-form-group>
             </b-col>
 
             <b-col md="6">
               <b-form-group label="Add to Cart" label-for="conversion-add-cart">
-                <b-form-input id="conversion-add-cart" v-model="formState.conversion_action_add_cart" type="text" placeholder="Conversion action add cart..." maxlength="50" />
+                <b-form-input
+                  id="conversion-add-cart"
+                  v-model="formState.conversion_action_add_cart"
+                  type="text"
+                  placeholder="Conversion action add cart..."
+                  maxlength="50"
+                />
               </b-form-group>
             </b-col>
 
             <b-col md="6">
-              <b-form-group label="Registration" label-for="conversion-registration">
-                <b-form-input id="conversion-registration" v-model="formState.conversion_action_registration" type="text" placeholder="Conversion action registration..." maxlength="50" />
+              <b-form-group
+                label="Registration"
+                label-for="conversion-registration"
+              >
+                <b-form-input
+                  id="conversion-registration"
+                  v-model="formState.conversion_action_registration"
+                  type="text"
+                  placeholder="Conversion action registration..."
+                  maxlength="50"
+                />
               </b-form-group>
             </b-col>
 
@@ -179,16 +276,23 @@
             <!-- Tombol -->
             <b-col cols="12">
               <div class="d-flex gap-2 justify-content-end">
-                <b-button variant="outline-secondary" @click="router.push('/ads-scripts')" :disabled="isPending">
+                <b-button
+                  variant="outline-secondary"
+                  @click="router.push('/ads-scripts')"
+                  :disabled="isPending"
+                >
                   Batal
                 </b-button>
-                <b-button variant="primary" @click="handleSubmit" :disabled="isPending">
+                <b-button
+                  variant="primary"
+                  @click="handleSubmit"
+                  :disabled="isPending"
+                >
                   <b-spinner v-if="isPending" small class="me-1" />
                   Simpan Perubahan
                 </b-button>
               </div>
             </b-col>
-
           </b-row>
         </UIComponentCard>
       </b-col>
@@ -254,13 +358,16 @@ watch(scriptData, (data) => {
   formState.conversion_action_purchase = data.conversion_action_purchase ?? "";
   formState.conversion_action_checkout = data.conversion_action_checkout ?? "";
   formState.conversion_action_add_cart = data.conversion_action_add_cart ?? "";
-  formState.conversion_action_registration = data.conversion_action_registration ?? "";
+  formState.conversion_action_registration =
+    data.conversion_action_registration ?? "";
 });
 
 const rules = {
   name: { required: helpers.withMessage("Nama wajib diisi", required) },
   type: { required: helpers.withMessage("Tipe wajib dipilih", required) },
-  script_id: { required: helpers.withMessage("Script ID wajib diisi", required) },
+  script_id: {
+    required: helpers.withMessage("Script ID wajib diisi", required),
+  },
 };
 
 const v$ = useVuelidate(rules, formState);
@@ -268,12 +375,17 @@ const v$ = useVuelidate(rules, formState);
 const { mutate, isPending } = useMutation({
   mutationFn: () => {
     const payload: Record<string, any> = {};
-    Object.entries(formState).forEach(([k, v]) => { if (v !== "") payload[k] = v; });
+    Object.entries(formState).forEach(([k, v]) => {
+      if (v !== "") payload[k] = v;
+    });
     return updateAdsScript(scriptId, payload);
   },
   onSuccess: () => {
     queryClient.invalidateQueries({ queryKey: ["ads-scripts"] });
-    showToast("Ads script berhasil diperbarui", { type: "success", position: "top-center" });
+    showToast("Ads script berhasil diperbarui", {
+      type: "success",
+      position: "top-center",
+    });
     setTimeout(() => router.push("/ads-scripts"), 1500);
   },
   onError: (err: any) => {
@@ -286,7 +398,10 @@ const handleSubmit = async () => {
   if (isPending.value) return;
   const isValid = await v$.value.$validate();
   if (!isValid) {
-    showToast("Lengkapi semua field yang wajib diisi", { type: "warning", position: "top-center" });
+    showToast("Lengkapi semua field yang wajib diisi", {
+      type: "warning",
+      position: "top-center",
+    });
     return;
   }
   mutate();

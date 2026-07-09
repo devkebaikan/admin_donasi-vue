@@ -19,7 +19,10 @@
                   :isLoading="isProjectLoading"
                   :key="projectOptions.length"
                 />
-                <div v-if="v$.project_id.$error" class="invalid-feedback d-block">
+                <div
+                  v-if="v$.project_id.$error"
+                  class="invalid-feedback d-block"
+                >
                   {{ v$.project_id.$errors[0].$message }}
                 </div>
               </b-form-group>
@@ -40,7 +43,10 @@
                   :isLoading="isKegiatanLoading"
                   :key="kegiatanOptions.length"
                 />
-                <div v-if="v$.kegiatan_id.$error" class="invalid-feedback d-block">
+                <div
+                  v-if="v$.kegiatan_id.$error"
+                  class="invalid-feedback d-block"
+                >
                   {{ v$.kegiatan_id.$errors[0].$message }}
                 </div>
               </b-form-group>
@@ -55,10 +61,16 @@
                   :state="v$.type.$error ? false : null"
                 >
                   <template #first>
-                    <b-form-select-option value="">-- Pilih Tipe --</b-form-select-option>
+                    <b-form-select-option value=""
+                      >-- Pilih Tipe --</b-form-select-option
+                    >
                   </template>
-                  <b-form-select-option value="Progress">Progress</b-form-select-option>
-                  <b-form-select-option value="Final">Final</b-form-select-option>
+                  <b-form-select-option value="Progress"
+                    >Progress</b-form-select-option
+                  >
+                  <b-form-select-option value="Final"
+                    >Final</b-form-select-option
+                  >
                 </b-form-select>
                 <b-form-invalid-feedback v-if="v$.type.$error">
                   {{ v$.type.$errors[0].$message }}
@@ -67,7 +79,7 @@
             </b-col>
 
             <!-- Mitra IDs -->
-            <b-col md="8">
+            <!-- <b-col md="8">
               <b-form-group label="Mitra IDs" label-for="mitra-ids">
                 <b-form-textarea
                   id="mitra-ids"
@@ -77,10 +89,13 @@
                 />
                 <small class="text-muted">Opsional</small>
               </b-form-group>
-            </b-col>
+            </b-col> -->
 
             <!-- Section: Media -->
-            <b-col cols="12"><hr class="my-1" /><h6 class="text-muted fw-semibold mb-3">Media</h6></b-col>
+            <b-col cols="12"
+              ><hr class="my-1" />
+              <h6 class="text-muted fw-semibold mb-3">Media</h6></b-col
+            >
 
             <!-- Thumbnail -->
             <b-col md="6">
@@ -91,7 +106,9 @@
                   @change="handleThumbnailChange"
                   placeholder="Pilih file thumbnail..."
                 />
-                <small class="text-muted">Opsional — JPG/PNG/WebP, maks 2MB</small>
+                <small class="text-muted"
+                  >Opsional — JPG/PNG/WebP, maks 2MB</small
+                >
               </b-form-group>
 
               <div v-if="thumbnailPreview" class="mt-2">
@@ -99,7 +116,11 @@
                   :src="thumbnailPreview"
                   alt="Thumbnail preview"
                   class="img-thumbnail"
-                  style="max-height: 150px; max-width: 200px; object-fit: contain"
+                  style="
+                    max-height: 150px;
+                    max-width: 200px;
+                    object-fit: contain;
+                  "
                 />
               </div>
             </b-col>
@@ -113,7 +134,9 @@
                   @change="handleWaImageChange"
                   placeholder="Pilih file gambar..."
                 />
-                <small class="text-muted">Opsional — JPG/PNG/WebP, maks 2MB</small>
+                <small class="text-muted"
+                  >Opsional — JPG/PNG/WebP, maks 2MB</small
+                >
               </b-form-group>
 
               <div v-if="waImagePreview" class="mt-2">
@@ -121,7 +144,11 @@
                   :src="waImagePreview"
                   alt="WhatsApp image preview"
                   class="img-thumbnail"
-                  style="max-height: 150px; max-width: 200px; object-fit: contain"
+                  style="
+                    max-height: 150px;
+                    max-width: 200px;
+                    object-fit: contain;
+                  "
                 />
               </div>
             </b-col>
@@ -168,15 +195,27 @@
 
             <!-- Loading + Actions -->
             <b-col v-if="isPending" cols="12" class="text-center">
-              <b-spinner variant="primary" class="me-2" /><span class="text-muted">Menyimpan...</span>
+              <b-spinner variant="primary" class="me-2" /><span
+                class="text-muted"
+                >Menyimpan...</span
+              >
             </b-col>
             <b-col cols="12">
               <div class="d-flex gap-2 justify-content-end">
-                <b-button variant="outline-secondary" :disabled="isPending" @click="router.push('/project-report')">
+                <b-button
+                  variant="outline-secondary"
+                  :disabled="isPending"
+                  @click="router.push('/project-report')"
+                >
                   Batal
                 </b-button>
-                <b-button variant="primary" :disabled="isPending" @click="handleSubmit">
-                  <b-spinner v-if="isPending" small class="me-1" />Simpan Laporan
+                <b-button
+                  variant="primary"
+                  :disabled="isPending"
+                  @click="handleSubmit"
+                >
+                  <b-spinner v-if="isPending" small class="me-1" />Simpan
+                  Laporan
                 </b-button>
               </div>
             </b-col>
@@ -188,7 +227,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { useVuelidate } from "@vuelidate/core";
 import { required, minValue, helpers } from "@vuelidate/validators";
@@ -201,8 +240,12 @@ import { createReport } from "@/services/reportService";
 import { getProjects } from "@/services/projectService";
 import { getAllKegiatan } from "@/services/kegiatanService";
 import router from "@/router";
+import { useRoute } from "vue-router";
 
-const showToast = (message: string, options: ToastOptions) => toast(message, options);
+const route = useRoute();
+
+const showToast = (message: string, options: ToastOptions) =>
+  toast(message, options);
 const queryClient = useQueryClient();
 
 const thumbnailFile = ref<File | null>(null);
@@ -219,6 +262,14 @@ const formState = reactive({
   embed_ig: "",
   wa_caption: "",
 });
+
+watch(
+  () => route.query.project_id,
+  (id) => {
+    formState.project_id = id ? Number(id) : 0;
+  },
+  { immediate: true },
+);
 
 const rules = {
   project_id: {
@@ -246,7 +297,7 @@ const projectOptions = computed(() => {
   const list = Array.isArray(projectData.value) ? projectData.value : [];
   return [
     { value: 0, text: "-- Pilih Project --" },
-    ...list.map((p: any) => ({ value: p.id, text: p.name })),
+    ...list.map((p: any) => ({ value: p.id, text: p.judul })),
   ];
 });
 
@@ -258,7 +309,7 @@ const kegiatanOptions = computed(() => {
   const list = Array.isArray(kegiatanData.value) ? kegiatanData.value : [];
   return [
     { value: 0, text: "-- Pilih Kegiatan --" },
-    ...list.map((k: any) => ({ value: k.id, text: k.nama })),
+    ...list.map((k: any) => ({ value: k.id, text: k.judul })),
   ];
 });
 
@@ -300,17 +351,24 @@ const { mutate, isPending } = useMutation({
     formData.append("project_id", String(formState.project_id));
     formData.append("kegiatan_id", String(formState.kegiatan_id));
     formData.append("type", formState.type);
-    if (formState.mitra_ids.trim()) formData.append("mitra_ids", formState.mitra_ids.trim());
+    if (formState.mitra_ids.trim())
+      formData.append("mitra_ids", formState.mitra_ids.trim());
     if (thumbnailFile.value) formData.append("thumbnail", thumbnailFile.value);
     if (waImageFile.value) formData.append("wa_image", waImageFile.value);
-    if (formState.link_ig.trim()) formData.append("link_ig", formState.link_ig.trim());
-    if (formState.embed_ig.trim()) formData.append("embed_ig", formState.embed_ig.trim());
-    if (formState.wa_caption.trim()) formData.append("wa_caption", formState.wa_caption.trim());
+    if (formState.link_ig.trim())
+      formData.append("link_ig", formState.link_ig.trim());
+    if (formState.embed_ig.trim())
+      formData.append("embed_ig", formState.embed_ig.trim());
+    if (formState.wa_caption.trim())
+      formData.append("wa_caption", formState.wa_caption.trim());
     return createReport(formData);
   },
   onSuccess: () => {
     queryClient.invalidateQueries({ queryKey: ["reports"] });
-    showToast("Laporan berhasil ditambahkan", { type: "success", position: "top-center" });
+    showToast("Laporan berhasil ditambahkan", {
+      type: "success",
+      position: "top-center",
+    });
     setTimeout(() => router.push("/project-report"), 1500);
   },
   onError: (err: any) => {
@@ -324,7 +382,10 @@ const { mutate, isPending } = useMutation({
 const handleSubmit = async () => {
   if (isPending.value) return;
   if (!(await v$.value.$validate())) {
-    showToast("Lengkapi field wajib", { type: "warning", position: "top-center" });
+    showToast("Lengkapi field wajib", {
+      type: "warning",
+      position: "top-center",
+    });
     return;
   }
   mutate();

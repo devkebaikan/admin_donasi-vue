@@ -1,5 +1,15 @@
 import HttpClient from "@/helpers/http-client";
 
+export const getAllProjects = async (params = {}) => {
+  try {
+    const res = await HttpClient.get("/program/projects", { params });
+    return res.data.data;
+  } catch (error) {
+    console.error("Error fetching projects:", error);
+    return { data: [], meta: { total: 0, last_page: 1 } };
+  }
+};
+
 export const getProjects = async (params = {}) => {
   try {
     const res = await HttpClient.get("/program/projects", { params });

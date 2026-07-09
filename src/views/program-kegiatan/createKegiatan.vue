@@ -141,7 +141,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive } from "vue";
+import { computed, reactive, watch } from "vue";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { useVuelidate } from "@vuelidate/core";
 import { required, minValue, helpers } from "@vuelidate/validators";
@@ -157,6 +157,9 @@ import { createKegiatan } from "@/services/kegiatanService";
 import { getAllMitra } from "@/services/mitraService";
 import { getProjects } from "@/services/projectService";
 import router from "@/router";
+import { useRoute } from "vue-router";
+
+const route = useRoute();
 
 const showToast = (message: string, options: ToastOptions) =>
   toast(message, options);
@@ -171,6 +174,14 @@ const formState = reactive({
   thumbnail: null as File | null,
   deskripsi: "",
 });
+
+watch(
+  () => route.query.project_id,
+  (id) => {
+    formState.project_id = id ? Number(id) : 0;
+  },
+  { immediate: true },
+);
 
 const rules = {
   mitra_id: {

@@ -362,7 +362,7 @@ const handleGlobalClick = (event: Event) => {
   if (transactionsBtn) {
     event.preventDefault();
     const id = transactionsBtn.getAttribute("data-id");
-    if (id) router.push(`/users/${id}/transactions`);
+    if (id) router.push(`/transactions?user_id=${id}`);
     return;
   }
   if (deleteBtn) {

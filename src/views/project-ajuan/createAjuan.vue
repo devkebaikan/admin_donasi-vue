@@ -126,7 +126,7 @@
 
             <!-- Bank Reference -->
             <b-col md="12">
-              <b-form-group label="Bank" label-for="bank-reference-id">
+              <b-form-group label="Bank Sumber" label-for="bank-reference-id">
                 <ChoicesSelect
                   id="bank-reference-id"
                   :modelValue="String(formState.bank_reference_id || 0)"

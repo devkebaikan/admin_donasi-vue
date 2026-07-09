@@ -243,11 +243,11 @@
 
                 <!-- Isi Konten -->
                 <b-col cols="12">
-                  <b-form-group label="Isi Konten (HTML)" label-for="isi">
+                  <b-form-group label="Isi Konten" label-for="isi">
                     <QuillEditor
                       theme="snow"
                       :toolbar="toolbar1"
-                      style="height: 260px"
+                      style="height: 460px"
                       placeholder="Konten HTML program..."
                       v-model:content="formState.isi"
                       content-type="html"
@@ -952,6 +952,7 @@ const handleSubmit = async () => {
   }
 
   updateProgramPayload(formData);
+  // console.log(formState);
 };
 
 // ── Quill toolbar ──────────────────────────────────────────────────────────

@@ -298,7 +298,7 @@
       <b-col>
         <UIComponentCard id="basic" title="Daftar Laporan Project">
           <div class="d-flex justify-content-end mb-3">
-            <b-button variant="primary" :to="{ name: 'project-report.create' }">
+            <b-button variant="primary" @click="handleAddReport">
               <i class="bx bx-plus fs-16 me-1"></i>Tambah Laporan
             </b-button>
           </div>
@@ -347,7 +347,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onBeforeUnmount, ref } from "vue";
+import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
 import { useQuery } from "@tanstack/vue-query";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
@@ -359,6 +359,7 @@ import { getReportById } from "@/services/reportService";
 import { getProjects } from "@/services/projectService";
 import { getAllKegiatan } from "@/services/kegiatanService";
 import router from "@/router";
+import { useRoute } from "vue-router";
 
 const {
   tableOptions,
@@ -379,8 +380,24 @@ const {
   selectedType,
 } = useReportTable();
 
-// ── Project & Kegiatan dropdowns ──────────────────────────────────────────
+const route = useRoute();
+watch(
+  () => route.query.project_id,
+  (id) => {
+    selectedProjectId.value = id ? Number(id) : "";
+  },
+  { immediate: true },
+);
 
+const handleAddReport = () => {
+  if (selectedProjectId.value) {
+    router.push(`/project-report/create?project_id=${selectedProjectId.value}`);
+  } else {
+    router.push("/project-report/create");
+  }
+};
+
+// ── Project & Kegiatan dropdowns ──────────────────────────────────────────
 const { data: projectData, isLoading: isProjectLoading } = useQuery({
   queryKey: ["projects-list"],
   queryFn: () => getProjects({ mode: "list" }),

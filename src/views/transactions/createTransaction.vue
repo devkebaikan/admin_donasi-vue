@@ -6,12 +6,12 @@
           <!-- Basic Info -->
           <UIComponentCard title="Informasi Dasar" class="mb-3">
             <b-row class="g-3">
-              <b-col cols="12" md="6">
+              <b-col cols="12" md="3">
                 <label class="form-label fw-semibold required">Tanggal</label>
                 <FlatPicker
                   id="tx-date"
                   v-model="formState.date"
-                  placeholder="YYYY-MM-DD"
+                  placeholder="Pilih tanggal"
                   :options="{ dateFormat: 'Y-m-d' }"
                 />
                 <div v-if="v$.date.$error" class="invalid-feedback d-block">
@@ -19,12 +19,12 @@
                 </div>
               </b-col>
 
-              <b-col cols="12" md="6">
+              <b-col cols="12" md="3">
                 <label class="form-label fw-semibold required">Waktu</label>
                 <FlatPicker
                   id="tx-time"
                   v-model="formState.time"
-                  placeholder="HH:MM:SS"
+                  placeholder="Pilih waktu"
                   :options="{
                     enableTime: true,
                     noCalendar: true,
@@ -37,7 +37,7 @@
                 </div>
               </b-col>
 
-              <b-col cols="12" md="4">
+              <b-col cols="12" md="3">
                 <label class="form-label fw-semibold required">Status</label>
                 <b-form-select
                   v-model="formState.status"
@@ -61,7 +61,7 @@
                 </div>
               </b-col>
 
-              <b-col cols="12" md="4">
+              <b-col cols="12" md="3">
                 <label class="form-label fw-semibold">Source</label>
                 <b-form-input
                   v-model="formState.source"
@@ -84,12 +84,21 @@
             <b-row class="g-3">
               <b-col cols="12" md="4">
                 <label class="form-label fw-semibold required">User ID</label>
-                <b-form-input
-                  v-model.number="formState.user_id"
-                  type="number"
-                  min="1"
-                  placeholder="ID User"
-                  :state="v$.user_id.$dirty ? !v$.user_id.$error : null"
+                <SearchSelect
+                  id="user-id"
+                  :modelValue="String(formState.user_id || 0)"
+                  @update:modelValue="
+                    (val: string) => {
+                      formState.user_id = val === '0' ? 0 : Number(val);
+                    }
+                  "
+                  @search="
+                    (query: string) => {
+                      userSearchQuery = query;
+                    }
+                  "
+                  :options="userList"
+                  :isLoading="isUserLoading"
                 />
                 <div v-if="v$.user_id.$error" class="invalid-feedback d-block">
                   {{ v$.user_id.$errors[0]?.$message }}
@@ -98,18 +107,20 @@
 
               <b-col cols="12" md="4">
                 <label class="form-label fw-semibold required"
-                  >Payment Method ID</label
+                  >Payment Method</label
                 >
-                <b-form-input
-                  v-model.number="formState.payment_method_id"
-                  type="number"
-                  min="1"
-                  placeholder="ID Payment Method"
-                  :state="
-                    v$.payment_method_id.$dirty
-                      ? !v$.payment_method_id.$error
-                      : null
+                <ChoicesSelect
+                  id="payment-method-id"
+                  :modelValue="String(formState.payment_method_id || 0)"
+                  @update:modelValue="
+                    (val: string) => {
+                      formState.payment_method_id =
+                        val === '0' ? 0 : Number(val);
+                    }
                   "
+                  :options="paymentMethodList"
+                  :isLoading="isPaymentMethodLoading"
+                  :key="paymentMethodList.length"
                 />
                 <div
                   v-if="v$.payment_method_id.$error"
@@ -141,6 +152,41 @@
                   {{ v$.transaction_type_id.$errors[0]?.$message }}
                 </div>
               </b-col>
+              <b-col cols="12" md="4">
+                <label class="form-label fw-semibold required">Type</label>
+                <b-form-select
+                  v-model="formState.type"
+                  :state="v$.type.$dirty ? !v$.type.$error : null"
+                >
+                  <template #first>
+                    <b-form-select-option value="" disabled
+                      >Pilih tipe</b-form-select-option
+                    >
+                  </template>
+                  <b-form-select-option value="donation"
+                    >Donation</b-form-select-option
+                  >
+                  <b-form-select-option value="zakat"
+                    >Zakat</b-form-select-option
+                  >
+                  <b-form-select-option value="other"
+                    >Other</b-form-select-option
+                  >
+                </b-form-select>
+                <div v-if="v$.type.$error" class="invalid-feedback d-block">
+                  {{ v$.type.$errors[0]?.$message }}
+                </div>
+              </b-col>
+
+              <b-col cols="12" md="4">
+                <label class="form-label fw-semibold">Jurnal ID</label>
+                <b-form-input
+                  v-model.number="formState.jurnal_id"
+                  type="number"
+                  min="1"
+                  placeholder="Opsional"
+                />
+              </b-col>
             </b-row>
           </UIComponentCard>
 
@@ -149,11 +195,10 @@
             <b-row class="g-3">
               <b-col cols="12" md="4">
                 <label class="form-label fw-semibold required">Total</label>
-                <b-form-input
-                  v-model.number="formState.total"
-                  type="number"
-                  min="0"
+                <CurrencyInput
+                  id="total"
                   placeholder="0"
+                  v-model.number="formState.total"
                   :state="v$.total.$dirty ? !v$.total.$error : null"
                 />
                 <div v-if="v$.total.$error" class="invalid-feedback d-block">
@@ -163,49 +208,54 @@
 
               <b-col cols="12" md="4">
                 <label class="form-label fw-semibold">Price</label>
-                <b-form-input
+                <CurrencyInput
                   v-model.number="formState.price"
-                  type="number"
-                  min="0"
                   placeholder="0"
+                  :state="null"
                 />
               </b-col>
 
               <b-col cols="12" md="4">
                 <label class="form-label fw-semibold">Diskon</label>
-                <b-form-input
+                <CurrencyInput
                   v-model.number="formState.discount"
-                  type="number"
-                  min="0"
                   placeholder="0"
+                  :state="null"
                 />
               </b-col>
 
               <b-col cols="12" md="4">
                 <label class="form-label fw-semibold">Application Fee</label>
-                <b-form-input
+                <CurrencyInput
                   v-model.number="formState.application_fee"
-                  type="number"
-                  min="0"
                   placeholder="0"
+                  :state="null"
                 />
               </b-col>
 
               <b-col cols="12" md="4">
                 <label class="form-label fw-semibold">Fee Detail</label>
-                <b-form-input
+                <CurrencyInput
                   v-model.number="formState.fee_detail"
-                  type="number"
-                  min="0"
                   placeholder="0"
+                  :state="null"
                 />
               </b-col>
             </b-row>
           </UIComponentCard>
 
           <!-- Optional -->
-          <UIComponentCard title="Opsional" class="mb-3">
+          <UIComponentCard title="Opsional" class="mb-3 hidden d-none">
             <b-row class="g-3">
+              <b-col cols="12" md="6">
+                <label class="form-label fw-semibold">Doa</label>
+                <b-form-textarea
+                  v-model="formState.doa"
+                  rows="2"
+                  placeholder="Permohonan doa dari pendonor..."
+                />
+              </b-col>
+
               <b-col cols="12" md="6">
                 <label class="form-label fw-semibold">Notes</label>
                 <b-form-textarea
@@ -322,10 +372,9 @@
 
                 <b-col cols="12" md="4">
                   <label class="form-label fw-semibold required">Qty</label>
-                  <b-form-input
+                  <CurrencyInput
                     v-model.number="detail.quantity"
-                    type="number"
-                    min="1"
+                    :state="null"
                     placeholder="1"
                   />
                 </b-col>
@@ -334,75 +383,75 @@
                   <label class="form-label fw-semibold required"
                     >Gross Nominal</label
                   >
-                  <b-form-input
+                  <CurrencyInput
                     v-model.number="detail.gross_nominal"
-                    type="number"
-                    min="0"
+                    :state="null"
                     placeholder="0"
                   />
                 </b-col>
 
                 <b-col cols="12" md="4">
                   <label class="form-label fw-semibold required">Nominal</label>
-                  <b-form-input
+                  <CurrencyInput
                     v-model.number="detail.nominal"
-                    type="number"
-                    min="0"
+                    :state="null"
                     placeholder="0"
                   />
                 </b-col>
 
                 <b-col cols="12" md="4">
                   <label class="form-label fw-semibold">Fee</label>
-                  <b-form-input
+                  <CurrencyInput
                     v-model.number="detail.fee"
-                    type="number"
-                    min="0"
+                    :state="null"
                     placeholder="0"
                   />
                 </b-col>
 
                 <b-col cols="12" md="4">
                   <label class="form-label fw-semibold">Diskon</label>
-                  <b-form-input
+                  <CurrencyInput
                     v-model.number="detail.discount"
-                    type="number"
-                    min="0"
+                    :state="null"
                     placeholder="0"
                   />
                 </b-col>
 
                 <b-col cols="12" md="4">
                   <label class="form-label fw-semibold">Operasional</label>
-                  <b-form-input
+                  <CurrencyInput
                     v-model.number="detail.operasional"
-                    type="number"
-                    min="0"
+                    :state="null"
                     placeholder="0"
                   />
                 </b-col>
 
                 <b-col cols="12" md="4">
                   <label class="form-label fw-semibold">Komisi</label>
-                  <b-form-input
+                  <CurrencyInput
                     v-model.number="detail.komisi"
-                    type="number"
-                    min="0"
+                    :state="null"
                     placeholder="0"
                   />
                 </b-col>
 
-                <b-col cols="12" md="4">
-                  <label class="form-label fw-semibold">Program ID</label>
-                  <b-form-input
-                    v-model.number="detail.program_id"
-                    type="number"
-                    min="1"
-                    placeholder="Opsional"
+                <b-col cols="12" md="6">
+                  <label class="form-label fw-semibold">Program</label>
+                  <ChoicesSelect
+                    id="program-id"
+                    :modelValue="String(detail.program_id || 0)"
+                    @update:modelValue="
+                      (val: string) => {
+                        detail.program_id = val === '0' ? 0 : Number(val);
+                      }
+                    "
+                    :options="programList"
+                    :isLoading="isProgramLoading"
+                    :key="programList.length"
                   />
                 </b-col>
 
-                <b-col cols="12" md="4">
+                <!-- <b-col cols="12" md="4">
                   <label class="form-label fw-semibold">Event ID</label>
                   <b-form-input
                     v-model.number="detail.event_id"
@@ -410,7 +459,7 @@
                     min="1"
                     placeholder="Opsional"
                   />
-                </b-col>
+                </b-col> -->
               </b-row>
             </div>
 
@@ -443,8 +492,8 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from "vue";
-import { useMutation } from "@tanstack/vue-query";
+import { computed, reactive, ref, watch } from "vue";
+import { useMutation, useQuery } from "@tanstack/vue-query";
 import { useVuelidate } from "@vuelidate/core";
 import { required, helpers, minValue } from "@vuelidate/validators";
 import { toast } from "vue3-toastify";
@@ -454,6 +503,9 @@ import UIComponentCard from "@/components/UIComponentCard.vue";
 import FlatPicker from "@/components/FlatPicker.vue";
 import { createTransaction } from "@/services/transactionService";
 import router from "@/router";
+import { getAllPaymentMethods } from "@/services/paymentMethodService";
+import { getUsers } from "@/services/userService";
+import { getAllPrograms, getProgramTypes } from "@/services/programService";
 
 const ACTIVITIES = [
   "Waiting for payment",
@@ -472,6 +524,9 @@ const formState = reactive({
   status: "",
   source: "",
   invoice: "",
+  type: "",
+  program_type: "",
+  jurnal_id: null as number | null,
   user_id: null as number | null,
   payment_method_id: null as number | null,
   transaction_type_id: null as number | null,
@@ -480,6 +535,7 @@ const formState = reactive({
   discount: 0,
   application_fee: 0,
   fee_detail: 0,
+  doa: "",
   notes: "",
   payment_detail: "",
   reff_code: "",
@@ -487,10 +543,86 @@ const formState = reactive({
   payment_url: "",
 });
 
+// user list with search
+const userSearchQuery = ref("");
+
+const {
+  data: userData,
+  isLoading: isUserLoading,
+  refetch: refetchUsers,
+} = useQuery({
+  queryKey: ["user-list", userSearchQuery],
+  queryFn: () => {
+    const params: Record<string, any> = { limit: 10 };
+    if (userSearchQuery.value && userSearchQuery.value.length > 2) {
+      params.search = userSearchQuery.value;
+    }
+    return getUsers(params);
+  },
+  enabled: computed(
+    () => !userSearchQuery.value || userSearchQuery.value.length > 2,
+  ),
+});
+
+const userList = computed(() => {
+  const list = Array.isArray(userData.value) ? userData.value : [];
+  return [
+    { value: 0, text: "Cari user..." },
+    ...list.map((p: any) => ({
+      value: p.id,
+      text: `${p.name} - ${p.phone}`,
+    })),
+  ];
+});
+
+watch(userSearchQuery, (newVal) => {
+  if (newVal && newVal.length > 2) {
+    refetchUsers();
+  }
+});
+
+// program list
+const { data: programData, isLoading: isProgramLoading } = useQuery({
+  queryKey: ["program-list"],
+  queryFn: getAllPrograms,
+});
+
+const programList = computed(() => {
+  const list = Array.isArray(programData.value) ? programData.value : [];
+  return [
+    { value: 0, text: "Pilih program..." },
+    ...list.map((p: any) => ({
+      value: p.id,
+      text: p.title,
+    })),
+  ];
+});
+
+// payment method list
+const { data: paymentMethodData, isLoading: isPaymentMethodLoading } = useQuery(
+  {
+    queryKey: ["payment-method-list"],
+    queryFn: getAllPaymentMethods,
+  },
+);
+
+const paymentMethodList = computed(() => {
+  const list = Array.isArray(paymentMethodData.value)
+    ? paymentMethodData.value
+    : [];
+  return [
+    { value: 0, text: "Pilih metode pembayaran" },
+    ...list.map((p: any) => ({
+      value: p.id,
+      text: `${p.bank_reference.name} | ${p.code}`,
+    })),
+  ];
+});
+
 const isAnonim = ref(false);
 
 const makeDetail = () => ({
-  detail_type: "",
+  detail_type: "donation",
   activity: "",
   quantity: 1,
   gross_nominal: 0,
@@ -500,7 +632,7 @@ const makeDetail = () => ({
   operasional: 0,
   komisi: 0,
   program_id: null as number | null,
-  event_id: null as number | null,
+  // event_id: null as number | null,
 });
 
 const transactionDetails = ref([makeDetail()]);
@@ -513,6 +645,7 @@ const rules = {
   date: { required: helpers.withMessage("Tanggal wajib diisi.", required) },
   time: { required: helpers.withMessage("Waktu wajib diisi.", required) },
   status: { required: helpers.withMessage("Status wajib dipilih.", required) },
+  type: { required: helpers.withMessage("Type wajib dipilih.", required) },
   user_id: {
     required: helpers.withMessage("User ID wajib diisi.", required),
     minValue: helpers.withMessage("User ID harus lebih dari 0.", minValue(1)),
@@ -588,7 +721,7 @@ const handleSubmit = async () => {
         komisi: d.komisi,
       };
       if (d.program_id) item.program_id = d.program_id;
-      if (d.event_id) item.event_id = d.event_id;
+      // if (d.event_id) item.event_id = d.event_id;
       return item;
     }),
   };
@@ -607,6 +740,8 @@ const handleSubmit = async () => {
   if (formState.third_party_id)
     payload.third_party_id = formState.third_party_id;
   if (formState.payment_url) payload.payment_url = formState.payment_url;
+
+  // console.log(payload);
 
   mutate(payload);
 };

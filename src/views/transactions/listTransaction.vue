@@ -621,7 +621,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onBeforeUnmount, ref } from "vue";
+import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
@@ -633,10 +633,12 @@ import { getTransactionById } from "@/services/transactionService";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
 import { formatCurrency, formatDateTime, formatDate } from "@/helpers/format";
 import { getAllPaymentMethods } from "@/services/paymentMethodService";
+import { useRoute } from "vue-router";
 
 // --- Detail Offcanvas ---
 const showDetailOffcanvas = ref(false);
 const selectedId = ref(0);
+const route = useRoute();
 
 const {
   data: txDetail,
@@ -707,6 +709,14 @@ const {
   resetPage,
   handleDelete,
 } = useTransactionTable();
+
+watch(
+  () => route.query.user_id,
+  (id) => {
+    filterUserId.value = id ? String(id) : "";
+  },
+  { immediate: true },
+);
 
 const hasActiveFilters = computed(
   () =>

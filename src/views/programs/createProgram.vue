@@ -12,8 +12,10 @@
             @on-complete="handleSubmit"
           >
             <!-- ══════════════════════════════════════════════════════════ STEP 1 — Identitas Program ══════════════════════════════════════════════════════════ -->
-            <tab-content custom-icon='<a class="nav-link fs-5">Identitas</a>'>
-              <!-- :before-change="validateStep1" -->
+            <tab-content
+              custom-icon='<a class="nav-link fs-5">Identitas</a>'
+              :before-change="validateStep1"
+            >
               <h4 class="fs-16 fw-semibold mb-1">Identitas Program</h4>
               <p class="text-muted mb-4">
                 Informasi dasar tentang program donasi
@@ -189,8 +191,8 @@
             <!-- ══════════════════════════════════════════════════════════ STEP 2 — Konten & Target ══════════════════════════════════════════════════════════ -->
             <tab-content
               custom-icon='<a class="nav-link fs-5">Konten & Target</a>'
+              :before-change="validateStep2"
             >
-              <!-- :before-change="validateStep2" -->
               <h4 class="fs-16 fw-semibold mb-1">Konten & Target Program</h4>
               <p class="text-muted mb-4">
                 Isi konten dan pengaturan target donasi
@@ -219,15 +221,31 @@
                 <b-col cols="12">
                   <b-form-group label="Isi Konten" label-for="isi">
                     <QuillEditor
+                      ref="quillRef"
+                      id="snow-editor"
+                      data-storage="program-content"
                       theme="snow"
-                      :toolbar="toolbar1"
-                      style="height: 260px"
-                      placeholder="Konten HTML program..."
+                      :toolbar="quillToolbarOptions"
+                      style="height: 460px"
+                      placeholder="Konten program..."
                       v-model="formState.isi"
                       content-type="html"
+                      @text-change="syncQuillContent"
+                      @selection-change="syncQuillContent"
                     />
+
+                    <!-- <QuillEditor
+                      theme="snow"
+                      :toolbar="toolbar1"
+                      style="height: 460px"
+                      placeholder="Konten program..."
+                      v-model:content="formState.isi"
+                      content-type="html"
+                    /> -->
                   </b-form-group>
-                  <small class="text-muted">Opsional — klik ikon gambar untuk upload</small>
+                  <small class="text-muted"
+                    >Opsional — klik ikon gambar untuk upload</small
+                  >
                 </b-col>
 
                 <!-- Video URL -->
@@ -756,64 +774,74 @@ const handleSubmit = async () => {
     });
   }
 
-  // createProgramPayload(formData);
-  console.log(formState);
+  createProgramPayload(formData);
+  // console.log(formState);
 };
 
-// ── Setup Quill editor untuk image upload ─────────────────────────────────
-onMounted(() => {
-  nextTick(() => {
-    const imageButton = document.querySelector(
-      "#program-form-create .ql-toolbar .ql-image",
-    ) as HTMLButtonElement;
-    if (imageButton) {
-      imageButton.onclick = async (e: Event) => {
-        e.preventDefault();
-        e.stopPropagation();
+const quillRef = ref();
 
-        const input = document.createElement("input");
-        input.setAttribute("type", "file");
-        input.setAttribute("accept", "image/jpeg,image/png,image/webp,image/gif");
+// ── Sync Quill content ke formState ────────────────────────────────────────
+const syncQuillContent = () => {
+  const quill = quillRef.value?.getQuill();
+  if (quill) {
+    formState.isi = quill.root.innerHTML;
+  }
+};
 
-        input.onchange = async () => {
-          const file = input.files?.[0];
-          if (!file) return;
+// ── Image upload handler ───────────────────────────────────────────────────
+const imageHandler = () => {
+  const quill = quillRef.value?.getQuill();
+  if (!quill) return;
 
-          try {
-            const imageUrl = await uploadImage(file);
+  // simpan posisi cursor SEBELUM file dialog dibuka
+  const range = quill.getSelection(true) ?? {
+    index: quill.getLength(),
+    length: 0,
+  };
 
-            const editorDiv = document.querySelector(
-              "#program-form-create .ql-editor",
-            ) as HTMLElement;
-            if (editorDiv) {
-              const img = document.createElement("img");
-              img.src = imageUrl;
-              img.style.maxWidth = "100%";
-              img.style.height = "auto";
-              editorDiv.appendChild(img);
+  const input = document.createElement("input");
+  input.setAttribute("type", "file");
+  input.setAttribute("accept", "image/jpeg,image/png,image/webp");
+  input.click();
 
-              formState.isi = editorDiv.innerHTML;
-            }
+  input.onchange = async () => {
+    const file = input.files?.[0];
+    if (!file) return;
 
-            showToast("Gambar berhasil diunggah", {
-              type: "success",
-              position: "top-center",
-            });
-          } catch (err: any) {
-            showToast(
-              err?.response?.data?.message ?? "Gagal mengunggah gambar",
-              {
-                type: "error",
-                position: "top-center",
-              },
-            );
-          }
-        };
-        input.click();
-      };
+    quill.enable(false);
+
+    try {
+      const imageUrl = await uploadImage(file);
+
+      if (!imageUrl) {
+        throw new Error("URL gambar tidak ditemukan pada response");
+      }
+
+      quill.insertEmbed(range.index, "image", imageUrl, "user");
+      quill.setSelection(range.index + 1, 0);
+
+      // Sync content ke formState setelah insert image
+      syncQuillContent();
+
+      showToast("Gambar berhasil diunggah", {
+        type: "success",
+        position: "top-center",
+      });
+    } catch (err: any) {
+      const msg = err?.response?.data?.message ?? "Gagal mengupload gambar";
+      showToast(msg, { type: "error", position: "top-center" });
+    } finally {
+      quill.enable(true);
     }
-  });
-});
+  };
+};
+
+const quillToolbarOptions = computed(() => ({
+  container: toolbar1,
+  handlers: {
+    image: imageHandler,
+  },
+}));
 
 // ── Quill toolbar ──────────────────────────────────────────────────────────
 const toolbar1 = [

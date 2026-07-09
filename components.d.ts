@@ -41,7 +41,6 @@ declare module 'vue' {
     BFormSelectOption: typeof import('bootstrap-vue-next')['BFormSelectOption']
     BFormTextarea: typeof import('bootstrap-vue-next')['BFormTextarea']
     BFormValidFeedback: typeof import('bootstrap-vue-next')['BFormValidFeedback']
-    BInput: typeof import('bootstrap-vue-next')['BInput']
     BInputGroup: typeof import('bootstrap-vue-next')['BInputGroup']
     BInputGroupText: typeof import('bootstrap-vue-next')['BInputGroupText']
     BListGroup: typeof import('bootstrap-vue-next')['BListGroup']
@@ -83,6 +82,7 @@ declare module 'vue' {
     MenuItemWithChildren: typeof import('./src/components/AppMenu/MenuItemWithChildren.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SearchSelect: typeof import('./src/components/SearchSelect.vue')['default']
     UIComponentCard: typeof import('./src/components/UIComponentCard.vue')['default']
   }
   export interface ComponentCustomProperties {

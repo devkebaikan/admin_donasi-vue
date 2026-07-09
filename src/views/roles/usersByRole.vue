@@ -97,7 +97,7 @@
                     </td>
                   </tr>
                   <tr v-for="(user, idx) in users" :key="user.id">
-                    <td class="text-muted small">{{ offset + idx + 1 }}</td>
+                    <td class="text-muted small">{{ offset + (idx as number) + 1 }}</td>
                     <td>
                       <span class="fw-semibold">{{ user.name || "-" }}</span>
                     </td>

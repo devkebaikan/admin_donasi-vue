@@ -25,9 +25,14 @@
                   "
                   :options="projectOptions"
                   :isLoading="isProjectLoading"
-                  :key="'proj-' + projectOptions.length + '-' + formState.project_id"
+                  :key="
+                    'proj-' + projectOptions.length + '-' + formState.project_id
+                  "
                 />
-                <div v-if="v$.project_id.$error" class="invalid-feedback d-block">
+                <div
+                  v-if="v$.project_id.$error"
+                  class="invalid-feedback d-block"
+                >
                   {{ v$.project_id.$errors[0].$message }}
                 </div>
               </b-form-group>
@@ -46,9 +51,17 @@
                   "
                   :options="kegiatanOptions"
                   :isLoading="isKegiatanLoading"
-                  :key="'keg-' + kegiatanOptions.length + '-' + formState.kegiatan_id"
+                  :key="
+                    'keg-' +
+                    kegiatanOptions.length +
+                    '-' +
+                    formState.kegiatan_id
+                  "
                 />
-                <div v-if="v$.kegiatan_id.$error" class="invalid-feedback d-block">
+                <div
+                  v-if="v$.kegiatan_id.$error"
+                  class="invalid-feedback d-block"
+                >
                   {{ v$.kegiatan_id.$errors[0].$message }}
                 </div>
               </b-form-group>
@@ -63,10 +76,16 @@
                   :state="v$.type.$error ? false : null"
                 >
                   <template #first>
-                    <b-form-select-option value="">-- Pilih Tipe --</b-form-select-option>
+                    <b-form-select-option value=""
+                      >-- Pilih Tipe --</b-form-select-option
+                    >
                   </template>
-                  <b-form-select-option value="Progress">Progress</b-form-select-option>
-                  <b-form-select-option value="Final">Final</b-form-select-option>
+                  <b-form-select-option value="Progress"
+                    >Progress</b-form-select-option
+                  >
+                  <b-form-select-option value="Final"
+                    >Final</b-form-select-option
+                  >
                 </b-form-select>
                 <b-form-invalid-feedback v-if="v$.type.$error">
                   {{ v$.type.$errors[0].$message }}
@@ -88,7 +107,10 @@
             </b-col>
 
             <!-- Section: Media -->
-            <b-col cols="12"><hr class="my-1" /><h6 class="text-muted fw-semibold mb-3">Media</h6></b-col>
+            <b-col cols="12"
+              ><hr class="my-1" />
+              <h6 class="text-muted fw-semibold mb-3">Media</h6></b-col
+            >
 
             <!-- Thumbnail -->
             <b-col md="6">
@@ -99,7 +121,9 @@
                   @change="handleThumbnailChange"
                   placeholder="Pilih file thumbnail baru..."
                 />
-                <small class="text-muted">Opsional — JPG/PNG/WebP, maks 2MB</small>
+                <small class="text-muted"
+                  >Opsional — JPG/PNG/WebP, maks 2MB</small
+                >
               </b-form-group>
 
               <div v-if="thumbnailPreview" class="mt-2">
@@ -107,7 +131,11 @@
                   :src="thumbnailPreview"
                   alt="Thumbnail preview"
                   class="img-thumbnail"
-                  style="max-height: 150px; max-width: 200px; object-fit: contain"
+                  style="
+                    max-height: 150px;
+                    max-width: 200px;
+                    object-fit: contain;
+                  "
                 />
               </div>
             </b-col>
@@ -121,7 +149,9 @@
                   @change="handleWaImageChange"
                   placeholder="Pilih file gambar baru..."
                 />
-                <small class="text-muted">Opsional — JPG/PNG/WebP, maks 2MB</small>
+                <small class="text-muted"
+                  >Opsional — JPG/PNG/WebP, maks 2MB</small
+                >
               </b-form-group>
 
               <div v-if="waImagePreview" class="mt-2">
@@ -129,7 +159,11 @@
                   :src="waImagePreview"
                   alt="WhatsApp image preview"
                   class="img-thumbnail"
-                  style="max-height: 150px; max-width: 200px; object-fit: contain"
+                  style="
+                    max-height: 150px;
+                    max-width: 200px;
+                    object-fit: contain;
+                  "
                 />
               </div>
             </b-col>
@@ -175,15 +209,27 @@
 
             <!-- Loading + Actions -->
             <b-col v-if="isPending" cols="12" class="text-center">
-              <b-spinner variant="primary" class="me-2" /><span class="text-muted">Menyimpan...</span>
+              <b-spinner variant="primary" class="me-2" /><span
+                class="text-muted"
+                >Menyimpan...</span
+              >
             </b-col>
             <b-col cols="12">
               <div class="d-flex gap-2 justify-content-end">
-                <b-button variant="outline-secondary" :disabled="isPending" @click="router.push('/project-report')">
+                <b-button
+                  variant="outline-secondary"
+                  :disabled="isPending"
+                  @click="router.push('/project-report')"
+                >
                   Batal
                 </b-button>
-                <b-button variant="primary" :disabled="isPending" @click="handleSubmit">
-                  <b-spinner v-if="isPending" small class="me-1" />Simpan Perubahan
+                <b-button
+                  variant="primary"
+                  :disabled="isPending"
+                  @click="handleSubmit"
+                >
+                  <b-spinner v-if="isPending" small class="me-1" />Simpan
+                  Perubahan
                 </b-button>
               </div>
             </b-col>
@@ -205,15 +251,13 @@ import { useRoute } from "vue-router";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
-import {
-  getReportById,
-  updateReport,
-} from "@/services/reportService";
+import { getReportById, updateReport } from "@/services/reportService";
 import { getProjects } from "@/services/projectService";
 import { getAllKegiatan } from "@/services/kegiatanService";
 import router from "@/router";
 
-const showToast = (message: string, options: ToastOptions) => toast(message, options);
+const showToast = (message: string, options: ToastOptions) =>
+  toast(message, options);
 const route = useRoute();
 const id = Number(route.params.id);
 const queryClient = useQueryClient();
@@ -282,7 +326,7 @@ const projectOptions = computed(() => {
   const list = Array.isArray(projectData.value) ? projectData.value : [];
   return [
     { value: 0, text: "-- Pilih Project --" },
-    ...list.map((p: any) => ({ value: p.id, text: p.name })),
+    ...list.map((p: any) => ({ value: p.id, text: p.judul })),
   ];
 });
 
@@ -294,7 +338,7 @@ const kegiatanOptions = computed(() => {
   const list = Array.isArray(kegiatanData.value) ? kegiatanData.value : [];
   return [
     { value: 0, text: "-- Pilih Kegiatan --" },
-    ...list.map((k: any) => ({ value: k.id, text: k.nama })),
+    ...list.map((k: any) => ({ value: k.id, text: k.judul })),
   ];
 });
 
@@ -332,18 +376,25 @@ const { mutate, isPending } = useMutation({
     formData.append("project_id", String(formState.project_id));
     formData.append("kegiatan_id", String(formState.kegiatan_id));
     formData.append("type", formState.type);
-    if (formState.mitra_ids.trim()) formData.append("mitra_ids", formState.mitra_ids.trim());
+    if (formState.mitra_ids.trim())
+      formData.append("mitra_ids", formState.mitra_ids.trim());
     if (thumbnailFile.value) formData.append("thumbnail", thumbnailFile.value);
     if (waImageFile.value) formData.append("wa_image", waImageFile.value);
-    if (formState.link_ig.trim()) formData.append("link_ig", formState.link_ig.trim());
-    if (formState.embed_ig.trim()) formData.append("embed_ig", formState.embed_ig.trim());
-    if (formState.wa_caption.trim()) formData.append("wa_caption", formState.wa_caption.trim());
+    if (formState.link_ig.trim())
+      formData.append("link_ig", formState.link_ig.trim());
+    if (formState.embed_ig.trim())
+      formData.append("embed_ig", formState.embed_ig.trim());
+    if (formState.wa_caption.trim())
+      formData.append("wa_caption", formState.wa_caption.trim());
     return updateReport(id, formData);
   },
   onSuccess: () => {
     queryClient.invalidateQueries({ queryKey: ["reports"] });
     queryClient.invalidateQueries({ queryKey: ["reports", id] });
-    showToast("Laporan berhasil diperbarui", { type: "success", position: "top-center" });
+    showToast("Laporan berhasil diperbarui", {
+      type: "success",
+      position: "top-center",
+    });
     setTimeout(() => router.push("/project-report"), 1500);
   },
   onError: (err: any) => {
@@ -357,7 +408,10 @@ const { mutate, isPending } = useMutation({
 const handleSubmit = async () => {
   if (isPending.value) return;
   if (!(await v$.value.$validate())) {
-    showToast("Lengkapi field wajib", { type: "warning", position: "top-center" });
+    showToast("Lengkapi field wajib", {
+      type: "warning",
+      position: "top-center",
+    });
     return;
   }
   mutate();

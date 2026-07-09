@@ -14,10 +14,14 @@ const formatRupiah = (val: number) =>
   }).format(val);
 
 export function useKeuanganTable() {
+  const selectedProjectId = ref<number | "">("");
   const selectedKegiatanId = ref<number | "">("");
   const selectedMitraId = ref<number | "">("");
 
   const extraFilters = computed(() => ({
+    ...(selectedProjectId.value !== ""
+      ? { project_id: selectedProjectId.value }
+      : {}),
     ...(selectedKegiatanId.value !== ""
       ? { kegiatan_id: selectedKegiatanId.value }
       : {}),
@@ -61,7 +65,7 @@ export function useKeuanganTable() {
           ),
       },
       {
-        name: "Kegiatan",
+        name: "Project",
         width: "200px",
         formatter: (cell: string) =>
           html(`<span class="small">${cell ?? "-"}</span>`),
@@ -97,11 +101,11 @@ export function useKeuanganTable() {
       index,
       item.items,
       item.nominal,
-      item.kegiatan?.nama ?? "-",
+      item.project?.name ?? "-",
       item.mitra?.nama ?? "-",
       item.id,
     ],
   });
 
-  return { ...table, selectedKegiatanId, selectedMitraId };
+  return { ...table, selectedProjectId, selectedKegiatanId, selectedMitraId };
 }

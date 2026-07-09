@@ -542,16 +542,6 @@ const userRoutes = [
     component: () => import("@/views/users/editUser.vue"),
   },
   {
-    path: "/users/:id/transactions",
-    name: "user.transactions",
-    meta: {
-      title: setTitle("User transactions"),
-      authRequired: true,
-    },
-    component: () =>
-      import("@/views/users/user-transactions/listUserTranscation.vue"),
-  },
-  {
     path: "/users/donatur",
     name: "user.donatur",
     meta: {

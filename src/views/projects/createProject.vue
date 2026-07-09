@@ -172,6 +172,7 @@
                       id="nominal-ajuan"
                       placeholder="0"
                       v-model="v$.nominal_ajuan.$model"
+                      :state="null"
                     />
                     <b-form-invalid-feedback
                       v-if="v$.nominal_ajuan.$error"
@@ -189,6 +190,7 @@
                       id="nominal-acc"
                       placeholder="0"
                       v-model="formState.nominal_acc"
+                      :state="null"
                     />
                     <small class="text-muted">Opsional</small>
                   </b-form-group>
@@ -447,7 +449,6 @@ import { useRouter } from "vue-router";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
-import CurrencyInput from "@/components/CurrencyInput.vue";
 import MapLocationPicker from "@/components/MapLocationPicker.vue";
 import { QuillEditor } from "@vueup/vue-quill";
 import { FormWizard, TabContent } from "vue3-form-wizard";
@@ -646,7 +647,7 @@ const handleSubmit = async () => {
   });
 
   submitCreate(formData);
-  console.log(formState);
+  // console.log(formState);
 };
 
 // ── Quill toolbar ─────────────────────────────────────────────────────────────

@@ -184,7 +184,7 @@
         <hr class="my-3" />
 
         <!-- Deskripsi -->
-        <h6
+        <!-- <h6
           class="fw-semibold text-muted mb-2 text-uppercase"
           style="font-size: 11px; letter-spacing: 0.5px"
         >
@@ -195,7 +195,7 @@
           class="small"
           v-html="kegiatanDetail.deskripsi"
         ></div>
-        <p v-else class="text-muted small fst-italic">Tidak ada deskripsi.</p>
+        <p v-else class="text-muted small fst-italic">Tidak ada deskripsi.</p> -->
       </div>
     </b-offcanvas>
 
@@ -204,10 +204,7 @@
       <b-col>
         <UIComponentCard id="basic" title="Daftar Kegiatan">
           <div class="d-flex justify-content-end mb-3">
-            <b-button
-              variant="primary"
-              @click="router.push('/kegiatan/create')"
-            >
+            <b-button variant="primary" @click="handleAddKegiatan">
               <i class="bx bx-plus fs-16 me-1"></i>Tambah kegiatan
             </b-button>
           </div>
@@ -256,7 +253,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onBeforeUnmount } from "vue";
+import { computed, ref, onMounted, onBeforeUnmount, watch } from "vue";
 import { useQuery } from "@tanstack/vue-query";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
@@ -267,6 +264,7 @@ import { getProjects } from "@/services/projectService";
 import { getAllMitra } from "@/services/mitraService";
 import { formatDate, formatDateTime } from "@/helpers/format";
 import router from "@/router";
+import { useRoute } from "vue-router";
 
 const STORAGE_BASE =
   (import.meta.env.VITE_API_BASE_URL as string).replace("/api/v1", "") +
@@ -290,6 +288,23 @@ const {
   resetPage,
   handleDelete,
 } = useKegiatanTable();
+
+const route = useRoute();
+watch(
+  () => route.query.project_id,
+  (id) => {
+    selectedProjectId.value = id ? Number(id) : "";
+  },
+  { immediate: true },
+);
+
+const handleAddKegiatan = () => {
+  if (selectedProjectId.value) {
+    router.push(`/kegiatan/create?project_id=${selectedProjectId.value}`);
+  } else {
+    router.push("/kegiatan/create");
+  }
+};
 
 const hasActiveFilters = computed(
   () =>

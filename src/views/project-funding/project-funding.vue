@@ -160,11 +160,17 @@
                 <b-form-select-option
                   v-for="p in programs"
                   :key="p.id"
-                  :value="p.id"
+                  :value="p.program_id"
                 >
-                  {{ p.description ?? p.title ?? p.name }}
+                  {{ p.program_name }}
                 </b-form-select-option>
               </b-form-select>
+              <div v-if="selectedProgramId !== 0">
+                Yang bisa diclaim
+                <span class="fw-semibold text-success">{{
+                  formatCurrency(canClaim)
+                }}</span>
+              </div>
             </b-col>
           </b-row>
           <b-row class="g-3 mb-3">
@@ -308,6 +314,12 @@ const selectedProgramId = ref<number>(0);
 const checkedIds = ref<Set<number>>(new Set());
 const saldoPakai = ref<number>(0);
 const nominalClaim = ref<number>(0);
+const canClaim = computed(() => {
+  const program = programs.value.find(
+    (p) => p.program_id === selectedProgramId.value,
+  );
+  return program?.can_claim ?? 0;
+});
 
 // Project detail — provides related programs + project nominal
 const { data: projectDetail, isLoading: isProjectLoading } = useQuery({
@@ -315,18 +327,21 @@ const { data: projectDetail, isLoading: isProjectLoading } = useQuery({
   queryFn: () => getProjectById(projectId),
 });
 
-const programs = computed<any[]>(() => projectDetail.value?.programs ?? []);
-
-watch(programs, (list) => {
-  if (list.length && !list.some((p) => p.id === selectedProgramId.value)) {
-    selectedProgramId.value = list[0].id;
-  }
-});
-
 // Fund check — project-level allocation summary
 const { data: fundCheck, isLoading: isFundCheckLoading } = useQuery({
   queryKey: ["fund-check", projectId],
   queryFn: () => checkFundingProject(projectId),
+});
+
+const programs = computed<any[]>(() => fundCheck.value?.breakdown ?? []);
+
+watch(programs, (list) => {
+  if (
+    list.length &&
+    !list.some((p) => p.program_id === selectedProgramId.value)
+  ) {
+    selectedProgramId.value = list[0].program_id;
+  }
 });
 
 const finance = computed(() => ({

@@ -4,9 +4,33 @@
       <b-col>
         <UIComponentCard title="Tambah Project Keuangan">
           <b-row class="g-3">
+            <!-- project -->
+            <b-col md="6">
+              <b-form-group label="Project" label-for="project-id">
+                <ChoicesSelect
+                  id="project-id"
+                  :modelValue="String(formState.project_id || 0)"
+                  @update:modelValue="
+                    (val) => {
+                      formState.project_id = val === '0' ? 0 : Number(val);
+                    }
+                  "
+                  :options="projectList"
+                  :isLoading="isProjectLoading"
+                  :key="projectList.length"
+                />
+                <div
+                  v-if="v$.project_id.$error"
+                  class="invalid-feedback d-block"
+                >
+                  {{ v$.project_id.$errors[0].$message }}
+                </div>
+              </b-form-group>
+            </b-col>
+
             <!-- Kegiatan -->
             <b-col md="6">
-              <b-form-group label="Kegiatan" label-for="kegiatan-id">
+              <b-form-group label="Kegiatan (opsional)" label-for="kegiatan-id">
                 <ChoicesSelect
                   id="kegiatan-id"
                   :modelValue="String(formState.kegiatan_id || 0)"
@@ -19,7 +43,10 @@
                   :isLoading="isKegiatanLoading"
                   :key="kegiatanList.length"
                 />
-                <div v-if="v$.kegiatan_id.$error" class="invalid-feedback d-block">
+                <div
+                  v-if="v$.kegiatan_id.$error"
+                  class="invalid-feedback d-block"
+                >
                   {{ v$.kegiatan_id.$errors[0].$message }}
                 </div>
               </b-form-group>
@@ -67,16 +94,17 @@
             <b-col md="4">
               <b-form-group label="Nominal" label-for="nominal">
                 <b-input-group prepend="Rp">
-                  <b-form-input
+                  <CurrencyInput
                     id="nominal"
                     v-model="v$.nominal.$model"
-                    type="number"
-                    min="0"
                     placeholder="0"
                     :state="v$.nominal.$error ? false : null"
                   />
                 </b-input-group>
-                <b-form-invalid-feedback v-if="v$.nominal.$error" class="d-block">
+                <b-form-invalid-feedback
+                  v-if="v$.nominal.$error"
+                  class="d-block"
+                >
                   {{ v$.nominal.$errors[0].$message }}
                 </b-form-invalid-feedback>
               </b-form-group>
@@ -140,9 +168,10 @@ import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
 import { createKeuangan } from "@/services/projectKeuanganService";
-import { getAllKegiatan } from "@/services/kegiatanService";
 import { getAllMitra } from "@/services/mitraService";
 import router from "@/router";
+import { getProjects } from "@/services/projectService";
+import { getAllKegiatan } from "@/services/kegiatanService";
 
 const showToast = (message: string, options: ToastOptions) =>
   toast(message, options);
@@ -150,6 +179,7 @@ const queryClient = useQueryClient();
 
 const formState = reactive({
   kegiatan_id: 0,
+  project_id: 0,
   mitra_id: 0,
   items: "",
   nominal: 0,
@@ -157,9 +187,13 @@ const formState = reactive({
 });
 
 const rules = {
+  project_id: {
+    required: helpers.withMessage("Project wajib dipilih.", required),
+    minValue: helpers.withMessage("Project wajib dipilih.", minValue(1)),
+  },
   kegiatan_id: {
-    required: helpers.withMessage("Kegiatan wajib dipilih.", required),
-    minValue: helpers.withMessage("Kegiatan wajib dipilih.", minValue(1)),
+    // required: helpers.withMessage("Kegiatan wajib dipilih.", required),
+    // minValue: helpers.withMessage("Kegiatan wajib dipilih.", minValue(1)),
   },
   mitra_id: {
     required: helpers.withMessage("Mitra wajib dipilih.", required),
@@ -175,6 +209,18 @@ const rules = {
 };
 
 const v$ = useVuelidate(rules, formState);
+
+const { data: projectData, isLoading: isProjectLoading } = useQuery({
+  queryKey: ["projects-list"],
+  queryFn: () => getProjects({ mode: "list" }),
+});
+const projectList = computed(() => {
+  const list = Array.isArray(projectData.value) ? projectData.value : [];
+  return [
+    { value: 0, text: "-- Pilih Project --" },
+    ...list.map((k: any) => ({ value: k.id, text: k.nama ?? k.judul })),
+  ];
+});
 
 const { data: kegiatanData, isLoading: isKegiatanLoading } = useQuery({
   queryKey: ["kegiatans-list"],
@@ -204,6 +250,7 @@ const { mutate, isPending } = useMutation({
   mutationFn: () =>
     createKeuangan({
       kegiatan_id: formState.kegiatan_id,
+      project_id: formState.project_id,
       mitra_id: formState.mitra_id,
       items: formState.items,
       nominal: formState.nominal,

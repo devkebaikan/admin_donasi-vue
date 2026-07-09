@@ -31,6 +31,23 @@
         </b-col>
 
         <b-col cols="12" md="4">
+          <label class="form-label fw-semibold">Project</label>
+          <ChoicesSelect
+            id="filter-project"
+            :modelValue="String(selectedProjectId || '')"
+            @update:modelValue="
+              (val: any) => {
+                selectedProjectId = val === '' ? '' : Number(val);
+                resetPage();
+              }
+            "
+            :options="projectOptions"
+            :isLoading="isProjectLoading"
+            :key="projectOptions.length"
+          />
+        </b-col>
+
+        <b-col cols="12" md="4">
           <label class="form-label fw-semibold">Kegiatan</label>
           <ChoicesSelect
             id="filter-kegiatan"
@@ -81,6 +98,20 @@
             class="bx bx-x cursor-pointer"
             @click="
               searchQuery = '';
+              resetPage();
+            "
+          ></i>
+        </b-badge>
+        <b-badge
+          v-if="selectedProjectId !== ''"
+          variant="primary"
+          class="d-flex align-items-center gap-1"
+        >
+          Project: {{ selectedProjectLabel }}
+          <i
+            class="bx bx-x cursor-pointer"
+            @click="
+              selectedProjectId = '';
               resetPage();
             "
           ></i>
@@ -304,6 +335,7 @@ import GridJsTable from "@/components/GridJsTable.vue";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
 import { useKeuanganTable } from "./components/data";
 import { getKeuanganById } from "@/services/projectKeuanganService";
+import { getAllProjects } from "@/services/projectService";
 import { getAllKegiatan } from "@/services/kegiatanService";
 import { getAllMitra } from "@/services/mitraService";
 import { formatCurrency, formatDateTime } from "@/helpers/format";
@@ -317,6 +349,7 @@ const {
   error,
   isFetching,
   searchQuery,
+  selectedProjectId,
   selectedKegiatanId,
   selectedMitraId,
   currentPage,
@@ -331,6 +364,7 @@ const hasActiveFilters = computed(
   () =>
     !!(
       searchQuery.value ||
+      selectedProjectId.value !== "" ||
       selectedKegiatanId.value !== "" ||
       selectedMitraId.value !== ""
     ),
@@ -338,10 +372,16 @@ const hasActiveFilters = computed(
 
 const clearFilters = () => {
   searchQuery.value = "";
+  selectedProjectId.value = "";
   selectedKegiatanId.value = "";
   selectedMitraId.value = "";
   resetPage();
 };
+
+const { data: projectList, isLoading: isProjectLoading } = useQuery({
+  queryKey: ["projects-list"],
+  queryFn: () => getAllProjects({ mode: "list" }),
+});
 
 const { data: kegiatanList, isLoading: isKegiatanLoading } = useQuery({
   queryKey: ["kegiatans-list"],
@@ -355,6 +395,17 @@ const { data: mitraList, isLoading: isMitraLoading } = useQuery({
 
 const toArray = (data: any) =>
   Array.isArray(data) ? data : (data?.data ?? []);
+
+const projectOptions = computed(() => {
+  const list = toArray(projectList.value);
+  return [
+    { value: "", text: "Semua Project" },
+    ...list.map((item: any) => ({
+      value: item.id,
+      text: item.nama ?? item.judul,
+    })),
+  ];
+});
 
 const kegiatanOptions = computed(() => {
   const list = toArray(kegiatanList.value);
@@ -374,6 +425,12 @@ const mitraOptions = computed(() => {
     ...list.map((item: any) => ({ value: item.id, text: item.nama })),
   ];
 });
+
+const selectedProjectLabel = computed(
+  () =>
+    projectOptions.value.find((o) => o.value === selectedProjectId.value)
+      ?.text ?? String(selectedProjectId.value),
+);
 
 const selectedKegiatanLabel = computed(
   () =>
