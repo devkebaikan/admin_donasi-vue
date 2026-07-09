@@ -4,6 +4,36 @@
       <b-col>
         <UIComponentCard title="Tambah Kegiatan">
           <b-row class="g-3">
+            <!-- Project -->
+            <b-col md="6">
+              <b-form-group label="Project" label-for="project-id">
+                <SearchSelect
+                  id="project-id"
+                  :modelValue="String(formState.project_id || 0)"
+                  @update:modelValue="
+                    (val) => {
+                      formState.project_id = val === '0' ? 0 : Number(val);
+                    }
+                  "
+                  @search="
+                    (query: string) => {
+                      projectSearchQuery = query;
+                    }
+                  "
+                  :options="projectList"
+                  :isLoading="isProjectLoading"
+                />
+                <div
+                  v-if="v$.project_id.$error"
+                  class="invalid-feedback d-block"
+                >
+                  {{ v$.project_id.$errors[0].$message }}
+                </div>
+
+                <small>{{ formState.mitra_id }} </small>
+              </b-form-group>
+            </b-col>
+
             <!-- Mitra -->
             <b-col md="6">
               <b-form-group label="Mitra" label-for="mitra-id">
@@ -21,30 +51,6 @@
                 />
                 <div v-if="v$.mitra_id.$error" class="invalid-feedback d-block">
                   {{ v$.mitra_id.$errors[0].$message }}
-                </div>
-              </b-form-group>
-            </b-col>
-
-            <!-- Project -->
-            <b-col md="6">
-              <b-form-group label="Project" label-for="project-id">
-                <ChoicesSelect
-                  id="project-id"
-                  :modelValue="String(formState.project_id || 0)"
-                  @update:modelValue="
-                    (val) => {
-                      formState.project_id = val === '0' ? 0 : Number(val);
-                    }
-                  "
-                  :options="projectList"
-                  :isLoading="isProjectLoading"
-                  :key="projectList.length"
-                />
-                <div
-                  v-if="v$.project_id.$error"
-                  class="invalid-feedback d-block"
-                >
-                  {{ v$.project_id.$errors[0].$message }}
                 </div>
               </b-form-group>
             </b-col>
@@ -152,12 +158,14 @@ import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
+import SearchSelect from "@/components/SearchSelect.vue";
 import ImageUpload from "@/components/ImageUpload.vue";
 import { createKegiatan } from "@/services/kegiatanService";
 import { getAllMitra } from "@/services/mitraService";
 import { getProjects } from "@/services/projectService";
 import router from "@/router";
 import { useRoute } from "vue-router";
+import { useSearchSelect } from "@/composables/useSearchSelect";
 
 const route = useRoute();
 
@@ -212,20 +220,20 @@ const mitraList = computed(() => {
   ];
 });
 
-// Project list
-const { data: projectData, isLoading: isProjectLoading } = useQuery({
-  queryKey: ["projects-list"],
-  queryFn: () => getProjects({ mode: "list" }),
-});
-const projectList = computed(() => {
-  const list = Array.isArray(projectData.value) ? projectData.value : [];
-  return [
-    { value: 0, text: "-- Pilih Project --" },
-    ...list.map((p: any) => ({
-      value: p.id,
-      text: p.judul ?? p.title ?? p.name,
-    })),
-  ];
+// project search select
+const {
+  searchQuery: projectSearchQuery,
+  options: projectList,
+  isLoading: isProjectLoading,
+} = useSearchSelect({
+  queryKey: "projects",
+  fetchFn: getProjects,
+  optionsMapper: (project: any) => ({
+    value: project.id,
+    text: project.judul ?? project.title ?? project.name,
+  }),
+  placeholder: "Cari project...",
+  limit: 10,
 });
 
 const { mutate, isPending } = useMutation({

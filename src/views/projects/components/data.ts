@@ -72,28 +72,6 @@ export function useProjectsTable() {
           return html(`<span class="badge ${badge}">${cell ?? "-"}</span>`);
         },
       },
-      // {
-      //   name: "Nominal",
-      //   width: "180px",
-      //   formatter: (item: { ajuan: number; acc: number }) =>
-      //     html(
-      //       `<div class="small lh-sm">
-      //         <div>
-      //           <span class="text-muted">Diajukan</span>
-      //           <span class="fw-semibold">
-      //             ${formatCurrency(item.ajuan)}
-      //           </span>
-      //         </div>
-
-      //         <div class="mt-1">
-      //           <span class="text-muted">Disetujui</span>
-      //           <span class="fw-semibold text-success">
-      //             ${formatCurrency(item.acc)}
-      //           </span>
-      //         </div>
-      //       </div>`,
-      //     ),
-      // },
       {
         name: "Nominal",
         width: "160px",
@@ -224,7 +202,8 @@ export function useProjectsTable() {
                 }
 
                 ${
-                  item.activity === "active open"
+                  item.activity === "active open" ||
+                  item.activity === "active close"
                     ? `
                     <button
                       class="btn btn-sm btn-soft-primary ajuan-btn"
@@ -248,7 +227,6 @@ export function useProjectsTable() {
       project.judul,
       project.status,
       project.activity,
-      // { ajuan: project.nominal_ajuan, acc: project.nominal_acc },
       {
         ajuan: project.nominal_ajuan,
         acc: project.nominal_acc,

@@ -492,7 +492,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from "vue";
+import { computed, reactive, ref } from "vue";
 import { useMutation, useQuery } from "@tanstack/vue-query";
 import { useVuelidate } from "@vuelidate/core";
 import { required, helpers, minValue } from "@vuelidate/validators";
@@ -501,11 +501,13 @@ import "vue3-toastify/dist/index.css";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import FlatPicker from "@/components/FlatPicker.vue";
+import SearchSelect from "@/components/SearchSelect.vue";
 import { createTransaction } from "@/services/transactionService";
 import router from "@/router";
 import { getAllPaymentMethods } from "@/services/paymentMethodService";
 import { getUsers } from "@/services/userService";
 import { getAllPrograms, getProgramTypes } from "@/services/programService";
+import { useSearchSelect } from "@/composables/useSearchSelect";
 
 const ACTIVITIES = [
   "Waiting for payment",
@@ -543,42 +545,16 @@ const formState = reactive({
   payment_url: "",
 });
 
-// user list with search
-const userSearchQuery = ref("");
-
-const {
-  data: userData,
-  isLoading: isUserLoading,
-  refetch: refetchUsers,
-} = useQuery({
-  queryKey: ["user-list", userSearchQuery],
-  queryFn: () => {
-    const params: Record<string, any> = { limit: 10 };
-    if (userSearchQuery.value && userSearchQuery.value.length > 2) {
-      params.search = userSearchQuery.value;
-    }
-    return getUsers(params);
-  },
-  enabled: computed(
-    () => !userSearchQuery.value || userSearchQuery.value.length > 2,
-  ),
-});
-
-const userList = computed(() => {
-  const list = Array.isArray(userData.value) ? userData.value : [];
-  return [
-    { value: 0, text: "Cari user..." },
-    ...list.map((p: any) => ({
-      value: p.id,
-      text: `${p.name} - ${p.phone}`,
-    })),
-  ];
-});
-
-watch(userSearchQuery, (newVal) => {
-  if (newVal && newVal.length > 2) {
-    refetchUsers();
-  }
+// user search select
+const { searchQuery: userSearchQuery, options: userList, isLoading: isUserLoading } = useSearchSelect({
+  queryKey: "users",
+  fetchFn: getUsers,
+  optionsMapper: (user: any) => ({
+    value: user.id,
+    text: `${user.name} - ${user.phone}`,
+  }),
+  placeholder: "Cari user...",
+  limit: 10,
 });
 
 // program list

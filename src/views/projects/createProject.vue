@@ -83,7 +83,7 @@
                 <!-- Mitra -->
                 <b-col md="6">
                   <b-form-group label="Mitra" label-for="mitra-id">
-                    <ChoicesSelect
+                    <SearchSelect
                       id="mitra-id"
                       :modelValue="String(formState.mitra_id || 0)"
                       @update:modelValue="
@@ -91,9 +91,13 @@
                           formState.mitra_id = val === '0' ? null : Number(val);
                         }
                       "
+                      @search="
+                        (query: string) => {
+                          mitraSearchQuery = query;
+                        }
+                      "
                       :options="mitraList"
                       :isLoading="isMitraLoading"
-                      :key="mitraList.length"
                     />
                     <small class="text-muted">Opsional</small>
                   </b-form-group>
@@ -449,6 +453,7 @@ import { useRouter } from "vue-router";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
+import SearchSelect from "@/components/SearchSelect.vue";
 import MapLocationPicker from "@/components/MapLocationPicker.vue";
 import { QuillEditor } from "@vueup/vue-quill";
 import { FormWizard, TabContent } from "vue3-form-wizard";
@@ -459,6 +464,7 @@ import { createProject } from "@/services/projectService";
 import { getAllPrograms } from "@/services/programService";
 import { getAllMitra } from "@/services/mitraService";
 import { toast, type ToastOptions } from "vue3-toastify";
+import { useSearchSelect } from "@/composables/useSearchSelect";
 
 const showToast = (message: string, options: ToastOptions) =>
   toast(message, options);
@@ -524,20 +530,16 @@ const validateStep2 = () =>
 const validateStep3 = () => true;
 
 // ── Data fetching ─────────────────────────────────────────────────────────────
-const { data: mitraData, isLoading: isMitraLoading } = useQuery({
-  queryKey: ["mitra"],
-  queryFn: getAllMitra,
-});
-
-const mitraList = computed(() => {
-  if (!mitraData.value) return [{ value: 0, text: "Choose Mitra..." }];
-  return [
-    { value: 0, text: "Choose Mitra..." },
-    ...mitraData.value.map((item: any) => ({
-      value: item.id,
-      text: item.nama,
-    })),
-  ];
+// mitra search select
+const { searchQuery: mitraSearchQuery, options: mitraList, isLoading: isMitraLoading } = useSearchSelect({
+  queryKey: "mitra",
+  fetchFn: getAllMitra,
+  optionsMapper: (mitra: any) => ({
+    value: mitra.id,
+    text: mitra.nama,
+  }),
+  placeholder: "Cari mitra...",
+  limit: 10,
 });
 
 const { data: programData, isLoading: isProgramLoading } = useQuery({
