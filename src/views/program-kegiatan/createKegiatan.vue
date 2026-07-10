@@ -4,27 +4,6 @@
       <b-col>
         <UIComponentCard title="Tambah Kegiatan">
           <b-row class="g-3">
-            <!-- Mitra -->
-            <!-- <b-col md="6">
-              <b-form-group label="Mitra" label-for="mitra-id">
-                <ChoicesSelect
-                  id="mitra-id"
-                  :modelValue="String(formState.mitra_id || 0)"
-                  @update:modelValue="
-                    (val) => {
-                      formState.mitra_id = val === '0' ? 0 : Number(val);
-                    }
-                  "
-                  :options="mitraList"
-                  :isLoading="isMitraLoading"
-                  :key="mitraList.length"
-                />
-                <div v-if="v$.mitra_id.$error" class="invalid-feedback d-block">
-                  {{ v$.mitra_id.$errors[0].$message }}
-                </div>
-              </b-form-group>
-            </b-col> -->
-
             <!-- Judul -->
             <b-col md="8">
               <b-form-group label="Judul" label-for="judul">
@@ -40,39 +19,6 @@
                   {{ v$.judul.$errors[0].$message }}
                 </b-form-invalid-feedback>
               </b-form-group>
-            </b-col>
-
-            <!-- Project -->
-            <b-col md="6">
-              <b-form-group label="Project" label-for="project-id">
-                <SearchSelect
-                  id="project-id"
-                  :modelValue="String(formState.project_id || 0)"
-                  @update:modelValue="
-                    (val) => {
-                      formState.project_id = val === '0' ? 0 : Number(val);
-                    }
-                  "
-                  @search="
-                    (query: string) => {
-                      projectSearchQuery = query;
-                    }
-                  "
-                  :options="projectList"
-                  :isLoading="isProjectLoading"
-                />
-                <div
-                  v-if="v$.project_id.$error"
-                  class="invalid-feedback d-block"
-                >
-                  {{ v$.project_id.$errors[0].$message }}
-                </div>
-              </b-form-group>
-
-              <small v-if="formState.mitra_name"
-                >Mitra : {{ formState.mitra_name }} -
-                {{ formState.mitra_id }}</small
-              >
             </b-col>
 
             <!-- Tipe -->
@@ -152,8 +98,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, watch } from "vue";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
+import { reactive, watch } from "vue";
+import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { useVuelidate } from "@vuelidate/core";
 import { required, minValue, helpers } from "@vuelidate/validators";
 import { toast, type ToastOptions } from "vue3-toastify";
@@ -162,15 +108,11 @@ import { QuillEditor } from "@vueup/vue-quill";
 import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
-// import ChoicesSelect from "@/components/ChoicesSelect.vue";
-import SearchSelect from "@/components/SearchSelect.vue";
 import ImageUpload from "@/components/ImageUpload.vue";
 import { createKegiatan } from "@/services/kegiatanService";
-import { getAllMitra } from "@/services/mitraService";
-import { getProjects, getProjectById } from "@/services/projectService";
+import { getProjectById } from "@/services/projectService";
 import router from "@/router";
 import { useRoute } from "vue-router";
-import { useSearchSelect } from "@/composables/useSearchSelect";
 
 const route = useRoute();
 
@@ -186,7 +128,6 @@ const formState = reactive({
   date: "",
   thumbnail: null as File | null,
   deskripsi: "",
-  mitra_name: "",
 });
 
 watch(
@@ -205,10 +146,8 @@ watch(
       if (project) {
         if (project.mitra_utama !== null) {
           formState.mitra_id = project.mitra_utama.id;
-          formState.mitra_name = project.mitra_utama.nama;
         } else {
           formState.mitra_id = "";
-          formState.mitra_name = "";
         }
       }
     }
@@ -228,36 +167,6 @@ const rules = {
 };
 
 const v$ = useVuelidate(rules, formState);
-
-// Mitra list
-// const { data: mitraData, isLoading: isMitraLoading } = useQuery({
-//   queryKey: ["mitras-list"],
-//   queryFn: () => getAllMitra({ mode: "list" }),
-// });
-
-// const mitraList = computed(() => {
-//   const list = Array.isArray(mitraData.value) ? mitraData.value : [];
-//   return [
-//     { value: 0, text: "-- Pilih Mitra --" },
-//     ...list.map((m: any) => ({ value: m.id, text: m.nama ?? m.name })),
-//   ];
-// });
-
-// project search select
-const {
-  searchQuery: projectSearchQuery,
-  options: projectList,
-  isLoading: isProjectLoading,
-} = useSearchSelect({
-  queryKey: "projects",
-  fetchFn: getProjects,
-  optionsMapper: (project: any) => ({
-    value: project.id,
-    text: project.judul ?? project.title ?? project.name,
-  }),
-  placeholder: "Cari project...",
-  limit: 10,
-});
 
 const { mutate, isPending } = useMutation({
   mutationFn: () => {

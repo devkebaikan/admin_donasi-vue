@@ -298,7 +298,11 @@
       <b-col>
         <UIComponentCard id="basic" title="Daftar Laporan Project">
           <div class="d-flex justify-content-end mb-3">
-            <b-button variant="primary" @click="handleAddReport">
+            <b-button
+              v-if="selectedProjectId"
+              variant="primary"
+              @click="handleAddReport"
+            >
               <i class="bx bx-plus fs-16 me-1"></i>Tambah Laporan
             </b-button>
           </div>

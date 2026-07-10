@@ -10,27 +10,6 @@
     @ok.prevent="handleSubmitAjuan"
   >
     <b-row class="g-3">
-      <!-- Mitra -->
-      <b-col cols="12">
-        <b-form-group label="Mitra" label-for="ajuan-mitra-id">
-          <ChoicesSelect
-            id="ajuan-mitra-id"
-            :modelValue="String(ajuanForm.mitra_id || 0)"
-            @update:modelValue="
-              (val: any) => {
-                ajuanForm.mitra_id = val === '0' ? 0 : Number(val);
-              }
-            "
-            :options="mitraOptions"
-            :isLoading="isMitraLoading"
-            :key="mitraOptions.length"
-          />
-          <div v-if="ajuanFormError" class="invalid-feedback d-block">
-            {{ ajuanFormError }}
-          </div>
-        </b-form-group>
-      </b-col>
-
       <!-- Tipe -->
       <b-col cols="12">
         <b-form-group label="Tipe" label-for="ajuan-type">
@@ -62,7 +41,7 @@
       </b-col>
 
       <!-- Biaya -->
-      <b-col cols="12">
+      <!-- <b-col cols="12">
         <b-form-group label="Biaya" label-for="ajuan-biaya">
           <b-input-group prepend="Rp">
             <CurrencyInput
@@ -74,7 +53,7 @@
           </b-input-group>
           <small class="text-muted">Opsional</small>
         </b-form-group>
-      </b-col>
+      </b-col> -->
 
       <!-- Bank Sumber -->
       <b-col cols="12">
@@ -138,8 +117,8 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
 import { createAjuan } from "@/services/ajuanService";
-import { getAllMitra } from "@/services/mitraService";
 import { getAllBankReferences } from "@/services/bankReferenceService";
+import { getProjectById } from "@/services/projectService";
 
 const props = withDefaults(
   defineProps<{
@@ -165,7 +144,7 @@ const showModal = computed({
 const queryClient = useQueryClient();
 
 const ajuanForm = reactive({
-  mitra_id: 0,
+  mitra_id: "",
   bank_reference_id: 0,
   account_behalf: "",
   account_number: "",
@@ -177,12 +156,28 @@ const ajuanForm = reactive({
 const ajuanFormError = ref("");
 const bankError = ref("");
 
-// Reset form saat modal dibuka/ditutup
+const { data: projectData } = useQuery({
+  queryKey: computed(() => ["project-detail", props.projectId]),
+  queryFn: () => getProjectById(props.projectId),
+  enabled: computed(() => props.projectId > 0),
+});
+
+watch(
+  () => projectData.value,
+  (project) => {
+    if (project?.mitra_utama) {
+      ajuanForm.mitra_id = project.mitra_utama.id;
+    } else {
+      ajuanForm.mitra_id = "";
+    }
+  },
+);
+
 watch(
   () => showModal.value,
   (isOpen) => {
     if (!isOpen) {
-      ajuanForm.mitra_id = 0;
+      ajuanForm.mitra_id = "";
       ajuanForm.bank_reference_id = 0;
       ajuanForm.account_behalf = "";
       ajuanForm.account_number = "";
@@ -194,19 +189,6 @@ watch(
     }
   },
 );
-
-const { data: mitraData, isLoading: isMitraLoading } = useQuery({
-  queryKey: ["mitras-list"],
-  queryFn: () => getAllMitra({ mode: "list" }),
-});
-
-const mitraOptions = computed(() => {
-  const list = Array.isArray(mitraData.value) ? mitraData.value : [];
-  return [
-    { value: 0, text: "-- Pilih Mitra --" },
-    ...list.map((m: any) => ({ value: m.id, text: m.nama ?? m.name })),
-  ];
-});
 
 const { data: bankData, isLoading: isBankLoading } = useQuery({
   queryKey: ["bank-references-list"],
@@ -291,6 +273,7 @@ const handleSubmitAjuan = () => {
     return;
   }
 
+  // console.log(ajuanForm);
   mutateAjuan();
 };
 </script>

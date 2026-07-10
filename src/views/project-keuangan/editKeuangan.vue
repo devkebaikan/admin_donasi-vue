@@ -18,7 +18,7 @@
 
           <form v-else @submit.prevent="handleSubmit">
             <b-row class="g-3">
-              <!-- Kegiatan -->
+              <!-- Kegiatan
               <b-col md="6">
                 <b-form-group label="Kegiatan" label-for="kegiatan-id">
                   <ChoicesSelect
@@ -33,35 +33,17 @@
                     :isLoading="isKegiatanLoading"
                     :key="kegiatanList.length"
                   />
-                  <div v-if="v$.kegiatan_id.$error" class="invalid-feedback d-block">
+                  <div
+                    v-if="v$.kegiatan_id.$error"
+                    class="invalid-feedback d-block"
+                  >
                     {{ v$.kegiatan_id.$errors[0].$message }}
                   </div>
                 </b-form-group>
-              </b-col>
-
-              <!-- Mitra -->
-              <b-col md="6">
-                <b-form-group label="Mitra" label-for="mitra-id">
-                  <ChoicesSelect
-                    id="mitra-id"
-                    :modelValue="String(formState.mitra_id || 0)"
-                    @update:modelValue="
-                      (val) => {
-                        formState.mitra_id = val === '0' ? 0 : Number(val);
-                      }
-                    "
-                    :options="mitraList"
-                    :isLoading="isMitraLoading"
-                    :key="mitraList.length"
-                  />
-                  <div v-if="v$.mitra_id.$error" class="invalid-feedback d-block">
-                    {{ v$.mitra_id.$errors[0].$message }}
-                  </div>
-                </b-form-group>
-              </b-col>
+              </b-col> -->
 
               <!-- Items -->
-              <b-col md="8">
+              <b-col md="6">
                 <b-form-group label="Items" label-for="items">
                   <b-form-input
                     id="items"
@@ -78,26 +60,27 @@
               </b-col>
 
               <!-- Nominal -->
-              <b-col md="4">
+              <b-col md="6">
                 <b-form-group label="Nominal" label-for="nominal">
                   <b-input-group prepend="Rp">
-                    <b-form-input
+                    <CurrencyInput
                       id="nominal"
                       v-model="v$.nominal.$model"
-                      type="number"
-                      min="0"
                       placeholder="0"
                       :state="v$.nominal.$error ? false : null"
                     />
                   </b-input-group>
-                  <b-form-invalid-feedback v-if="v$.nominal.$error" class="d-block">
+                  <b-form-invalid-feedback
+                    v-if="v$.nominal.$error"
+                    class="d-block"
+                  >
                     {{ v$.nominal.$errors[0].$message }}
                   </b-form-invalid-feedback>
                 </b-form-group>
               </b-col>
 
               <!-- Nota -->
-              <b-col cols="12">
+              <b-col cols="6">
                 <b-form-group label="Nota" label-for="nota">
                   <b-form-input
                     id="nota"
@@ -154,8 +137,10 @@ import { toast, type ToastOptions } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
-import ChoicesSelect from "@/components/ChoicesSelect.vue";
-import { getKeuanganById, updateKeuangan } from "@/services/projectKeuanganService";
+import {
+  getKeuanganById,
+  updateKeuangan,
+} from "@/services/projectKeuanganService";
 import { getAllKegiatan } from "@/services/kegiatanService";
 import { getAllMitra } from "@/services/mitraService";
 import router from "@/router";
@@ -214,30 +199,6 @@ watch(keuanganData, (data) => {
   formState.nota = data.nota ?? "";
 });
 
-const { data: kegiatanData, isLoading: isKegiatanLoading } = useQuery({
-  queryKey: ["kegiatans-list"],
-  queryFn: () => getAllKegiatan({ mode: "list" }),
-});
-const kegiatanList = computed(() => {
-  const list = Array.isArray(kegiatanData.value) ? kegiatanData.value : [];
-  return [
-    { value: 0, text: "-- Pilih Kegiatan --" },
-    ...list.map((k: any) => ({ value: k.id, text: k.nama ?? k.judul })),
-  ];
-});
-
-const { data: mitraData, isLoading: isMitraLoading } = useQuery({
-  queryKey: ["mitras-list"],
-  queryFn: () => getAllMitra({ mode: "list" }),
-});
-const mitraList = computed(() => {
-  const list = Array.isArray(mitraData.value) ? mitraData.value : [];
-  return [
-    { value: 0, text: "-- Pilih Mitra --" },
-    ...list.map((m: any) => ({ value: m.id, text: m.nama ?? m.name })),
-  ];
-});
-
 const { mutate, isPending } = useMutation({
   mutationFn: () =>
     updateKeuangan(keuanganId, {
@@ -257,7 +218,8 @@ const { mutate, isPending } = useMutation({
     setTimeout(() => router.push("/keuangan"), 1500);
   },
   onError: (err: any) => {
-    const msg = err?.response?.data?.message ?? "Gagal memperbarui data keuangan";
+    const msg =
+      err?.response?.data?.message ?? "Gagal memperbarui data keuangan";
     showToast(msg, { type: "error", position: "top-center" });
   },
 });

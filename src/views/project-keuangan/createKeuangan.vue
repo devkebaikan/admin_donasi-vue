@@ -4,39 +4,6 @@
       <b-col>
         <UIComponentCard title="Tambah Project Keuangan">
           <b-row class="g-3">
-            <!-- Project -->
-            <b-col md="6">
-              <b-form-group label="Project" label-for="project-id">
-                <SearchSelect
-                  id="project-id"
-                  :modelValue="String(formState.project_id || 0)"
-                  @update:modelValue="
-                    (val: string) => {
-                      formState.project_id = val === '0' ? 0 : Number(val);
-                    }
-                  "
-                  @search="
-                    (query: string) => {
-                      projectSearchQuery = query;
-                    }
-                  "
-                  :options="projectList"
-                  :isLoading="isProjectLoading"
-                />
-                <div
-                  v-if="v$.project_id.$error"
-                  class="invalid-feedback d-block"
-                >
-                  {{ v$.project_id.$errors[0].$message }}
-                </div>
-              </b-form-group>
-
-              <small v-if="formState.mitra_name"
-                >Mitra : {{ formState.mitra_name }} -
-                {{ formState.mitra_id }}</small
-              >
-            </b-col>
-
             <!-- Kegiatan -->
             <b-col md="6">
               <b-form-group label="Kegiatan (opsional)" label-for="kegiatan-id">
@@ -61,29 +28,8 @@
               </b-form-group>
             </b-col>
 
-            <!-- Mitra -->
-            <!-- <b-col md="6">
-              <b-form-group label="Mitra" label-for="mitra-id">
-                <ChoicesSelect
-                  id="mitra-id"
-                  :modelValue="String(formState.mitra_id || 0)"
-                  @update:modelValue="
-                    (val) => {
-                      formState.mitra_id = val === '0' ? 0 : Number(val);
-                    }
-                  "
-                  :options="mitraList"
-                  :isLoading="isMitraLoading"
-                  :key="mitraList.length"
-                />
-                <div v-if="v$.mitra_id.$error" class="invalid-feedback d-block">
-                  {{ v$.mitra_id.$errors[0].$message }}
-                </div>
-              </b-form-group>
-            </b-col> -->
-
             <!-- Items -->
-            <b-col md="8">
+            <b-col md="6">
               <b-form-group label="Items" label-for="items">
                 <b-form-input
                   id="items"
@@ -100,7 +46,7 @@
             </b-col>
 
             <!-- Nominal -->
-            <b-col md="4">
+            <b-col md="6">
               <b-form-group label="Nominal" label-for="nominal">
                 <b-input-group prepend="Rp">
                   <CurrencyInput
@@ -120,7 +66,7 @@
             </b-col>
 
             <!-- Nota -->
-            <b-col cols="12">
+            <b-col cols="6">
               <b-form-group label="Nota" label-for="nota">
                 <b-form-input
                   id="nota"
@@ -145,7 +91,7 @@
                 <b-button
                   variant="outline-secondary"
                   :disabled="isPending"
-                  @click="router.push('/keuangan')"
+                  @click="router.back()"
                 >
                   Batal
                 </b-button>
@@ -182,6 +128,7 @@ import router from "@/router";
 import { getProjectById, getProjects } from "@/services/projectService";
 import { getAllKegiatan } from "@/services/kegiatanService";
 import { useSearchSelect } from "@/composables/useSearchSelect";
+import { useRoute } from "vue-router";
 
 const showToast = (message: string, options: ToastOptions) =>
   toast(message, options);
@@ -194,14 +141,9 @@ const formState = reactive({
   items: "",
   nominal: 0,
   nota: "",
-  mitra_name: "",
 });
 
 const rules = {
-  project_id: {
-    required: helpers.withMessage("Project wajib dipilih.", required),
-    minValue: helpers.withMessage("Project wajib dipilih.", minValue(1)),
-  },
   kegiatan_id: {
     // required: helpers.withMessage("Kegiatan wajib dipilih.", required),
     // minValue: helpers.withMessage("Kegiatan wajib dipilih.", minValue(1)),
@@ -220,21 +162,16 @@ const rules = {
 };
 
 const v$ = useVuelidate(rules, formState);
-// project search select
-const {
-  searchQuery: projectSearchQuery,
-  options: projectList,
-  isLoading: isProjectLoading,
-} = useSearchSelect({
-  queryKey: "projects",
-  fetchFn: getProjects,
-  optionsMapper: (project: any) => ({
-    value: project.id,
-    text: project.judul ?? project.title ?? project.name,
-  }),
-  placeholder: "Cari project...",
-  limit: 10,
-});
+
+const route = useRoute();
+
+watch(
+  () => route.query.project_id,
+  (id) => {
+    formState.project_id = id ? Number(id) : 0;
+  },
+  { immediate: true },
+);
 
 watch(
   () => formState.project_id,
@@ -244,10 +181,8 @@ watch(
       if (project) {
         if (project.mitra_utama !== null) {
           formState.mitra_id = project.mitra_utama.id;
-          formState.mitra_name = project.mitra_utama.nama;
         } else {
           formState.mitra_id = "";
-          formState.mitra_name = "";
         }
       }
     }
@@ -264,18 +199,6 @@ const kegiatanList = computed(() => {
   return [
     { value: 0, text: "-- Pilih Kegiatan --" },
     ...list.map((k: any) => ({ value: k.id, text: k.nama ?? k.judul })),
-  ];
-});
-
-const { data: mitraData, isLoading: isMitraLoading } = useQuery({
-  queryKey: ["mitras-list"],
-  queryFn: () => getAllMitra({ mode: "list" }),
-});
-const mitraList = computed(() => {
-  const list = Array.isArray(mitraData.value) ? mitraData.value : [];
-  return [
-    { value: 0, text: "-- Pilih Mitra --" },
-    ...list.map((m: any) => ({ value: m.id, text: m.nama ?? m.name })),
   ];
 });
 
@@ -313,6 +236,7 @@ const handleSubmit = async () => {
     });
     return;
   }
+  // console.log(formState);
   mutate();
 };
 </script>

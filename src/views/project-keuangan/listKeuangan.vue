@@ -276,8 +276,9 @@
         <UIComponentCard id="basic" title="Daftar Project Keuangan">
           <div class="d-flex justify-content-end mb-3">
             <b-button
+              v-if="selectedProjectId"
               variant="primary"
-              @click="router.push('/keuangan/create')"
+              @click="handleAddKeuangan"
             >
               <i class="bx bx-plus fs-16 me-1"></i>Tambah Keuangan
             </b-button>
@@ -327,7 +328,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onBeforeUnmount } from "vue";
+import { computed, ref, onMounted, onBeforeUnmount, watch } from "vue";
 import { useQuery } from "@tanstack/vue-query";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
@@ -340,6 +341,7 @@ import { getAllKegiatan } from "@/services/kegiatanService";
 import { getAllMitra } from "@/services/mitraService";
 import { formatCurrency, formatDateTime } from "@/helpers/format";
 import router from "@/router";
+import { useRoute } from "vue-router";
 
 const {
   tableOptions,
@@ -369,6 +371,23 @@ const hasActiveFilters = computed(
       selectedMitraId.value !== ""
     ),
 );
+
+const route = useRoute();
+watch(
+  () => route.query.project_id,
+  (id) => {
+    selectedProjectId.value = id ? Number(id) : "";
+  },
+  { immediate: true },
+);
+
+const handleAddKeuangan = () => {
+  if (selectedProjectId.value) {
+    router.push(`/keuangan/create?project_id=${selectedProjectId.value}`);
+  } else {
+    router.push("/keuangan/create");
+  }
+};
 
 const clearFilters = () => {
   searchQuery.value = "";

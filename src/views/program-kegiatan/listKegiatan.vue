@@ -204,7 +204,11 @@
       <b-col>
         <UIComponentCard id="basic" title="Daftar Kegiatan">
           <div class="d-flex justify-content-end mb-3">
-            <b-button variant="primary" @click="handleAddKegiatan">
+            <b-button
+              v-if="selectedProjectId"
+              variant="primary"
+              @click="handleAddKegiatan"
+            >
               <i class="bx bx-plus fs-16 me-1"></i>Tambah kegiatan
             </b-button>
           </div>

@@ -18,54 +18,6 @@
 
           <form v-else @submit.prevent="handleSubmit">
             <b-row class="g-3">
-              <!-- Mitra -->
-              <b-col md="6">
-                <b-form-group label="Mitra" label-for="mitra-id">
-                  <ChoicesSelect
-                    id="mitra-id"
-                    :modelValue="String(formState.mitra_id || 0)"
-                    @update:modelValue="
-                      (val) => {
-                        formState.mitra_id = val === '0' ? 0 : Number(val);
-                      }
-                    "
-                    :options="mitraList"
-                    :isLoading="isMitraLoading"
-                    :key="mitraList.length"
-                  />
-                  <div
-                    v-if="v$.mitra_id.$error"
-                    class="invalid-feedback d-block"
-                  >
-                    {{ v$.mitra_id.$errors[0].$message }}
-                  </div>
-                </b-form-group>
-              </b-col>
-
-              <!-- Project -->
-              <b-col md="6">
-                <b-form-group label="Project" label-for="project-id">
-                  <ChoicesSelect
-                    id="project-id"
-                    :modelValue="String(formState.project_id || 0)"
-                    @update:modelValue="
-                      (val) => {
-                        formState.project_id = val === '0' ? 0 : Number(val);
-                      }
-                    "
-                    :options="projectList"
-                    :isLoading="isProjectLoading"
-                    :key="projectList.length"
-                  />
-                  <div
-                    v-if="v$.project_id.$error"
-                    class="invalid-feedback d-block"
-                  >
-                    {{ v$.project_id.$errors[0].$message }}
-                  </div>
-                </b-form-group>
-              </b-col>
-
               <!-- Judul -->
               <b-col md="8">
                 <b-form-group label="Judul" label-for="judul">
@@ -243,7 +195,6 @@ import { QuillEditor } from "@vueup/vue-quill";
 import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
-import ChoicesSelect from "@/components/ChoicesSelect.vue";
 import { getKegiatanById, updateKegiatan } from "@/services/kegiatanService";
 import { getAllMitra } from "@/services/mitraService";
 import { getProjects } from "@/services/projectService";

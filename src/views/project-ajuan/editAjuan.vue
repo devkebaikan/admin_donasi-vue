@@ -19,7 +19,7 @@
           <form v-else @submit.prevent="handleSubmit">
             <b-row class="g-3">
               <!-- Project -->
-              <b-col md="6">
+              <!-- <b-col md="6">
                 <b-form-group label="Project" label-for="project-id">
                   <ChoicesSelect
                     id="project-id"
@@ -40,10 +40,10 @@
                     {{ v$.project_id.$errors[0].$message }}
                   </div>
                 </b-form-group>
-              </b-col>
+              </b-col> -->
 
               <!-- Mitra -->
-              <b-col md="6">
+              <!-- <b-col md="6">
                 <b-form-group label="Mitra" label-for="mitra-id">
                   <ChoicesSelect
                     id="mitra-id"
@@ -64,13 +64,14 @@
                     {{ v$.mitra_id.$errors[0].$message }}
                   </div>
                 </b-form-group>
-              </b-col>
+              </b-col> -->
 
               <!-- Tipe -->
               <b-col md="4">
                 <b-form-group label="Tipe" label-for="type">
                   <b-form-select
                     id="type"
+                    disabled
                     v-model="v$.type.$model"
                     :state="v$.type.$error ? false : null"
                   >

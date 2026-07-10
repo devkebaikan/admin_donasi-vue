@@ -339,7 +339,6 @@
                       type="text"
                       placeholder="Nama pengaju..."
                       maxlength="255"
-                      disabled
                     />
                     <small class="text-muted">Opsional</small>
                   </b-form-group>
@@ -353,7 +352,6 @@
                       v-model="formState.email"
                       type="email"
                       placeholder="email@example.com"
-                      disabled
                     />
                     <small class="text-muted">Opsional</small>
                   </b-form-group>
@@ -368,7 +366,6 @@
                       type="text"
                       placeholder="e.g., 081234567890"
                       maxlength="30"
-                      disabled
                     />
                     <small class="text-muted">Opsional</small>
                   </b-form-group>
@@ -531,7 +528,11 @@ const validateStep3 = () => true;
 
 // ── Data fetching ─────────────────────────────────────────────────────────────
 // mitra search select
-const { searchQuery: mitraSearchQuery, options: mitraList, isLoading: isMitraLoading } = useSearchSelect({
+const {
+  searchQuery: mitraSearchQuery,
+  options: mitraList,
+  isLoading: isMitraLoading,
+} = useSearchSelect({
   queryKey: "mitra",
   fetchFn: getAllMitra,
   optionsMapper: (mitra: any) => ({

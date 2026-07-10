@@ -197,6 +197,15 @@ export function useProjectsTable() {
                     >
                       <i class="bx bx-dollar-circle fs-16"></i>
                     </button>
+                    <button
+                      class="btn btn-sm btn-soft-secondary keuangan-btn"
+                      style="width:48px"
+                      data-action="keuangan"
+                      data-id="${item.id}"
+                      title="Keuangan Project"
+                    >
+                      <i class="bx bx-money fs-16"></i>
+                    </button>
                   `
                     : ""
                 }

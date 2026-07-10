@@ -109,6 +109,7 @@
                   <b-form-group label="Mitra" label-for="mitra-id">
                     <ChoicesSelect
                       id="mitra-id"
+                      disabled
                       :modelValue="String(formState.mitra_id || 0)"
                       @update:modelValue="
                         (val) => {
@@ -119,7 +120,9 @@
                       :isLoading="isMitraLoading"
                       :key="`mitra-${mitraList.length}-${formState.mitra_id}`"
                     />
-                    <small class="text-muted">Opsional</small>
+                    <smal v-if="formState.mitra_id" class="text-muted">
+                      {{ `${formState.mitra_name} (${formState.mitra_id})` }}
+                    </smal>
                   </b-form-group>
                 </b-col>
 
@@ -177,6 +180,7 @@
                       placeholder="0"
                       v-model="v$.nominal_ajuan.$model"
                       :key="`nominal-ajuan-${formState.nominal_ajuan}`"
+                      :state="null"
                     />
                     <b-form-invalid-feedback
                       v-if="v$.nominal_ajuan.$error"
@@ -195,6 +199,7 @@
                       placeholder="0"
                       v-model="formState.nominal_acc"
                       :key="`nominal-acc-${formState.nominal_acc}`"
+                      :state="null"
                     />
                     <small class="text-muted">Opsional</small>
                   </b-form-group>
@@ -505,7 +510,6 @@ import { useRouter, useRoute } from "vue-router";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
-import CurrencyInput from "@/components/CurrencyInput.vue";
 import MapLocationPicker from "@/components/MapLocationPicker.vue";
 import { QuillEditor } from "@vueup/vue-quill";
 import { FormWizard, TabContent } from "vue3-form-wizard";
@@ -542,6 +546,7 @@ const formState = reactive({
   activity: "",
   request: "nothing",
   mitra_id: null as number | null,
+  mitra_name: null as string | null,
   program_ids: [] as number[],
   nominal_ajuan: undefined as number | undefined,
   nominal_acc: undefined as number | undefined,
@@ -609,7 +614,8 @@ watch(
     formState.status = data.status ?? "draft";
     formState.activity = data.activity ?? "";
     formState.request = data.request ?? "nothing";
-    formState.mitra_id = data.mitras.id ?? null;
+    formState.mitra_id = data.mitra_utama.id ?? null;
+    formState.mitra_name = data.mitra_utama.nama ?? null;
     formState.nominal_ajuan = data.nominal_ajuan ?? undefined;
     formState.nominal_acc = data.nominal_acc ?? undefined;
     formState.waktu_pelaksanaan = data.waktu_pelaksanaan ?? "";
@@ -618,8 +624,8 @@ watch(
     formState.kesiapan = data.kesiapan ?? "";
     formState.notes = data.notes ?? "";
     formState.deskripsi = data.deskripsi ?? "";
-    formState.lat = data.lat ?? undefined;
-    formState.lng = data.lng ?? undefined;
+    formState.lat = data.lat ? Number(data.lat) : undefined;
+    formState.lng = data.lng ? Number(data.lng) : undefined;
     formState.kode_wilayah = data.kode_wilayah ?? "";
     formState.pengaju = data.pengaju ?? "";
     formState.email = data.email ?? "";
@@ -630,8 +636,8 @@ watch(
       formState.program_ids = data.programs.map((p: any) => p.id);
     }
 
-    existingImageUrl.value = data.image ?? null;
-    existingImagesUrl.value = data.images ?? null;
+    existingImageUrl.value = data.image_url ?? null;
+    existingImagesUrl.value = data.images_url ?? null;
 
     formReady.value = true;
     programSelectKey.value++;

@@ -565,11 +565,11 @@
     <b-row>
       <b-col>
         <UIComponentCard id="basic" title="Daftar Project Ajuan">
-          <div class="d-flex justify-content-end mb-3">
+          <!-- <div class="d-flex justify-content-end mb-3">
             <b-button variant="primary" @click="router.push('/ajuan/create')">
               <i class="bx bx-plus fs-16 me-1"></i>Tambah Ajuan
             </b-button>
-          </div>
+          </div> -->
 
           <div v-if="isLoading" class="text-center p-4">
             <b-spinner variant="primary" />

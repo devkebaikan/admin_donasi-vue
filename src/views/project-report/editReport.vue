@@ -94,7 +94,7 @@
             </b-col>
 
             <!-- Mitra IDs -->
-            <b-col md="8">
+            <!-- <b-col md="8">
               <b-form-group label="Mitra IDs" label-for="mitra-ids">
                 <b-form-textarea
                   id="mitra-ids"
@@ -104,7 +104,7 @@
                 />
                 <small class="text-muted">Opsional</small>
               </b-form-group>
-            </b-col>
+            </b-col> -->
 
             <!-- Section: Media -->
             <b-col cols="12"

@@ -4,30 +4,6 @@
       <b-col>
         <UIComponentCard title="Tambah Laporan Project">
           <b-row class="g-3">
-            <!-- Project -->
-            <b-col md="6">
-              <b-form-group label="Project" label-for="project-id">
-                <ChoicesSelect
-                  id="project-id"
-                  :modelValue="String(formState.project_id || 0)"
-                  @update:modelValue="
-                    (val) => {
-                      formState.project_id = val === '0' ? 0 : Number(val);
-                    }
-                  "
-                  :options="projectOptions"
-                  :isLoading="isProjectLoading"
-                  :key="projectOptions.length"
-                />
-                <div
-                  v-if="v$.project_id.$error"
-                  class="invalid-feedback d-block"
-                >
-                  {{ v$.project_id.$errors[0].$message }}
-                </div>
-              </b-form-group>
-            </b-col>
-
             <!-- Kegiatan -->
             <b-col md="6">
               <b-form-group label="Kegiatan" label-for="kegiatan-id">
@@ -237,7 +213,7 @@ import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
 import { createReport } from "@/services/reportService";
-import { getProjects } from "@/services/projectService";
+import { getProjectById, getProjects } from "@/services/projectService";
 import { getAllKegiatan } from "@/services/kegiatanService";
 import router from "@/router";
 import { useRoute } from "vue-router";
@@ -271,11 +247,24 @@ watch(
   { immediate: true },
 );
 
-const rules = {
-  project_id: {
-    required: helpers.withMessage("Project wajib dipilih", required),
-    minValue: helpers.withMessage("Project wajib dipilih", minValue(1)),
+watch(
+  () => formState.project_id,
+  async (projectId) => {
+    if (projectId && projectId > 0) {
+      const project = await getProjectById(projectId);
+      if (project) {
+        if (project.mitra_utama !== null) {
+          formState.mitra_ids = project.mitra_utama.id;
+        } else {
+          formState.mitra_ids = "";
+        }
+      }
+    }
   },
+  { immediate: true },
+);
+
+const rules = {
   kegiatan_id: {
     required: helpers.withMessage("Kegiatan wajib dipilih", required),
     minValue: helpers.withMessage("Kegiatan wajib dipilih", minValue(1)),
@@ -288,19 +277,6 @@ const rules = {
 const v$ = useVuelidate(rules, formState);
 
 // ── Dropdown options ──────────────────────────────────────────────────────
-
-const { data: projectData, isLoading: isProjectLoading } = useQuery({
-  queryKey: ["projects-list"],
-  queryFn: () => getProjects({ mode: "list" }),
-});
-const projectOptions = computed(() => {
-  const list = Array.isArray(projectData.value) ? projectData.value : [];
-  return [
-    { value: 0, text: "-- Pilih Project --" },
-    ...list.map((p: any) => ({ value: p.id, text: p.judul })),
-  ];
-});
-
 const { data: kegiatanData, isLoading: isKegiatanLoading } = useQuery({
   queryKey: ["kegiatans-list"],
   queryFn: () => getAllKegiatan({ mode: "list" }),
@@ -314,7 +290,6 @@ const kegiatanOptions = computed(() => {
 });
 
 // ── File handlers ─────────────────────────────────────────────────────────
-
 const handleThumbnailChange = (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0] ?? null;
   thumbnailFile.value = file;
@@ -344,7 +319,6 @@ const handleWaImageChange = (event: Event) => {
 };
 
 // ── Submit ────────────────────────────────────────────────────────────────
-
 const { mutate, isPending } = useMutation({
   mutationFn: () => {
     const formData = new FormData();
@@ -372,7 +346,7 @@ const { mutate, isPending } = useMutation({
     setTimeout(() => router.push("/project-report"), 1500);
   },
   onError: (err: any) => {
-    showToast(err?.response?.data?.message ?? "Gagal menambahkan laporan", {
+    showToast(err?.response ?? "Gagal menambahkan laporan", {
       type: "error",
       position: "top-center",
     });
@@ -389,5 +363,6 @@ const handleSubmit = async () => {
     return;
   }
   mutate();
+  // console.log(formState);
 };
 </script>

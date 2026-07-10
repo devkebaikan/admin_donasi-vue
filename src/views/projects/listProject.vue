@@ -323,6 +323,9 @@ const handleGlobalClick = (event: Event) => {
   const ajuanBtn = target.closest<HTMLElement>(
     '#table-gridjs .ajuan-btn[data-action="ajuan"]',
   );
+  const keuanganBtn = target.closest<HTMLElement>(
+    '#table-gridjs .keuangan-btn[data-action="keuangan"]',
+  );
 
   if (detailBtn) {
     event.preventDefault();
@@ -352,45 +355,12 @@ const handleGlobalClick = (event: Event) => {
     return;
   }
 
-  // const kegiatanBtn = target.closest<HTMLElement>(
-  //   '#table-gridjs .kegiatan-btn[data-action="kegiatan"]',
-  // );
-  // const manageBtn = target.closest<HTMLElement>(
-  //   '#table-gridjs .manage-btn[data-action="manage"]',
-  // );
-  // const reportBtn = target.closest<HTMLElement>(
-  //   '#table-gridjs .report-btn[data-action="report"]',
-  // );
-  // const deleteBtn = target.closest<HTMLElement>(
-  //   '#table-gridjs .delete-btn[data-action="delete"]',
-  // );
-
-  // if (kegiatanBtn) {
-  //   event.preventDefault();
-  //   const id = kegiatanBtn.getAttribute("data-id");
-  //   if (id) router.push(`/projects/kegiatan/${id}`);
-  //   return;
-  // }
-
-  // if (manageBtn) {
-  //   event.preventDefault();
-  //   const id = manageBtn.getAttribute("data-id");
-  //   if (id) router.push(`/projects/manage/${id}`);
-  //   return;
-  // }
-
-  // if (reportBtn) {
-  //   event.preventDefault();
-  //   const id = reportBtn.getAttribute("data-id");
-  //   if (id) router.push(`/projects/report/${id}`);
-  //   return;
-  // }
-
-  // if (deleteBtn) {
-  //   event.preventDefault();
-  //   const id = deleteBtn.getAttribute("data-id");
-  //   if (id) handleDelete(Number(id));
-  // }
+  if (keuanganBtn) {
+    event.preventDefault();
+    const id = keuanganBtn.getAttribute("data-id");
+    if (id) router.push(`/keuangan?project_id=${id}`);
+    return;
+  }
 };
 
 onMounted(() => document.addEventListener("click", handleGlobalClick));

@@ -622,25 +622,6 @@ const projectRoutes = [
     component: () => import("@/views/projects/editProject.vue"),
   },
   {
-    path: "/projects/kegiatan/:id",
-    name: "project-kegiatan.list",
-    meta: {
-      title: setTitle("Project Kegiatan"),
-      authRequired: true,
-    },
-    component: () =>
-      import("@/views/projects/kegiatan/listKegiatanProject.vue"),
-  },
-  {
-    path: "/projects/keuangan/:id",
-    name: "project-keuangan.list",
-    meta: {
-      title: setTitle("Project keuangan"),
-      authRequired: true,
-    },
-    component: () => import("@/views/projects/keuangan/listKeuangan.vue"),
-  },
-  {
     path: "/projects/funding/:id",
     name: "project-funding.index",
     meta: {
