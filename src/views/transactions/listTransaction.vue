@@ -1,5 +1,12 @@
 <template>
   <VerticalLayout>
+    <!-- Detail Offcanvas Component -->
+    <TransactionDetailOffcanvas
+      v-model="showDetailOffcanvas"
+      :selectedId="selectedId"
+      @hide="selectedId = 0"
+    />
+
     <!-- Filters -->
     <b-card class="mb-3 shadow-sm">
       <template #header>
@@ -270,300 +277,6 @@
       </div>
     </b-card>
 
-    <!-- ----------------------------------------------------- Detail Offcanvas ----------------------------------------------------- -->
-    <b-offcanvas
-      v-model="showDetailOffcanvas"
-      placement="end"
-      :bodyScrolling="true"
-      :backdrop="true"
-      style="--bs-offcanvas-width: 720px"
-      @hide="selectedId = 0"
-    >
-      <template #header="{ hide }">
-        <div
-          class="d-flex align-items-center justify-content-between w-100 gap-2"
-        >
-          <h5 class="mb-0 fw-semibold text-truncate">
-            <i class="bx bx-receipt me-1 text-primary"></i>Detail Transaksi
-          </h5>
-          <b-button size="sm" variant="outline-secondary" @click="hide">
-            <i class="bx bx-x fs-18"></i>
-          </b-button>
-        </div>
-      </template>
-
-      <div v-if="isDetailLoading" class="text-center py-5">
-        <b-spinner variant="primary" />
-        <p class="mt-2 text-muted">Memuat detail...</p>
-      </div>
-      <div v-else-if="isDetailError" class="alert alert-danger m-0">
-        Gagal memuat detail. Silakan coba lagi.
-      </div>
-      <div v-else-if="txDetail" class="pb-4">
-        <!-- Invoice + Status -->
-        <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-          <span class="font-monospace fw-bold fs-6">{{
-            txDetail.invoice
-          }}</span>
-          <span :class="['badge', statusBadgeClass(txDetail.status)]">{{
-            txDetail.status
-          }}</span>
-          <span class="badge bg-light text-dark border">{{
-            txDetail.source
-          }}</span>
-        </div>
-
-        <hr class="my-3" />
-
-        <!-- Informasi Pembayar -->
-        <h6
-          class="fw-semibold text-muted mb-2 text-uppercase"
-          style="font-size: 11px; letter-spacing: 0.5px"
-        >
-          <i class="bx bx-user me-1"></i>Informasi Pembayar
-        </h6>
-        <b-row class="g-2 mb-3">
-          <b-col cols="6">
-            <div class="bg-light rounded p-2">
-              <small class="text-muted d-block">Nama</small>
-              <span class="fw-semibold small">{{
-                txDetail.user?.name || "-"
-              }}</span>
-            </div>
-          </b-col>
-          <b-col cols="6">
-            <div class="bg-light rounded p-2">
-              <small class="text-muted d-block">No. Telepon</small>
-              <span class="fw-semibold small">{{
-                txDetail.user?.phone || "-"
-              }}</span>
-            </div>
-          </b-col>
-        </b-row>
-
-        <hr class="my-3" />
-
-        <!-- Detail Donasi -->
-        <h6
-          class="fw-semibold text-muted mb-2 text-uppercase"
-          style="font-size: 11px; letter-spacing: 0.5px"
-        >
-          <i class="bx bx-list-ul me-1"></i>Detail Donasi
-          <span class="ms-1 badge bg-secondary">{{
-            txDetail.transaction_details?.length ?? 0
-          }}</span>
-        </h6>
-        <div
-          v-if="txDetail.transaction_details?.length"
-          class="d-flex flex-column gap-3"
-        >
-          <div
-            v-for="detail in txDetail.transaction_details"
-            :key="detail.id"
-            class="border rounded p-3"
-          >
-            <div class="d-flex justify-content-between align-items-start mb-2">
-              <div class="fw-semibold small">
-                {{ detail.program?.name || "-" }}
-              </div>
-              <span :class="['badge', activityBadgeClass(detail.activity)]">{{
-                detail.activity
-              }}</span>
-            </div>
-            <b-row class="g-2">
-              <b-col cols="6">
-                <small class="text-muted d-block">Gross Nominal</small>
-                <small class="fw-semibold">{{
-                  formatCurrency(detail.gross_nominal)
-                }}</small>
-              </b-col>
-              <b-col cols="6">
-                <small class="text-muted d-block">Nominal Bersih</small>
-                <small class="fw-semibold text-success">{{
-                  formatCurrency(detail.nominal)
-                }}</small>
-              </b-col>
-              <b-col cols="6">
-                <small class="text-muted d-block">Operasional</small>
-                <small class="fw-semibold">{{
-                  formatCurrency(detail.operasional)
-                }}</small>
-              </b-col>
-              <b-col cols="6">
-                <small class="text-muted d-block">Komisi</small>
-                <small class="fw-semibold">{{
-                  formatCurrency(detail.komisi)
-                }}</small>
-              </b-col>
-              <b-col cols="6">
-                <small class="text-muted d-block">Fee</small>
-                <small class="fw-semibold">{{
-                  formatCurrency(detail.fee)
-                }}</small>
-              </b-col>
-              <b-col cols="6">
-                <small class="text-muted d-block">Diskon</small>
-                <small class="fw-semibold">{{
-                  formatCurrency(detail.discount)
-                }}</small>
-              </b-col>
-              <b-col v-if="detail.refund" cols="6">
-                <small class="text-muted d-block">Refund</small>
-                <small class="fw-semibold text-danger">{{
-                  formatCurrency(detail.refund)
-                }}</small>
-              </b-col>
-            </b-row>
-          </div>
-        </div>
-        <p v-else class="text-muted small fst-italic">
-          Tidak ada detail donasi.
-        </p>
-
-        <hr class="my-3" />
-
-        <!-- Informasi Transaksi -->
-        <h6
-          class="fw-semibold text-muted mb-2 text-uppercase"
-          style="font-size: 11px; letter-spacing: 0.5px"
-        >
-          <i class="bx bx-info-circle me-1"></i>Informasi Transaksi
-        </h6>
-        <b-row class="g-2 mb-3">
-          <b-col cols="6">
-            <div class="bg-light rounded p-2">
-              <small class="text-muted d-block">Tanggal</small>
-              <span class="fw-semibold small">{{
-                formatDate(txDetail.date)
-              }}</span>
-            </div>
-          </b-col>
-          <b-col cols="6">
-            <div class="bg-light rounded p-2">
-              <small class="text-muted d-block">Jenis Transaksi</small>
-              <span class="fw-semibold small">{{
-                txDetail.transaction_type?.name || "-"
-              }}</span>
-            </div>
-          </b-col>
-          <b-col cols="6">
-            <div class="bg-light rounded p-2">
-              <small class="text-muted d-block">No. Order</small>
-              <span class="fw-semibold small">#{{ txDetail.order }}</span>
-            </div>
-          </b-col>
-          <b-col cols="6">
-            <div class="bg-light rounded p-2">
-              <small class="text-muted d-block">Anonim</small>
-              <span class="fw-semibold small">{{
-                txDetail.anonim ? "Ya" : "Tidak"
-              }}</span>
-            </div>
-          </b-col>
-        </b-row>
-
-        <hr class="my-3" />
-
-        <!-- Metode Pembayaran -->
-        <h6
-          class="fw-semibold text-muted mb-2 text-uppercase"
-          style="font-size: 11px; letter-spacing: 0.5px"
-        >
-          <i class="bx bx-credit-card me-1"></i>Metode Pembayaran
-        </h6>
-        <b-row class="g-2 mb-3">
-          <b-col cols="6">
-            <div class="bg-light rounded p-2">
-              <small class="text-muted d-block">Bank / Provider</small>
-              <span class="fw-semibold small text-capitalize">{{
-                txDetail.payment_method?.bank_provider || "-"
-              }}</span>
-            </div>
-          </b-col>
-          <b-col cols="6">
-            <div class="bg-light rounded p-2">
-              <small class="text-muted d-block">Atas Nama</small>
-              <span class="fw-semibold small">{{
-                txDetail.payment_method?.account_behalf || "-"
-              }}</span>
-            </div>
-          </b-col>
-          <b-col cols="12">
-            <div class="bg-light rounded p-2">
-              <small class="text-muted d-block">No. Rekening</small>
-              <span class="fw-semibold small font-monospace">{{
-                txDetail.payment_method?.account_number || "-"
-              }}</span>
-            </div>
-          </b-col>
-        </b-row>
-
-        <hr class="my-3" />
-
-        <!-- Ringkasan Keuangan -->
-        <h6
-          class="fw-semibold text-muted mb-2 text-uppercase"
-          style="font-size: 11px; letter-spacing: 0.5px"
-        >
-          <i class="bx bx-money me-1"></i>Ringkasan Keuangan
-        </h6>
-        <b-row class="g-2 mb-3">
-          <b-col cols="6">
-            <div class="bg-light rounded p-2">
-              <small class="text-muted d-block">Harga</small>
-              <span class="fw-semibold small">{{
-                formatCurrency(txDetail.price)
-              }}</span>
-            </div>
-          </b-col>
-          <b-col cols="6">
-            <div class="bg-light rounded p-2">
-              <small class="text-muted d-block">Diskon</small>
-              <span class="fw-semibold small">{{
-                formatCurrency(txDetail.discount)
-              }}</span>
-            </div>
-          </b-col>
-          <b-col cols="6">
-            <div class="bg-light rounded p-2">
-              <small class="text-muted d-block">Biaya Aplikasi</small>
-              <span class="fw-semibold small">{{
-                formatCurrency(txDetail.application_fee)
-              }}</span>
-            </div>
-          </b-col>
-          <b-col cols="6">
-            <div class="bg-light rounded p-2">
-              <small class="text-muted d-block">Fee Detail</small>
-              <span class="fw-semibold small">{{
-                formatCurrency(txDetail.fee_detail)
-              }}</span>
-            </div>
-          </b-col>
-          <b-col cols="12">
-            <div class="rounded p-2" style="background: #e8f4ff">
-              <small class="text-muted d-block">Total</small>
-              <span class="fw-bold text-primary">{{
-                formatCurrency(txDetail.total)
-              }}</span>
-            </div>
-          </b-col>
-        </b-row>
-
-        <hr class="my-3" />
-
-        <!-- Timestamps -->
-        <div class="d-flex gap-3">
-          <div>
-            <small class="text-muted d-block">Diperbarui</small>
-            <small class="fw-semibold">{{
-              formatDateTime(txDetail.updated_at)
-            }}</small>
-          </div>
-        </div>
-      </div>
-    </b-offcanvas>
-
     <!-- Table -->
     <b-row>
       <b-col>
@@ -626,12 +339,11 @@ import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
 import FlatPicker from "@/components/FlatPicker.vue";
+import TransactionDetailOffcanvas from "./components/TransactionDetailOffcanvas.vue";
 import { useTransactionTable } from "./components/data";
 import router from "@/router";
 import { useQuery } from "@tanstack/vue-query";
-import { getTransactionById } from "@/services/transactionService";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
-import { formatCurrency, formatDateTime, formatDate } from "@/helpers/format";
 import { getAllPaymentMethods } from "@/services/paymentMethodService";
 import { useRoute } from "vue-router";
 
@@ -639,31 +351,6 @@ import { useRoute } from "vue-router";
 const showDetailOffcanvas = ref(false);
 const selectedId = ref(0);
 const route = useRoute();
-
-const {
-  data: txDetail,
-  isLoading: isDetailLoading,
-  isError: isDetailError,
-} = useQuery({
-  queryKey: computed(() => ["transaction-detail", selectedId.value]),
-  queryFn: () => getTransactionById(selectedId.value),
-  enabled: computed(() => selectedId.value > 0),
-});
-
-const STATUS_BADGE: Record<string, string> = {
-  Paid: "bg-success",
-  Pending: "bg-warning text-dark",
-  Canceled: "bg-danger",
-};
-const statusBadgeClass = (s: string) => STATUS_BADGE[s] ?? "bg-secondary";
-
-const ACTIVITY_BADGE: Record<string, string> = {
-  "Waiting for payment": "bg-warning text-dark",
-  Paid: "bg-success",
-  Canceled: "bg-danger",
-  Refunded: "bg-info",
-};
-const activityBadgeClass = (s: string) => ACTIVITY_BADGE[s] ?? "bg-secondary";
 
 const openDetail = (id: number) => {
   selectedId.value = id;

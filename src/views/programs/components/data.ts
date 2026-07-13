@@ -121,13 +121,15 @@ export function useProgramsTable() {
                 title="Projects">
                 <i class="bx bx-folder-open fs-16"></i>
               </button>
-              <button class="btn btn-sm btn-soft-danger delete-btn" data-action="delete" data-id="${program.id}" title="Hapus">
-                <i class="bx bx-trash fs-16"></i>
-              </button>
+              
             </div>
           `),
       },
     ],
+
+    // <button class="btn btn-sm btn-soft-danger delete-btn" data-action="delete" data-id="${program.id}" title="Hapus">
+    //   <i class="bx bx-trash fs-16"></i>
+    // </button>
 
     // <button
     //   class="btn btn-sm btn-soft-info news-btn"

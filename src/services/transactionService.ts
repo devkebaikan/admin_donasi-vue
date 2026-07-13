@@ -52,3 +52,13 @@ export const deleteTransaction = async (id: number) => {
     throw error;
   }
 };
+
+export const getUserTransactionHistory = async (userId: number, params = {}) => {
+  try {
+    const res = await HttpClient.get(`/admin/users/${userId}/transactions`, { params });
+    return res.data.data;
+  } catch (error) {
+    console.error(`Error fetching transaction history for user ${userId}:`, error);
+    return { data: [], meta: { total: 0, last_page: 1 } };
+  }
+};

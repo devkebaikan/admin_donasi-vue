@@ -738,7 +738,8 @@ watch(
     formState.is_target_nominal = data.nominal_target ? "TERTENTU" : "BEBAS";
 
     formState.target_waktu = data.time_target ?? "";
-    formState.target_nominal = data.nominal_target ?? 0;
+    formState.target_nominal =
+      data.nominal_target === "∞" ? 0 : Number(data.nominal_target);
 
     formState.jenis_nominal = data.jenis_nominal ?? "default";
 
