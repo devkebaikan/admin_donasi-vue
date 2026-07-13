@@ -3,7 +3,7 @@ name: Deploy Go Fiber Application
 on:
   push:
     branches:
-      - main # Memicu pipeline ketika ada push ke branch main
+      - admin # Memicu pipeline ketika ada push ke branch main
 
 jobs:
   deploy:
