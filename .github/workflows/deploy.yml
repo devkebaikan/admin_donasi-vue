@@ -1,0 +1,52 @@
+name: Deploy Go Fiber Application
+
+on:
+  push:
+    branches:
+      - main # Memicu pipeline ketika ada push ke branch main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4 # Menggunakan versi terbaru yang lebih stabil dan aman
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25' # Sesuaikan dengan versi Go yang Anda gunakan
+
+      # Opsional: Menjalankan test atau linter sebelum deploy untuk memastikan code aman
+      # - name: Run Tests
+      #   run: |
+      #     go test -v ./...
+
+      - name: Deploy to Server (via SSH)
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          # Buat direktori .ssh jika belum ada
+          mkdir -p ~/.ssh
+          
+          # Simpan private key ke file lokal runner
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          # Tambahkan host ke known_hosts untuk keamanan (bisa juga pakai StrictHostKeyChecking=no jika ingin instan)
+          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts
+
+          # Melakukan koneksi SSH dan eksekusi perintah di VPS
+          ssh -i ~/.ssh/id_rsa $VPS_USER@$VPS_HOST << 'EOF'
+            # Masuk ke direktori projek di VPS
+            cd /var/www/akber-new/admin/
+            
+            # Tarik kode terbaru dari branch main
+            git pull
+            
+            yarn
+            yarn build-only
+          EOF
