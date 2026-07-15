@@ -161,7 +161,12 @@ export function useProjectsTable() {
         name: "Actions",
         width: "40px",
         sort: false,
-        formatter: (item: { activity: string; id: number }) =>
+        formatter: (item: {
+          activity: string;
+          id: number;
+          alokasi: number;
+          refundMitra: number;
+        }) =>
           html(`
             <div
               class="d-grid gap-0 justify-content-center"
@@ -209,10 +214,11 @@ export function useProjectsTable() {
                   `
                     : ""
                 }
-
+                
                 ${
-                  item.activity === "active open" ||
-                  item.activity === "active close"
+                  item.alokasi > 0 &&
+                  (item.activity === "active open" ||
+                    item.activity === "active close")
                     ? `
                     <button
                       class="btn btn-sm btn-soft-primary ajuan-btn"
@@ -222,6 +228,24 @@ export function useProjectsTable() {
                       title="Ajuan Project"
                     >
                       <i class="bx bx-receipt fs-16"></i>
+                    </button>
+                  `
+                    : ""
+                }
+                ${
+                  item.refundMitra > 0 &&
+                  (item.activity === "active open" ||
+                    item.activity === "active close" ||
+                    item.activity === "selesai")
+                    ? `
+                    <button
+                      class="btn btn-sm btn-soft-danger refund-btn"
+                      style="width:48px"
+                      data-action="refund"
+                      data-id="${item.id}"
+                      title="Refund Project"
+                    >
+                     <i class="bx bx-revision fs-16"></i>
                     </button>
                   `
                     : ""
@@ -247,7 +271,12 @@ export function useProjectsTable() {
         sisaDana: project.sisa_dana_mitra,
       },
       project.waktu_pelaksanaan,
-      { activity: project.activity, id: project.id },
+      {
+        activity: project.activity,
+        id: project.id,
+        alokasi: project.total_alokasi,
+        refundMitra: project.total_refund_mitra,
+      },
     ],
   });
 

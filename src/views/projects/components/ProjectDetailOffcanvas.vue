@@ -60,6 +60,26 @@
         </span>
       </div>
 
+      <!-- button actions -->
+      <div class="d-flex gap-2 mb-3">
+        <b-button
+          variant="soft-primary"
+          size="sm"
+          class="flex-fill"
+          @click="router.push(`/kegiatan?project_id=${projectDetail.id}`)"
+        >
+          <i class="bx bx-task fs-16 me-1"></i>Kegiatan
+        </b-button>
+        <b-button
+          variant="soft-info"
+          size="sm"
+          class="flex-fill"
+          @click="router.push(`/project-report?project_id=${projectDetail.id}`)"
+        >
+          <i class="bx bxs-report fs-16 me-1"></i>Report
+        </b-button>
+      </div>
+
       <hr class="my-3" />
 
       <!-- Info Grid -->
@@ -121,8 +141,40 @@
       >
         <i class="bx bx-money me-1"></i>Informasi Keuangan
       </h6>
+      <!-- Progress bar -->
+      <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <small class="text-muted fw-medium"> Progress Alokasi Dana </small>
+
+          <small class="fw-semibold text-success">
+            {{ allocationProgress.toFixed(1) }}%
+          </small>
+        </div>
+
+        <div class="progress" style="height: 10px">
+          <div
+            class="progress-bar bg-success"
+            role="progressbar"
+            :style="{ width: `${allocationProgress}%` }"
+            :aria-valuenow="allocationProgress"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          />
+        </div>
+
+        <div class="d-flex justify-content-between mt-2">
+          <small class="text-muted">
+            {{ formatCurrency(projectDetail.total_alokasi) }}
+          </small>
+
+          <small class="text-muted">
+            {{ formatCurrency(projectDetail.nominal_acc) }}
+          </small>
+        </div>
+      </div>
+
       <b-row class="g-2 mb-3">
-        <b-col cols="6">
+        <b-col cols="4">
           <div class="bg-light rounded p-2">
             <small class="text-muted d-block">Nominal Diajukan</small>
             <span class="fw-semibold font-monospace small">
@@ -130,7 +182,7 @@
             </span>
           </div>
         </b-col>
-        <b-col cols="6">
+        <b-col cols="4">
           <div class="bg-light rounded p-2">
             <small class="text-muted d-block">Nominal Disetujui</small>
             <span class="fw-semibold font-monospace small text-success">
@@ -139,7 +191,7 @@
           </div>
         </b-col>
 
-        <b-col cols="6">
+        <b-col cols="4">
           <div class="bg-light rounded p-2">
             <small class="text-muted d-block">Claim Donasi</small>
             <span class="fw-semibold font-monospace small">
@@ -148,7 +200,7 @@
           </div>
         </b-col>
 
-        <b-col cols="6">
+        <b-col cols="4">
           <div class="bg-light rounded p-2">
             <small class="text-muted d-block">Total Alokasi</small>
             <span class="fw-semibold font-monospace small">
@@ -157,7 +209,7 @@
           </div>
         </b-col>
 
-        <b-col cols="6">
+        <b-col cols="4">
           <div class="bg-light rounded p-2">
             <small class="text-muted d-block">Total Allocated</small>
             <span class="fw-semibold font-monospace small">
@@ -166,7 +218,7 @@
           </div>
         </b-col>
 
-        <b-col cols="6">
+        <b-col cols="4">
           <div class="bg-light rounded p-2">
             <small class="text-muted d-block">Total Disbursed</small>
             <span class="fw-semibold font-monospace small">
@@ -175,7 +227,7 @@
           </div>
         </b-col>
 
-        <b-col cols="6">
+        <b-col cols="4">
           <div class="bg-light rounded p-2">
             <small class="text-muted d-block">Transfer ke Mitra</small>
             <span class="fw-semibold font-monospace small">
@@ -184,7 +236,7 @@
           </div>
         </b-col>
 
-        <b-col cols="6">
+        <b-col cols="4">
           <div class="bg-light rounded p-2">
             <small class="text-muted d-block">Pemakaian Mitra</small>
             <span class="fw-semibold font-monospace small">
@@ -193,7 +245,7 @@
           </div>
         </b-col>
 
-        <b-col cols="6">
+        <b-col cols="4">
           <div class="bg-light rounded p-2">
             <small class="text-muted d-block">Refund Mitra</small>
             <span class="fw-semibold font-monospace small">
@@ -202,7 +254,7 @@
           </div>
         </b-col>
 
-        <b-col cols="6">
+        <b-col cols="4">
           <div class="bg-light rounded p-2">
             <small class="text-muted d-block">Sisa Dana Mitra</small>
             <span class="fw-semibold font-monospace small text-primary">
@@ -363,26 +415,6 @@
       </div>
 
       <hr class="my-3" />
-
-      <!-- button actions -->
-      <div class="d-flex gap-2 mb-3">
-        <b-button
-          variant="soft-primary"
-          size="sm"
-          class="flex-fill"
-          @click="router.push(`/kegiatan?project_id=${projectDetail.id}`)"
-        >
-          <i class="bx bx-task fs-16 me-1"></i>Kegiatan
-        </b-button>
-        <b-button
-          variant="soft-info"
-          size="sm"
-          class="flex-fill"
-          @click="router.push(`/project-report?project_id=${projectDetail.id}`)"
-        >
-          <i class="bx bxs-report fs-16 me-1"></i>Report
-        </b-button>
-      </div>
     </div>
   </b-offcanvas>
 </template>
@@ -423,6 +455,21 @@ const {
   queryKey: computed(() => ["project-detail", props.selectedId]),
   queryFn: () => getProjectById(props.selectedId),
   enabled: computed(() => props.selectedId > 0),
+});
+
+const allocationProgress = computed(() => {
+  if (!projectDetail.value) return 0;
+
+  const nominalAcc = Number(projectDetail.value.nominal_acc ?? 0);
+  const totalAlokasi = Number(
+    projectDetail.value.total_alokasi === 0
+      ? projectDetail.value.total_tf_ke_mitra
+      : projectDetail.value.total_alokasi,
+  );
+
+  if (nominalAcc <= 0) return 0;
+
+  return Math.min((totalAlokasi / nominalAcc) * 100, 100);
 });
 
 const STATUS_BADGE: Record<string, string> = {

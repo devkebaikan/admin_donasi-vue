@@ -6,10 +6,11 @@
       :selected-id="selectedProjectId"
       @hide="selectedProjectId = 0"
     />
-    <AjuanModal
-      v-model="showAjaunModal"
+    <AjuanRefundModal
+      v-model="showAjuanRefundModal"
       :project-id="selectedProjectId"
-      @success="handleAjuanSuccess"
+      :mode="modalMode"
+      @success="handleModalSuccess"
     />
 
     <!-- Filter Section -->
@@ -212,12 +213,14 @@ import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
 import ProjectDetailOffcanvas from "./components/ProjectDetailOffcanvas.vue";
-import AjuanModal from "./components/AjuanModal.vue";
+// import AjuanModal from "./components/AjuanModal.vue";
+// import RefundModal from "./components/RefundModal.vue";
 import { useProjectsTable } from "./components/data";
 import router from "@/router";
 import { useQuery, useQueryClient } from "@tanstack/vue-query";
 import { getAllPrograms } from "@/services/programService";
 import { useRoute } from "vue-router";
+import AjuanRefundModal from "./components/AjuanRefundModal.vue";
 
 const {
   tableOptions,
@@ -239,7 +242,8 @@ const {
 } = useProjectsTable();
 
 // state
-const showAjaunModal = ref(false);
+const showAjuanRefundModal = ref(false);
+const modalMode = ref<"ajuan" | "refund">("ajuan");
 const showDetailOffcanvas = ref(false);
 const selectedProjectId = ref(0);
 
@@ -299,11 +303,18 @@ const openDetail = (id: number) => {
 
 const openAjuan = (id: number) => {
   selectedProjectId.value = id;
-  showAjaunModal.value = true;
+  modalMode.value = "ajuan";
+  showAjuanRefundModal.value = true;
 };
 
-const handleAjuanSuccess = () => {
-  showAjaunModal.value = false;
+const openRefund = (id: number) => {
+  selectedProjectId.value = id;
+  modalMode.value = "refund";
+  showAjuanRefundModal.value = true;
+};
+
+const handleModalSuccess = () => {
+  showAjuanRefundModal.value = false;
   selectedProjectId.value = 0;
   queryClient.invalidateQueries({ queryKey: ["projects"] });
 };
@@ -322,6 +333,9 @@ const handleGlobalClick = (event: Event) => {
   );
   const ajuanBtn = target.closest<HTMLElement>(
     '#table-gridjs .ajuan-btn[data-action="ajuan"]',
+  );
+  const refundBtn = target.closest<HTMLElement>(
+    '#table-gridjs .refund-btn[data-action="refund"]',
   );
   const keuanganBtn = target.closest<HTMLElement>(
     '#table-gridjs .keuangan-btn[data-action="keuangan"]',
@@ -348,6 +362,12 @@ const handleGlobalClick = (event: Event) => {
     return;
   }
 
+  if (refundBtn) {
+    event.preventDefault();
+    const id = refundBtn.getAttribute("data-id");
+    if (id) openRefund(Number(id));
+    return;
+  }
   if (ajuanBtn) {
     event.preventDefault();
     const id = ajuanBtn.getAttribute("data-id");

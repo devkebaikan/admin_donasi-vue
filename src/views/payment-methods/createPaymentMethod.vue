@@ -124,8 +124,8 @@
 
             <!-- Section: Keuangan -->
             <b-col cols="12"
-              ><hr class="my-1" />
-              <h6 class="text-muted fw-semibold mb-3">Keuangan</h6></b-col
+              ><hr class="mt-3" />
+              <h5 class="my-1 fw-semibold text-info">Keuangan</h5></b-col
             >
 
             <!-- Fee Type -->

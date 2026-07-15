@@ -1,5 +1,7 @@
 <template>
-  <RouterView />
+  <KeepAlive :max="10">
+    <RouterView />
+  </KeepAlive>
 </template>
 
 <script setup lang="ts">

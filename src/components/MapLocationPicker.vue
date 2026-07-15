@@ -193,7 +193,10 @@ const onMarkerDragEnd = (event: any) => {
 };
 
 const useMyLocation = () => {
-  if (!navigator.geolocation) return;
+  if (!navigator.geolocation) {
+    alert("Geolocation tidak tersedia di browser Anda.");
+    return;
+  }
   isLocating.value = true;
   navigator.geolocation.getCurrentPosition(
     (pos) => {
@@ -205,7 +208,12 @@ const useMyLocation = () => {
       if (!showMap.value) showMap.value = true;
       isLocating.value = false;
     },
-    () => {
+    (error) => {
+      let msg = "Gagal mendapatkan lokasi";
+      if (error.code === 1) msg = "Izin lokasi ditolak. Periksa setting browser Anda.";
+      else if (error.code === 2) msg = "Lokasi tidak tersedia.";
+      else if (error.code === 3) msg = "Request timeout. Coba lagi.";
+      alert(msg);
       isLocating.value = false;
     },
   );

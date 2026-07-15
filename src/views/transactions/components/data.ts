@@ -53,7 +53,7 @@ export function useTransactionTable() {
     fetchFn: getAllTransactions,
     deleteFn: deleteTransaction,
     extraFilters,
-    defaultPerPage: 5,
+    defaultPerPage: 10,
     deleteMessages: {
       text: "Data transaksi tidak bisa dikembalikan setelah dihapus!",
       successText: "Transaksi berhasil dihapus.",

@@ -130,7 +130,9 @@
                   @change="handleLogoChange"
                   placeholder="Pilih file logo..."
                 />
-                <small class="text-muted">Opsional — JPG/PNG/WebP, maks 2MB</small>
+                <small class="text-muted"
+                  >Opsional — JPG/PNG/WebP, maks 2MB</small
+                >
               </b-form-group>
 
               <div v-if="logoPreview" class="mt-2">
@@ -141,6 +143,61 @@
                   style="max-height: 120px; max-width: 120px; object-fit: cover"
                 />
               </div>
+            </b-col>
+
+            <b-col cols="12"
+              ><hr class="mt-3" />
+              <h5 class="my-1 fw-semibold text-info">Info Bank</h5></b-col
+            >
+            <!-- Bank Reference -->
+            <b-col md="6">
+              <b-form-group label="Bank Referensi" label-for="bank-ref">
+                <ChoicesSelect
+                  id="form-bank-id"
+                  :modelValue="String(formState.bank_references_id || 0)"
+                  @update:modelValue="
+                    (val: any) => {
+                      formState.bank_references_id =
+                        val === '0' ? 0 : Number(val);
+                    }
+                  "
+                  :options="bankRefOptions"
+                  :isLoading="isBankLoading"
+                  :key="bankRefOptions.length"
+                />
+                <small class="text-muted">Opsional</small>
+              </b-form-group>
+            </b-col>
+
+            <!-- Account Holder Name -->
+            <b-col md="6">
+              <b-form-group
+                label="Nama Pemilik Rekening"
+                label-for="account-behalf"
+              >
+                <b-form-input
+                  id="account-behalf"
+                  v-model="formState.account_behalf"
+                  type="text"
+                  placeholder="e.g., Ahmad Fauzi"
+                  maxlength="255"
+                />
+                <small class="text-muted">Opsional</small>
+              </b-form-group>
+            </b-col>
+
+            <!-- Account Number -->
+            <b-col md="6">
+              <b-form-group label="Nomor Rekening" label-for="account-number">
+                <b-form-input
+                  id="account-number"
+                  v-model="formState.account_number"
+                  type="text"
+                  placeholder="e.g., 1234567890"
+                  maxlength="50"
+                />
+                <small class="text-muted">Opsional</small>
+              </b-form-group>
             </b-col>
 
             <!-- Spinner saat submit -->
@@ -177,14 +234,15 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from "vue";
-import { useMutation, useQueryClient } from "@tanstack/vue-query";
+import { reactive, ref, onMounted, computed } from "vue";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
 import { useRouter } from "vue-router";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import { createMitra } from "@/services/mitraService";
+import { getAllBankReferences } from "@/services/bankReferenceService";
 import { toast, type ToastOptions } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 
@@ -197,6 +255,24 @@ const queryClient = useQueryClient();
 const logoFile = ref<File | null>(null);
 const logoPreview = ref<string | null>(null);
 
+// bank ref option
+const { data: bankData, isLoading: isBankLoading } = useQuery({
+  queryKey: ["bank-references-list"],
+  queryFn: () => getAllBankReferences({ mode: "list" }),
+});
+
+const bankRefOptions = computed(() => {
+  const raw = bankData.value;
+  const list = Array.isArray(raw) ? raw : (raw?.data ?? []);
+  return [
+    { value: 0, text: "-- Pilih Bank --" },
+    ...list.map((b: any) => ({
+      value: b.id,
+      text: `${b.name}${b.code && b.code !== "-" ? ` (${b.code})` : ""}`,
+    })),
+  ];
+});
+
 // ── Form state ─────────────────────────────────────────────────────────────
 const formState = reactive({
   nama: "",
@@ -207,6 +283,9 @@ const formState = reactive({
   kode_wilayah: null as number | null,
   pj: "",
   nomer: "",
+  account_behalf: "",
+  account_number: "",
+  bank_references_id: null as number | null,
 });
 
 // ── Validation ─────────────────────────────────────────────────────────────
@@ -273,10 +352,15 @@ const handleSubmit = async () => {
   if (formState.kontak?.trim())
     formData.append("kontak", formState.kontak.trim());
   if (formState.pj?.trim()) formData.append("pj", formState.pj.trim());
-  if (formState.nomer?.trim())
-    formData.append("nomer", formState.nomer.trim());
+  if (formState.nomer?.trim()) formData.append("nomer", formState.nomer.trim());
   if (formState.kode_wilayah)
     formData.append("kode_wilayah", String(formState.kode_wilayah));
+  if (formState.account_behalf?.trim())
+    formData.append("account_behalf", formState.account_behalf.trim());
+  if (formState.account_number?.trim())
+    formData.append("account_number", formState.account_number.trim());
+  if (formState.bank_references_id)
+    formData.append("bank_references_id", String(formState.bank_references_id));
   if (logoFile.value) formData.append("logo", logoFile.value);
 
   createMitraPayload(formData);

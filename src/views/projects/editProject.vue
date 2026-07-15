@@ -41,6 +41,7 @@
               :before-change="validateStep1"
             >
               <h4 class="fs-16 fw-semibold mb-1">Identitas Project</h4>
+
               <p class="text-muted mb-4">Informasi dasar tentang project</p>
 
               <b-row class="g-3">
@@ -58,6 +59,8 @@
                     <b-form-invalid-feedback v-if="v$.judul.$error">
                       Judul wajib diisi.
                     </b-form-invalid-feedback>
+
+                    <small> Mitra: {{ formState.mitra_name }} </small>
                   </b-form-group>
                 </b-col>
 
@@ -101,28 +104,6 @@
                       <option value="nothing">Nothing</option>
                       <option value="nominal">Nominal</option>
                     </b-form-select>
-                  </b-form-group>
-                </b-col>
-
-                <!-- Mitra -->
-                <b-col md="6">
-                  <b-form-group label="Mitra" label-for="mitra-id">
-                    <ChoicesSelect
-                      id="mitra-id"
-                      disabled
-                      :modelValue="String(formState.mitra_id || 0)"
-                      @update:modelValue="
-                        (val) => {
-                          formState.mitra_id = val === '0' ? null : Number(val);
-                        }
-                      "
-                      :options="mitraList"
-                      :isLoading="isMitraLoading"
-                      :key="`mitra-${mitraList.length}-${formState.mitra_id}`"
-                    />
-                    <smal v-if="formState.mitra_id" class="text-muted">
-                      {{ `${formState.mitra_name} (${formState.mitra_id})` }}
-                    </smal>
                   </b-form-group>
                 </b-col>
 
@@ -518,7 +499,6 @@ import "vue3-toastify/dist/index.css";
 
 import { getProjectById, updateProject } from "@/services/projectService";
 import { getAllPrograms } from "@/services/programService";
-import { getAllMitra } from "@/services/mitraService";
 import { toast, type ToastOptions } from "vue3-toastify";
 
 const route = useRoute();
@@ -646,21 +626,6 @@ watch(
 );
 
 // ── Data fetching (dropdowns) ─────────────────────────────────────────────────
-const { data: mitraData, isLoading: isMitraLoading } = useQuery({
-  queryKey: ["mitra"],
-  queryFn: getAllMitra,
-});
-
-const mitraList = computed(() => {
-  if (!mitraData.value) return [{ value: 0, text: "Choose Mitra..." }];
-  return [
-    { value: 0, text: "Choose Mitra..." },
-    ...mitraData.value.map((item: any) => ({
-      value: item.id,
-      text: item.nama,
-    })),
-  ];
-});
 
 const { data: programData, isLoading: isProgramLoading } = useQuery({
   queryKey: ["programs-all"],

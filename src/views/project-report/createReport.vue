@@ -278,9 +278,12 @@ const v$ = useVuelidate(rules, formState);
 
 // ── Dropdown options ──────────────────────────────────────────────────────
 const { data: kegiatanData, isLoading: isKegiatanLoading } = useQuery({
-  queryKey: ["kegiatans-list"],
-  queryFn: () => getAllKegiatan({ mode: "list" }),
+  queryKey: ["kegiatans-list", formState.project_id],
+  queryFn: () =>
+    getAllKegiatan({ mode: "list", project_id: formState.project_id }),
+  enabled: !!formState.project_id,
 });
+
 const kegiatanOptions = computed(() => {
   const list = Array.isArray(kegiatanData.value) ? kegiatanData.value : [];
   return [

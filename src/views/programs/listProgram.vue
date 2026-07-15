@@ -41,7 +41,7 @@
         </b-col>
 
         <!-- Category Filter -->
-        <b-col cols="12" md="3" class="mb-3">
+        <!-- <b-col cols="12" md="3" class="mb-3">
           <label class="form-label fw-semibold">Category</label>
           <b-form-select v-model="selectedCategory" :options="categoryOptions">
             <template #first>
@@ -50,7 +50,17 @@
               >
             </template>
           </b-form-select>
-        </b-col>
+        </b-col> -->
+
+        <!-- Tipe Filter -->
+        <!-- <b-col cols="12" md="3" class="mb-3">
+          <label class="form-label fw-semibold">Tipe</label>
+          <b-form-select v-model="selectedTipe" :options="tipeOptions">
+            <template #first>
+              <b-form-select-option value="">All Tipe</b-form-select-option>
+            </template>
+          </b-form-select>
+        </b-col> -->
 
         <!-- Sort Order -->
         <!-- <b-col cols="12" md="2" class="mb-3">
@@ -224,7 +234,7 @@
         </div>
 
         <b-row class="g-2 mb-3">
-          <b-col cols="6">
+          <b-col cols="4">
             <div class="bg-light rounded p-2">
               <small class="text-muted d-block">Target</small>
               <span class="fw-semibold font-monospace small">
@@ -232,7 +242,7 @@
               </span>
             </div>
           </b-col>
-          <b-col cols="6">
+          <b-col cols="4">
             <div class="bg-light rounded p-2">
               <small class="text-muted d-block">Terkumpul</small>
               <span class="fw-semibold font-monospace small text-success">
@@ -240,18 +250,34 @@
               </span>
             </div>
           </b-col>
-          <b-col cols="6">
+          <b-col cols="4">
             <div class="bg-light rounded p-2">
-              <small class="text-muted d-block">Digunakan</small>
+              <small class="text-muted d-block">Menunggu Salur</small>
+              <span class="fw-semibold font-monospace small text-success">
+                {{
+                  formatCurrency(
+                    Number(
+                      programDetail.nominal_achieved -
+                        programDetail.nominal_used,
+                    ),
+                  )
+                }}
+              </span>
+            </div>
+          </b-col>
+
+          <b-col cols="4">
+            <div class="bg-light rounded p-2">
+              <small class="text-muted d-block">Dana Tersalurkan</small>
               <span class="fw-semibold font-monospace small text-warning">
                 {{ formatCurrency(Number(programDetail.nominal_used)) }}
               </span>
             </div>
           </b-col>
-          <b-col cols="6">
+          <b-col cols="4">
             <div class="bg-light rounded p-2">
-              <small class="text-muted d-block">Sisa Dana</small>
-              <span class="fw-semibold font-monospace small text-info">
+              <small class="text-muted d-block">Kekurangan Dana</small>
+              <span class="fw-semibold font-monospace small text-warning">
                 {{ formatCurrency(Number(programDetail.remaining_nominal)) }}
               </span>
             </div>
@@ -367,6 +393,14 @@
           <span class="ms-1 badge bg-secondary">{{
             programDetail.last_two_projects?.length ?? 0
           }}</span>
+          <div
+            class="text-end"
+            @click="router.push(`/projects?program_id=${programDetail.id}`)"
+          >
+            <i
+              class="bx bx-link-external ms-1 fs-5 text-success cursor-pointer"
+            ></i>
+          </div>
         </h6>
 
         <div
@@ -527,11 +561,13 @@ import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
 import { useProgramsTable } from "./components/data";
+import { useListStatePreserve } from "@/composables/useListStatePreserve";
 import router from "@/router";
 import { useQuery } from "@tanstack/vue-query";
 import {
   getProgramCategories,
   getProgramBylink,
+  getProgramTypes,
 } from "@/services/programService";
 import { formatCurrency, formatDate, formatDateTime } from "@/helpers/format";
 
@@ -550,6 +586,7 @@ const {
   error,
   isFetching,
   selectedCategory,
+  selectedTipe,
   searchQuery,
   currentPage,
   perPageItem,
@@ -559,13 +596,29 @@ const {
   handleDelete,
 } = useProgramsTable();
 
+// Preserve list state & scroll position
+useListStatePreserve("programs-list", {
+  searchQuery,
+  currentPage,
+  perPageItem,
+  extraFilters: computed(() => ({
+    selectedCategory: selectedCategory.value,
+    selectedTipe: selectedTipe.value,
+  })),
+});
+
 const hasActiveFilters = computed(
-  () => !!(selectedCategory.value || searchQuery.value),
+  () => !!(selectedCategory.value || selectedTipe.value || searchQuery.value),
 );
 
 const { data: dataCategories } = useQuery({
   queryKey: ["programCategories"],
   queryFn: getProgramCategories,
+});
+
+const { data: dataTypes } = useQuery({
+  queryKey: ["programTypes"],
+  queryFn: getProgramTypes,
 });
 
 const categoryOptions = computed(() => {
@@ -576,8 +629,17 @@ const categoryOptions = computed(() => {
   }));
 });
 
+const tipeOptions = computed(() => {
+  if (!dataTypes.value) return [];
+  return dataTypes.value.map((tipe: any) => ({
+    value: tipe.id,
+    text: tipe.nama,
+  }));
+});
+
 const clearFilters = () => {
   selectedCategory.value = "";
+  selectedTipe.value = "";
   searchQuery.value = "";
   resetPage();
 };

@@ -64,4 +64,4 @@ coverage
 
 .env
 .env.*
-CLAUDE.md
+*.md

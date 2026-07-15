@@ -512,6 +512,28 @@ const permissionRoutes = [
   },
 ];
 
+// Menu Routes
+const menuRoutes = [
+  {
+    path: "/menus",
+    name: "menu.list",
+    meta: {
+      title: setTitle("RBAC Menu"),
+      authRequired: true,
+    },
+    component: () => import("@/views/menus/listMenu.vue"),
+  },
+  {
+    path: "/menus/:id/edit",
+    name: "menu.edit",
+    meta: {
+      title: setTitle("Edit Menu"),
+      authRequired: true,
+    },
+    component: () => import("@/views/menus/editMenu.vue"),
+  },
+];
+
 // User Routes
 const userRoutes = [
   {
@@ -1758,4 +1780,5 @@ export const allRoutes = [
   ...projectKeuanganRoutes,
   ...paymentMethodRoutes,
   ...projectReportRoutes,
+  ...menuRoutes,
 ];
