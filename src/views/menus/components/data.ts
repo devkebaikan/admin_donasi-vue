@@ -5,9 +5,9 @@ import { getAll, deleteMenu } from "@/services/rbacMenuService";
 export function useMenuTable() {
   const table = useDataTable({
     queryKey: "rbac-menus",
-    fetchFn: getAll,
+    fetchFn: (params = {}) => getAll({ ...params, format: "list" }),
     deleteFn: deleteMenu,
-    defaultPerPage: 10,
+    defaultPerPage: 50,
     deleteMessages: {
       text: "Tidak bisa dikembalikan!",
       successText: "Menu berhasil dihapus.",
@@ -30,6 +30,18 @@ export function useMenuTable() {
         name: "Route",
         width: "180px",
         formatter: (cell?: string) =>
+          html(`<span class="text-muted small">${cell || "-"}</span>`),
+      },
+      {
+        name: "Icon",
+        width: "150px",
+        formatter: (cell?: string) =>
+          html(`<span class="text-muted small">${cell || "-"}</span>`),
+      },
+      {
+        name: "Parent",
+        width: "100px",
+        formatter: (cell?: number) =>
           html(`<span class="text-muted small">${cell || "-"}</span>`),
       },
       {
@@ -60,17 +72,17 @@ export function useMenuTable() {
           html(`
             <div class="d-flex gap-1 justify-content-center">
               <button class="btn btn-sm btn-soft-warning edit-btn" data-action="edit" data-id="${id}" title="Edit"><i class="bx bx-edit fs-16"></i></button>
-
+              <button class="btn btn-sm btn-soft-danger delete-btn" data-action="delete" data-id="${id}" title="Hapus"><i class="bx bx-trash fs-16"></i></button>
             </div>
           `),
       },
     ],
-    // <button class="btn btn-sm btn-soft-primary detail-btn" data-action="detail" data-id="${id}" title="Detail"><i class="bx bx-show fs-16"></i></button>
-    // <button class="btn btn-sm btn-soft-danger delete-btn" data-action="delete" data-id="${id}" title="Hapus"><i class="bx bx-trash fs-16"></i></button>
     rowMapper: (item: any, index: number) => [
       index,
       item.name,
-      item.route || "-",
+      item.route || null,
+      item.icon || null,
+      item.parent_id || null,
       item.guard_name,
       item.is_active,
       item.id,

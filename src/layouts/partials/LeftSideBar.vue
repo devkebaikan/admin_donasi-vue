@@ -9,7 +9,10 @@
     </button>
 
     <simplebar class="scrollbar">
-      <AppMenu :menu-items="getMenuItems()" />
+      <div v-if="isLoadingMenu" class="text-center p-3">
+        <b-spinner small /><p class="mt-2 small text-muted">Memuat Menu...</p>
+      </div>
+      <AppMenu v-else :menu-items="menuItems" />
     </simplebar>
   </div>
 </template>
@@ -18,11 +21,12 @@
 import { Icon } from "@iconify/vue";
 import simplebar from 'simplebar-vue';
 import AppMenu from '@/components/AppMenu/index.vue';
-import { getMenuItems } from '@/helpers/menu';
+import { useDynamicMenu } from '@/composables/useDynamicMenu';
 import { useLayoutStore } from '@/stores/layout';
 import { onMounted } from 'vue';
 
 const useLayout = useLayoutStore();
+const { menuItems, isLoading: isLoadingMenu } = useDynamicMenu();
 
 const { layout, setLeftSideBarSize } = useLayout;
 

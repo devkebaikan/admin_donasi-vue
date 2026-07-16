@@ -3,6 +3,34 @@
     <b-row>
       <b-col>
         <UIComponentCard id="menus-table" title="Daftar Menu">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <b-button-group>
+                <b-button
+                  :variant="
+                    viewFormat === 'tree' ? 'primary' : 'outline-secondary'
+                  "
+                  size="sm"
+                  @click="viewFormat = 'tree'"
+                >
+                  <i class="bx bx-sitemap me-1"></i>Struktur
+                </b-button>
+                <b-button
+                  :variant="
+                    viewFormat === 'list' ? 'primary' : 'outline-secondary'
+                  "
+                  size="sm"
+                  @click="viewFormat = 'list'"
+                >
+                  <i class="bx bx-list-ul me-1"></i>Daftar
+                </b-button>
+              </b-button-group>
+            </div>
+            <b-button variant="primary" @click="router.push('/menus/create')">
+              <i class="bx bx-plus fs-16 me-1"></i>Buat Menu
+            </b-button>
+          </div>
+
           <div v-if="isLoading" class="text-center p-4">
             <b-spinner />
             <p class="mt-2">Memuat...</p>
@@ -11,24 +39,39 @@
             {{ error?.message }}
           </div>
           <div v-else>
-            <GridJsTable
-              id="table-menus"
-              :key="tableKeyString"
-              :options="tableOptions"
-            />
-            <div class="d-flex justify-content-between mt-3">
-              <div class="text-muted">
-                Halaman {{ currentPage }} dari {{ totalPages }} (Total:
-                {{ totalRows }})
+            <!-- List View -->
+            <div v-if="viewFormat === 'list'">
+              <GridJsTable
+                id="table-menus"
+                :key="tableKeyString"
+                :options="tableOptions"
+              />
+              <div class="d-flex justify-content-between mt-3">
+                <div class="text-muted">
+                  Halaman {{ currentPage }} dari {{ totalPages }} (Total:
+                  {{ totalRows }})
+                </div>
+                <b-pagination
+                  v-model="currentPage"
+                  :total-rows="totalRows"
+                  :per-page="perPageItem"
+                  prev-text="Sebelumnya"
+                  next-text="Selanjutnya"
+                />
               </div>
-              <b-pagination
-                v-model="currentPage"
-                :total-rows="totalRows"
-                :per-page="perPageItem"
-                prev-text="Sebelumnya"
-                next-text="Selanjutnya"
+            </div>
+
+            <!-- Tree View -->
+            <div v-else class="menu-tree">
+              <MenuItem
+                v-for="item in treeData"
+                :key="item.id"
+                :item="item"
+                @edit="editItem"
+                @delete="deleteItem"
               />
             </div>
+
             <div v-if="isFetching" class="text-center mt-2">
               <small><b-spinner small />Memperbarui...</small>
             </div>
@@ -40,12 +83,20 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
+import { useQuery } from "@tanstack/vue-query";
+import { getAll, deleteMenu } from "@/services/rbacMenuService";
 import { useMenuTable } from "./components/data";
+import MenuItem from "./components/MenuItem.vue";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
+import Swal from "sweetalert2/dist/sweetalert2.js";
+import "sweetalert2/dist/sweetalert2.css";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 const router = useRouter();
+const viewFormat = ref<"list" | "tree">("tree");
 
 const {
   tableOptions,
@@ -61,7 +112,51 @@ const {
   handleDelete,
 } = useMenuTable();
 
+const { data: treeDataRes } = useQuery({
+  queryKey: computed(() => ["rbac-menus-tree", viewFormat.value]),
+  queryFn: () => getAll({ format: "tree" }),
+  enabled: computed(() => viewFormat.value === "tree" && !isLoading.value),
+});
+
+const treeData = computed(() => treeDataRes.value?.data || []);
+
+const editItem = (id: number) => {
+  router.push({
+    name: "menu.edit",
+    params: { id },
+  });
+};
+
+const deleteItem = async (id: number) => {
+  const result = await Swal.fire({
+    title: "Hapus Menu?",
+    text: "Tidak bisa dikembalikan!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Ya, Hapus",
+    cancelButtonText: "Batal",
+    confirmButtonColor: "#dc3545",
+  });
+
+  if (!result.isConfirmed) return;
+
+  try {
+    await deleteMenu(id);
+    toast("Menu berhasil dihapus.", {
+      type: "success",
+      position: "top-center",
+    });
+  } catch (err: any) {
+    toast(err?.response?.data?.message ?? "Gagal menghapus", {
+      type: "error",
+      position: "top-center",
+    });
+  }
+};
+
 const handleGlobalClick = (event: Event) => {
+  if (viewFormat.value !== "list") return;
+
   const target = event.target as HTMLElement;
   const editBtn = target.closest<HTMLElement>(
     '#table-menus .edit-btn[data-action="edit"]',
@@ -86,3 +181,11 @@ const handleGlobalClick = (event: Event) => {
 onMounted(() => document.addEventListener("click", handleGlobalClick));
 onBeforeUnmount(() => document.removeEventListener("click", handleGlobalClick));
 </script>
+
+<style scoped>
+.menu-tree {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+}
+</style>

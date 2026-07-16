@@ -524,6 +524,15 @@ const menuRoutes = [
     component: () => import("@/views/menus/listMenu.vue"),
   },
   {
+    path: "/menus/create",
+    name: "menu.create",
+    meta: {
+      title: setTitle("Buat Menu"),
+      authRequired: true,
+    },
+    component: () => import("@/views/menus/createMenu.vue"),
+  },
+  {
     path: "/menus/:id/edit",
     name: "menu.edit",
     meta: {

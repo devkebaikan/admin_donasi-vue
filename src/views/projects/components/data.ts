@@ -51,30 +51,24 @@ export function useProjectsTable() {
           html(`<span class="text-muted small">${cell}</span>`),
       },
       {
-        name: "Judul",
-        width: "300px",
-        formatter: (cell: string) =>
-          html(`<span class="fw-semibold">${cell}</span>`),
-      },
-      {
-        name: "Status",
-        width: "100px",
-        formatter: (cell: string) => {
-          const badge = STATUS_BADGE[cell] ?? "bg-secondary";
-          return html(`<span class="badge ${badge}">${cell}</span>`);
-        },
-      },
-      {
-        name: "Activity",
-        width: "100px",
-        formatter: (cell: string) => {
-          const badge = ACTIVITY_BADGE[cell] ?? "bg-secondary";
-          return html(`<span class="badge ${badge}">${cell ?? "-"}</span>`);
+        name: "Judul, Status, Activty",
+        width: "200px",
+        formatter: (item: {
+          judul: string;
+          status: string;
+          activity: string;
+        }) => {
+          const badgeStatus = STATUS_BADGE[item.status] ?? "bg-secondary";
+          const badgeActivity = ACTIVITY_BADGE[item.activity] ?? "bg-secondary";
+          return html(`<span class="fw-semibold">${item.judul}</span> <br/>
+            <span class="badge ${badgeStatus}">${item.status}</span>
+            <span class="badge ${badgeActivity}">${item.activity ?? "-"}</span>
+            `);
         },
       },
       {
         name: "Nominal",
-        width: "160px",
+        width: "120px",
         formatter: (item: {
           ajuan: number;
           acc: number;
@@ -87,13 +81,7 @@ export function useProjectsTable() {
         }) =>
           html(`
       <div class="small lh-sm">
-
-        <div class="d-flex justify-content-between">
-          <span class="text-muted">Diajukan</span>
-          <span class="fw-semibold">
-            ${formatCurrency(item.ajuan)}
-          </span>
-        </div>
+        
 
         <div class="d-flex justify-content-between mt-1">
           <span class="text-muted">Disetujui</span>
@@ -106,13 +94,6 @@ export function useProjectsTable() {
           <span class="text-muted">Terklaim</span>
           <span class="fw-semibold">
             ${formatCurrency(item.claimed)}
-          </span>
-        </div>
-
-        <div class="d-flex justify-content-between mt-1">
-          <span class="text-muted">Alokasi</span>
-          <span class="fw-semibold">
-            ${formatCurrency(item.alokasi)}
           </span>
         </div>
 
@@ -151,7 +132,7 @@ export function useProjectsTable() {
       },
       {
         name: "Pelaksanaan",
-        width: "100px",
+        width: "80px",
         formatter: (cell: string) =>
           html(
             `<span class="text-muted small">${formatDate(cell) ?? "-"}</span>`,
@@ -164,8 +145,8 @@ export function useProjectsTable() {
         formatter: (item: {
           activity: string;
           id: number;
-          alokasi: number;
-          refundMitra: number;
+          total_claim: number;
+          sisaDana: number;
         }) =>
           html(`
             <div
@@ -216,7 +197,7 @@ export function useProjectsTable() {
                 }
                 
                 ${
-                  item.alokasi > 0 &&
+                  item.total_claim > 0 &&
                   (item.activity === "active open" ||
                     item.activity === "active close")
                     ? `
@@ -233,7 +214,7 @@ export function useProjectsTable() {
                     : ""
                 }
                 ${
-                  item.refundMitra > 0 &&
+                  item.sisaDana > 0 &&
                   (item.activity === "active open" ||
                     item.activity === "active close" ||
                     item.activity === "selesai")
@@ -257,9 +238,11 @@ export function useProjectsTable() {
 
     rowMapper: (project: any, index: number) => [
       index,
-      project.judul,
-      project.status,
-      project.activity,
+      {
+        judul: project.judul,
+        status: project.status,
+        activity: project.activity,
+      },
       {
         ajuan: project.nominal_ajuan,
         acc: project.nominal_acc,
@@ -275,7 +258,7 @@ export function useProjectsTable() {
         activity: project.activity,
         id: project.id,
         alokasi: project.total_alokasi,
-        refundMitra: project.total_refund_mitra,
+        sisaDana: project.sisa_dana_mitra,
       },
     ],
   });

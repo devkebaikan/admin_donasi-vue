@@ -1,5 +1,17 @@
 import HttpClient from "@/helpers/http-client";
-import type { PaginatedResponse } from "@/composables/useDataTable";
+
+export interface MenuItem {
+  id: number;
+  name: string;
+  route?: string;
+  icon?: string;
+  order_index: number;
+  parent_id?: number;
+  guard_name: string;
+  is_active: boolean;
+  permissions?: Array<{ id: number; name: string }>;
+  children?: MenuItem[];
+}
 
 export const getRbacMenus = async () => {
   try {
@@ -11,12 +23,13 @@ export const getRbacMenus = async () => {
   }
 };
 
-export const getAll = async (params = {}) => {
+export const getAll = async (params: { format?: "list" | "tree" } = {}) => {
   try {
     const res = await HttpClient.get("/rbac/menus", { params });
     const items = res.data.data || [];
     return {
       data: items,
+      format: res.data.format || "list",
       meta: {
         total: items.length,
         last_page: 1,
@@ -26,7 +39,7 @@ export const getAll = async (params = {}) => {
     };
   } catch (error) {
     console.error("Error fetching menus:", error);
-    return { data: [], meta: { total: 0, last_page: 1 } };
+    return { data: [], format: "list", meta: { total: 0, last_page: 1 } };
   }
 };
 
@@ -40,7 +53,17 @@ export const getById = async (id: number) => {
   }
 };
 
-export const updateMenu = async (id: number, data: {}) => {
+export const createMenu = async (data: Record<string, any>) => {
+  try {
+    const res = await HttpClient.post("/rbac/menus", data);
+    return res.data.data;
+  } catch (error) {
+    console.error("Error creating menu:", error);
+    throw error;
+  }
+};
+
+export const updateMenu = async (id: number, data: Record<string, any>) => {
   try {
     const res = await HttpClient.put(`/rbac/menus/${id}`, data);
     return res.data.data;

@@ -3,10 +3,15 @@ import type { MenuItemType } from '@/types/menu'
 import type { RouteRecordName } from 'vue-router'
 
 let activeMenuItem = {}
+let cachedMenuItems: MenuItemType[] | null = null
 
 export const getMenuItems = () => {
-  // NOTE - You can fetch from server and return here as well
-  return MENU_ITEMS
+  // Fallback to static menu if dynamic menu is not loaded yet
+  return cachedMenuItems || MENU_ITEMS
+}
+
+export const setDynamicMenuItems = (items: MenuItemType[]) => {
+  cachedMenuItems = items
 }
 
 const getMatchingMenuItems = (data: MenuItemType[], currentRouteName: RouteRecordName | null | undefined) => {
@@ -31,6 +36,7 @@ const getMatchingMenuItems = (data: MenuItemType[], currentRouteName: RouteRecor
 }
 
 export const menuItemActive = (key: string, currentRouteName: RouteRecordName | null | undefined) => {
-  activeMenuItem = getMatchingMenuItems(MENU_ITEMS, currentRouteName)
+  const menuData = cachedMenuItems || MENU_ITEMS
+  activeMenuItem = getMatchingMenuItems(menuData, currentRouteName)
   return activeMenuItem && Object.values(activeMenuItem).includes(key)
 }
