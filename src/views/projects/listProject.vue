@@ -216,6 +216,8 @@ import ProjectDetailOffcanvas from "./components/ProjectDetailOffcanvas.vue";
 // import AjuanModal from "./components/AjuanModal.vue";
 // import RefundModal from "./components/RefundModal.vue";
 import { useProjectsTable } from "./components/data";
+import { useListStatePreserve } from "@/composables/useListStatePreserve";
+import { useOffcanvasStatePreserve } from "@/composables/useOffcanvasStatePreserve";
 import router from "@/router";
 import { useQuery, useQueryClient } from "@tanstack/vue-query";
 import { getAllPrograms } from "@/services/programService";
@@ -241,11 +243,29 @@ const {
   // handleDelete,
 } = useProjectsTable();
 
+// Preserve list state & scroll position
+useListStatePreserve("projects-list", {
+  searchQuery,
+  currentPage,
+  perPageItem,
+  extraFilters: computed(() => ({
+    selectedStatus: selectedStatus.value,
+    selectedActivity: selectedActivity.value,
+    selectedProgramId: selectedProgramId.value,
+  })),
+});
+
 // state
 const showAjuanRefundModal = ref(false);
 const modalMode = ref<"ajuan" | "refund">("ajuan");
 const showDetailOffcanvas = ref(false);
 const selectedProjectId = ref(0);
+
+// Preserve offcanvas detail state
+useOffcanvasStatePreserve("projects-detail", {
+  showOffcanvas: showDetailOffcanvas,
+  selectedId: selectedProjectId,
+});
 
 const route = useRoute();
 watch(
@@ -341,6 +361,10 @@ const handleGlobalClick = (event: Event) => {
     '#table-gridjs .keuangan-btn[data-action="keuangan"]',
   );
 
+  const kegiatanBtn = target.closest<HTMLElement>(
+    '#table-gridjs .kegiatan-btn[data-action="kegiatan"]',
+  );
+
   if (detailBtn) {
     event.preventDefault();
     const id = detailBtn.getAttribute("data-id");
@@ -379,6 +403,13 @@ const handleGlobalClick = (event: Event) => {
     event.preventDefault();
     const id = keuanganBtn.getAttribute("data-id");
     if (id) router.push(`/keuangan?project_id=${id}`);
+    return;
+  }
+
+  if (kegiatanBtn) {
+    event.preventDefault();
+    const id = kegiatanBtn.getAttribute("data-id");
+    if (id) router.push(`/kegiatan?project_id=${id}`);
     return;
   }
 };

@@ -18,6 +18,103 @@ const ACTIVITY_BADGE: Record<string, string> = {
   selesai: "bg-primary",
 };
 
+// Helper untuk render tombol berdasarkan kondisi
+const renderActionButtons = (item: {
+  id: number;
+  activity: string;
+  claimed: number;
+  acc: number;
+  sisaDana: number;
+  tfMitra: number;
+}) => {
+  const kurangFunding = item.acc - item.claimed;
+  const belumCair = item.claimed - item.tfMitra;
+
+  let html = '<div class="d-flex flex-column gap-2">';
+
+  // Funding Section
+  if (item.activity === "active open") {
+    html += `
+      <div class="d-flex align-items-center gap-2 p-2 bg-light rounded">
+        <button class="btn btn-sm btn-soft-success funding-btn flex-shrink-0"
+          data-action="funding" data-id="${item.id}"
+          title="Tambah Funding">
+          <i class="bx bx-dollar-circle fs-16"></i>
+        </button>
+        <div class="small flex-grow-1 text-truncate">
+          <div class="text-muted">Kurang Funding</div>
+          <div class="fw-semibold text-warning">${formatCurrency(kurangFunding)}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Ajuan Section
+  if (
+    item.claimed > 0 &&
+    (item.activity === "active open" || item.activity === "active close")
+  ) {
+    html += `
+      <div class="d-flex align-items-center gap-2 p-2 bg-light rounded">
+        <button class="btn btn-sm btn-soft-info ajuan-btn flex-shrink-0"
+          data-action="ajuan" data-id="${item.id}"
+          title="Ajuan Dana">
+          <i class="bx bx-receipt fs-16"></i>
+        </button>
+        <div class="small flex-grow-1 text-truncate">
+          <div class="text-muted">Belum Cair</div>
+          <div class="fw-semibold text-primary">${formatCurrency(belumCair)}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Keuangan Section
+  if (item.activity === "active open") {
+    html += `
+      <div class="d-flex align-items-center gap-2 p-2 bg-light rounded">
+        <button class="btn btn-sm btn-soft-secondary keuangan-btn flex-shrink-0"
+          data-action="keuangan" data-id="${item.id}"
+          title="Laporan Keuangan">
+          <i class="bx bx-money fs-16"></i>
+        </button>
+        <div class="small flex-grow-1 text-truncate">
+          <div class="text-muted">Sisa Dana</div>
+          <div class="fw-semibold text-success">${formatCurrency(item.sisaDana)}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Refund Section
+  if (
+    item.sisaDana > 0 &&
+    (item.activity === "active open" ||
+      item.activity === "active close" ||
+      item.activity === "selesai")
+  ) {
+    html += `
+      <div class="d-flex align-items-center gap-2 p-2 bg-light rounded">
+        <button class="btn btn-sm btn-soft-danger refund-btn flex-shrink-0"
+          data-action="refund" data-id="${item.id}"
+          title="Refund Dana">
+          <i class="bx bx-revision fs-16"></i>
+        </button>
+        <div class="small flex-grow-1 text-truncate">
+          <div class="text-muted">Sisa Dana</div>
+          <div class="fw-semibold text-danger">${formatCurrency(item.sisaDana)}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  html += "</div>";
+
+  return html.includes("btn-soft-")
+    ? html
+    : '<span class="text-muted small text-center d-block">—</span>';
+};
+
 export function useProjectsTable() {
   const selectedStatus = ref<string>("");
   const selectedActivity = ref<string>("");
@@ -51,26 +148,43 @@ export function useProjectsTable() {
           html(`<span class="text-muted small">${cell}</span>`),
       },
       {
-        name: "Judul, Status, Activty",
-        width: "200px",
+        name: "Proyek",
+        width: "280px",
         formatter: (item: {
+          id: number;
           judul: string;
           status: string;
           activity: string;
+          pelaksanaan: string;
         }) => {
           const badgeStatus = STATUS_BADGE[item.status] ?? "bg-secondary";
           const badgeActivity = ACTIVITY_BADGE[item.activity] ?? "bg-secondary";
-          return html(`<span class="fw-semibold">${item.judul}</span> <br/>
-            <span class="badge ${badgeStatus}">${item.status}</span>
-            <span class="badge ${badgeActivity}">${item.activity ?? "-"}</span>
+          return html(`
+            <div class="fw-semibold">${item.judul}</div>
+            <div class="d-flex justify-content-between align-items-center mt-1">
+              <div class="d-flex gap-1">
+                <span class="badge ${badgeStatus}">${item.status}</span>
+                <span class="badge ${badgeActivity}">${item.activity ?? "-"}</span>
+              </div>
+            </div>
+            <small class="text-muted d-block mt-2">${formatDate(item.pelaksanaan) ?? "-"}</small>
+            <div class="d-flex gap-1 mt-3">
+              <button class="btn btn-sm btn-soft-primary detail-btn flex-fill"
+                data-action="detail" data-id="${item.id}" title="Lihat Detail">
+                <i class="bx bx-show me-1"></i>Detail
+              </button>
+              <button class="btn btn-sm btn-soft-warning kegiatan-btn flex-fill"
+                data-action="kegiatan" data-id="${item.id}" title="Progres Proyek">
+                <i class="bx bx-task me-1"></i>Progres
+              </button>
+            </div>
             `);
         },
       },
       {
-        name: "Nominal",
-        width: "120px",
+        name: "Keuangan",
+        width: "280px",
         formatter: (item: {
-          ajuan: number;
           acc: number;
           claimed: number;
           alokasi: number;
@@ -81,170 +195,150 @@ export function useProjectsTable() {
         }) =>
           html(`
       <div class="small lh-sm">
-        
-
-        <div class="d-flex justify-content-between mt-1">
+        <div class="d-flex justify-content-between">
           <span class="text-muted">Disetujui</span>
-          <span class="fw-semibold text-success">
-            ${formatCurrency(item.acc)}
-          </span>
+          <span class="fw-semibold text-success">${formatCurrency(item.acc)}</span>
         </div>
-
         <div class="d-flex justify-content-between mt-1">
           <span class="text-muted">Terklaim</span>
-          <span class="fw-semibold">
-            ${formatCurrency(item.claimed)}
-          </span>
+          <span class="fw-semibold">${formatCurrency(item.claimed)}</span>
         </div>
-
+        <div class="d-flex justify-content-between mt-1">
+          <span class="text-muted">Kurang Funding</span>
+          <span class="fw-semibold text-warning">${formatCurrency(item.acc - item.claimed)}</span>
+        </div>
         <div class="d-flex justify-content-between mt-1">
           <span class="text-muted">TF Mitra</span>
-          <span class="fw-semibold">
-            ${formatCurrency(item.tfMitra)}
-          </span>
+          <span class="fw-semibold">${formatCurrency(item.tfMitra)}</span>
         </div>
-
+        <div class="d-flex justify-content-between mt-1">
+          <span class="text-muted">Saldo belum cair</span>
+          <span class="fw-semibold">${formatCurrency(item.claimed - item.tfMitra)}</span>
+        </div>
         <div class="d-flex justify-content-between mt-1">
           <span class="text-muted">Pakai Mitra</span>
-          <span class="fw-semibold">
-            ${formatCurrency(item.pakaiMitra)}
-          </span>
+          <span class="fw-semibold">${formatCurrency(item.pakaiMitra)}</span>
         </div>
-
         <div class="d-flex justify-content-between mt-1">
           <span class="text-muted">Refund</span>
-          <span class="fw-semibold text-danger">
-            ${formatCurrency(item.refundMitra)}
-          </span>
+          <span class="fw-semibold text-danger">${formatCurrency(item.refundMitra)}</span>
         </div>
-
         <hr class="my-2"/>
-
         <div class="d-flex justify-content-between">
           <span class="fw-semibold">Sisa Dana</span>
-          <span class="fw-bold text-primary">
-            ${formatCurrency(item.sisaDana)}
-          </span>
+          <span class="fw-bold text-primary">${formatCurrency(item.sisaDana)}</span>
         </div>
-
       </div>
     `),
       },
       {
-        name: "Pelaksanaan",
-        width: "80px",
-        formatter: (cell: string) =>
-          html(
-            `<span class="text-muted small">${formatDate(cell) ?? "-"}</span>`,
-          ),
-      },
-      {
-        name: "Actions",
-        width: "40px",
+        name: "Aksi",
+        width: "220px",
         sort: false,
-        formatter: (item: {
-          activity: string;
-          id: number;
-          total_claim: number;
-          sisaDana: number;
-        }) =>
-          html(`
-            <div
-              class="d-grid gap-0 justify-content-center"
-              style="grid-template-columns: repeat(2, auto);"
-            >
-              <button
-                  class="btn btn-sm btn-soft-primary detail-btn"
-                  style='width:48px'
-                  data-action="detail"
-                  data-id="${item.id}"
-                  title="Lihat Detail">
-                  <i class="bx bx-show fs-16"></i>
-                </button>             
-
-                <button
-                  class="btn btn-sm btn-soft-warning edit-btn"
-                  style='width:48px'
-                  data-action="edit"
-                  data-id="${item.id}"
-                  title="Edit Project">
-                  <i class="bx bx-edit-alt fs-16"></i>
-                </button>
-                
-                ${
-                  item.activity === "active open"
-                    ? `
-                    <button
-                      class="btn btn-sm btn-soft-success funding-btn"
-                      style="width:48px"
-                      data-action="funding"
-                      data-id="${item.id}"
-                      title="Funding Project"
-                    >
-                      <i class="bx bx-dollar-circle fs-16"></i>
-                    </button>
-                    <button
-                      class="btn btn-sm btn-soft-secondary keuangan-btn"
-                      style="width:48px"
-                      data-action="keuangan"
-                      data-id="${item.id}"
-                      title="Keuangan Project"
-                    >
-                      <i class="bx bx-money fs-16"></i>
-                    </button>
-                  `
-                    : ""
-                }
-                
-                ${
-                  item.total_claim > 0 &&
-                  (item.activity === "active open" ||
-                    item.activity === "active close")
-                    ? `
-                    <button
-                      class="btn btn-sm btn-soft-primary ajuan-btn"
-                      style="width:48px"
-                      data-action="ajuan"
-                      data-id="${item.id}"
-                      title="Ajuan Project"
-                    >
-                      <i class="bx bx-receipt fs-16"></i>
-                    </button>
-                  `
-                    : ""
-                }
-                ${
-                  item.sisaDana > 0 &&
-                  (item.activity === "active open" ||
-                    item.activity === "active close" ||
-                    item.activity === "selesai")
-                    ? `
-                    <button
-                      class="btn btn-sm btn-soft-danger refund-btn"
-                      style="width:48px"
-                      data-action="refund"
-                      data-id="${item.id}"
-                      title="Refund Project"
-                    >
-                     <i class="bx bx-revision fs-16"></i>
-                    </button>
-                  `
-                    : ""
-                }
-              </div>
-              `),
+        formatter: (actionsData: string) => {
+          const data = JSON.parse(actionsData);
+          return html(renderActionButtons(data));
+        },
       },
+      // {
+      //   name: "Actions",
+      //   width: "40px",
+      //   sort: false,
+      //   formatter: (item: {
+      //     activity: string;
+      //     id: number;
+      //     total_claim: number;
+      //     sisaDana: number;
+      //   }) =>
+      //     html(`
+      //       <div
+      //         class="d-grid gap-0 justify-content-center"
+      //         style="grid-template-columns: repeat(2, auto);"
+      //       >
+      //           ${
+      //             item.activity === "active open"
+      //               ? `
+      //               <button
+      //                 class="btn btn-sm btn-soft-success funding-btn"
+      //                 style="width:48px"
+      //                 data-action="funding"
+      //                 data-id="${item.id}"
+      //                 title="Funding Project"
+      //               >
+      //                 <i class="bx bx-dollar-circle fs-16"></i>
+      //               </button>
+      //               <button
+      //                 class="btn btn-sm btn-soft-secondary keuangan-btn"
+      //                 style="width:48px"
+      //                 data-action="keuangan"
+      //                 data-id="${item.id}"
+      //                 title="Keuangan Project"
+      //               >
+      //                 <i class="bx bx-money fs-16"></i>
+      //               </button>
+      //             `
+      //               : ""
+      //           }
+
+      //           ${
+      //             item.total_claim > 0 &&
+      //             (item.activity === "active open" ||
+      //               item.activity === "active close")
+      //               ? `
+      //               <button
+      //                 class="btn btn-sm btn-soft-primary ajuan-btn"
+      //                 style="width:48px"
+      //                 data-action="ajuan"
+      //                 data-id="${item.id}"
+      //                 title="Ajuan Project"
+      //               >
+      //                 <i class="bx bx-receipt fs-16"></i>
+      //               </button>
+      //             `
+      //               : ""
+      //           }
+      //           <button
+      //             class="btn btn-sm btn-soft-primary ajuan-btn"
+      //             style="width:48px"
+      //             data-action="ajuan"
+      //             data-id="${item.id}"
+      //             title="Laporkan keuangan"
+      //           >
+      //             <i class="bx bx-receipt fs-16"></i>
+      //           </button>
+      //           ${
+      //             item.sisaDana > 0 &&
+      //             (item.activity === "active open" ||
+      //               item.activity === "active close" ||
+      //               item.activity === "selesai")
+      //               ? `
+      //               <button
+      //                 class="btn btn-sm btn-soft-danger refund-btn"
+      //                 style="width:48px"
+      //                 data-action="refund"
+      //                 data-id="${item.id}"
+      //                 title="Refund Project"
+      //               >
+      //                <i class="bx bx-revision fs-16"></i>
+      //               </button>
+      //             `
+      //               : ""
+      //           }
+      //         </div>
+      //         `),
+      // },
     ],
 
     rowMapper: (project: any, index: number) => [
       index,
       {
+        id: project.id,
         judul: project.judul,
         status: project.status,
         activity: project.activity,
+        pelaksanaan: project.waktu_pelaksanaan,
       },
       {
-        ajuan: project.nominal_ajuan,
         acc: project.nominal_acc,
         claimed: project.claimed_donasi,
         alokasi: project.total_alokasi,
@@ -253,13 +347,14 @@ export function useProjectsTable() {
         refundMitra: project.total_refund_mitra,
         sisaDana: project.sisa_dana_mitra,
       },
-      project.waktu_pelaksanaan,
-      {
-        activity: project.activity,
+      JSON.stringify({
         id: project.id,
-        alokasi: project.total_alokasi,
+        activity: project.activity,
+        claimed: project.claimed_donasi,
+        acc: project.nominal_acc,
         sisaDana: project.sisa_dana_mitra,
-      },
+        tfMitra: project.total_tf_ke_mitra,
+      }),
     ],
   });
 

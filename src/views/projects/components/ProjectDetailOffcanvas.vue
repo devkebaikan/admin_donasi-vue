@@ -66,9 +66,9 @@
           variant="soft-primary"
           size="sm"
           class="flex-fill"
-          @click="router.push(`/kegiatan?project_id=${projectDetail.id}`)"
+          @click="router.push(`/projects/${projectDetail.id}/edit`)"
         >
-          <i class="bx bx-task fs-16 me-1"></i>Kegiatan
+          <i class="bx bx-edit-alt fs-16 me-1"></i>Edit
         </b-button>
         <b-button
           variant="soft-info"

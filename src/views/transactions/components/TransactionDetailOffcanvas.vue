@@ -154,6 +154,48 @@
         <p v-else class="text-muted small fst-italic">
           Tidak ada detail donasi.
         </p>
+        <hr class="my-3" />
+
+        <!-- Info Donatur -->
+        <h6
+          class="fw-semibold text-muted mb-3 text-uppercase"
+          style="font-size: 11px; letter-spacing: 0.5px"
+        >
+          <i class="bx bx-user me-1"></i>Informasi Donatur
+        </h6>
+        <b-row class="g-2 mb-3 border rounded p-3">
+          <b-col cols="6">
+            <small class="text-muted d-block">Nama</small>
+            <span class="fw-semibold small">
+              {{ txDetail.user.name || "-" }}
+            </span>
+          </b-col>
+          <b-col cols="6">
+            <small class="text-muted d-block">Email</small>
+            <span class="fw-semibold small">
+              {{ txDetail.user.email || "-" }}
+            </span>
+          </b-col>
+          <b-col cols="6">
+            <small class="text-muted d-block">No. Telepon</small>
+            <a
+              v-if="txDetail.user.phone"
+              :href="`https://wa.me/${txDetail.user.phone}`"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="fw-semibold small"
+            >
+              <i class="bx bxl-whatsapp text-success me-1"></i
+              >{{ txDetail.user.phone }}
+            </a>
+          </b-col>
+          <b-col cols="6">
+            <small class="text-muted d-block">ID User</small>
+            <span class="fw-semibold small font-monospace">
+              {{ txDetail.user.id || "-" }}
+            </span>
+          </b-col>
+        </b-row>
 
         <hr class="my-3" />
 
@@ -308,12 +350,12 @@
       </div>
       <div v-if="activeTab === 'user'" class="tab-content">
         <div v-if="txDetail.user">
-          <!-- Info Pembayar -->
+          <!-- Info Donatur -->
           <h6
             class="fw-semibold text-muted mb-3 text-uppercase"
             style="font-size: 11px; letter-spacing: 0.5px"
           >
-            <i class="bx bx-user me-1"></i>Informasi Pembayar
+            <i class="bx bx-user me-1"></i>Informasi Donatur
           </h6>
           <b-row class="g-2 mb-3">
             <b-col cols="6">
@@ -343,7 +385,7 @@
                   :href="`https://wa.me/${userDetail.phone}`"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="fw-semibold"
+                  class="fw-semibold small"
                 >
                   <i class="bx bxl-whatsapp text-success me-1"></i
                   >{{ userDetail.phone }}

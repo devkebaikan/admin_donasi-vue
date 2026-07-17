@@ -562,6 +562,7 @@ import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
 import { useProgramsTable } from "./components/data";
 import { useListStatePreserve } from "@/composables/useListStatePreserve";
+import { useOffcanvasStatePreserve } from "@/composables/useOffcanvasStatePreserve";
 import router from "@/router";
 import { useQuery } from "@tanstack/vue-query";
 import {
@@ -652,6 +653,12 @@ const getCategoryName = (value: string | number) =>
 // --- Detail Offcanvas ---
 const showDetailOffcanvas = ref(false);
 const selectedProgramLink = ref("");
+
+// Preserve offcanvas state (open/close + selected program)
+useOffcanvasStatePreserve("programs-detail", {
+  showOffcanvas: showDetailOffcanvas,
+  selectedId: selectedProgramLink,
+});
 
 const {
   data: programDetail,
