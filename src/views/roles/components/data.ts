@@ -9,6 +9,7 @@ export function useRoleTable() {
   const extraFilters = computed(() => {
     const filters: Record<string, string> = {};
     if (selectedGuardName.value) filters.guard_name = selectedGuardName.value;
+    else filters.guard_name = "api";
     return filters;
   });
 

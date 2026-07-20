@@ -165,7 +165,7 @@ const MODE_CONFIG: Record<
     successMsg: string;
     errorMsg: string;
     invalidateKey: string;
-    maxField: "total_alokasi" | "total_refund_mitra";
+    maxField: "total_alokasi" | "sisa_dana_mitra";
     maxExceededMsg: (max: string) => string;
   }
 > = {
@@ -189,9 +189,9 @@ const MODE_CONFIG: Record<
     successMsg: "Refund berhasil dibuat",
     errorMsg: "Gagal membuat refund",
     invalidateKey: "project-refunds",
-    maxField: "total_refund_mitra",
+    maxField: "sisa_dana_mitra",
     maxExceededMsg: (max) =>
-      `Nominal refund tidak boleh melebihi total refund mitra (Rp ${max})`,
+      `Nominal refund tidak boleh melebihi sisa dana (Rp ${max})`,
   },
 };
 

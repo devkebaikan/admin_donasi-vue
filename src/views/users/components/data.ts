@@ -64,21 +64,6 @@ export function useUsersTable() {
             : html(`<span class="text-muted small">-</span>`),
       },
       {
-        name: "Role ID",
-        width: "80px",
-        formatter: (cell: number) =>
-          html(`<span class="badge bg-primary">${cell ?? "-"}</span>`),
-      },
-      //   {
-      //     name: "Verified",
-      //     width: "100px",
-      //     formatter: (cell: string) => {
-      //       if (!cell) return html(`<span class="badge bg-secondary">-</span>`);
-      //       const badge = VERIFIED_BADGE[cell] ?? "bg-info";
-      //       return html(`<span class="badge ${badge}">${cell}</span>`);
-      //     },
-      //   },
-      {
         name: "Aksi",
         width: "120px",
         sort: false,
@@ -124,8 +109,6 @@ export function useUsersTable() {
       item.name,
       item.phone,
       item.email ?? "",
-      item.role_id,
-      //   item.verified ?? "",
       item.id,
     ],
   });

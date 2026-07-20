@@ -78,7 +78,7 @@
         </b-col>
 
         <!-- Program Filter -->
-        <b-col cols="12" md="4">
+        <!-- <b-col cols="12" md="4">
           <label class="form-label fw-semibold"> Program </label>
 
           <ChoicesSelect
@@ -93,7 +93,7 @@
             :options="programOptions"
             :key="programOptions.length"
           />
-        </b-col>
+        </b-col> -->
 
         <!-- <b-col cols="12" md="3" class="mb-3">
           <label class="form-label fw-semibold">Program</label>
@@ -145,7 +145,7 @@
           variant="primary"
           class="d-flex align-items-center gap-1"
         >
-          Program: {{ getProgramName(selectedProgramId) }}
+          Program Id: {{ selectedProgramId }}
           <i class="bx bx-x cursor-pointer" @click="selectedProgramId = ''"></i>
         </b-badge>
       </div>
@@ -286,21 +286,21 @@ const hasActiveFilters = computed(
     ),
 );
 
-const { data: programData } = useQuery({
-  queryKey: ["programs-all"],
-  queryFn: () => getAllPrograms({ mode: "list" }),
-});
+// const { data: programData } = useQuery({
+//   queryKey: ["programs-all"],
+//   queryFn: () => getAllPrograms({ mode: "list" }),
+// });
 
-const programOptions = computed(() => {
-  if (!programData.value) return [{ value: "", text: "Semua program" }];
-  return [
-    { value: "", text: "Semua program" },
-    ...programData.value?.map((item: any) => ({
-      value: item.id,
-      text: item.title,
-    })),
-  ];
-});
+// const programOptions = computed(() => {
+//   if (!programData.value) return [{ value: "", text: "Semua program" }];
+//   return [
+//     { value: "", text: "Semua program" },
+//     ...programData.value?.map((item: any) => ({
+//       value: item.id,
+//       text: item.title,
+//     })),
+//   ];
+// });
 
 const clearFilters = () => {
   selectedStatus.value = "";
@@ -312,9 +312,9 @@ const clearFilters = () => {
 
 const queryClient = useQueryClient();
 
-const getProgramName = (id: string | number) =>
-  programOptions.value.find((p: any) => p.id === Number(id))?.title ??
-  String(id);
+// const getProgramName = (id: string | number) =>
+//   programOptions.value.find((p: any) => p.id === Number(id))?.title ??
+//   String(id);
 
 const openDetail = (id: number) => {
   selectedProjectId.value = id;

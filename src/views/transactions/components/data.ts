@@ -5,7 +5,7 @@ import {
   getAllTransactions,
   deleteTransaction,
 } from "@/services/transactionService";
-import { formatCurrency } from "@/helpers/format";
+import { formatCurrency, formatDateTime } from "@/helpers/format";
 
 const STATUS_MAP: Record<string, { cls: string; label: string }> = {
   Paid: { cls: "bg-success", label: "Paid" },
@@ -79,10 +79,7 @@ export function useTransactionTable() {
         width: "110px",
         formatter: (cell: string) => {
           if (!cell) return html(`<span class="text-muted">-</span>`);
-          const d = new Date(cell);
-          return html(
-            `<span class="small">${d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}</span>`,
-          );
+          return html(`<span class="small">${formatDateTime(cell)}</span>`);
         },
       },
       {

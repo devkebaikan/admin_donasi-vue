@@ -38,7 +38,7 @@
           <label class="form-label fw-semibold">Guard</label>
           <b-form-select v-model="selectedGuardName" @change="resetPage">
             <template #first>
-              <b-form-select-option value="">Semua Guard</b-form-select-option>
+              <b-form-select-option value="">Pilih Guard</b-form-select-option>
             </template>
             <b-form-select-option value="api">api</b-form-select-option>
             <b-form-select-option value="web">web</b-form-select-option>
@@ -160,7 +160,7 @@ const hasActiveFilters = computed(
 
 const clearFilters = () => {
   searchQuery.value = "";
-  selectedGuardName.value = "";
+  selectedGuardName.value = "api";
   resetPage();
 };
 

@@ -84,8 +84,13 @@
           style="font-size: 11px; letter-spacing: 0.5px"
         >
           <i class="bx bx-list-ul me-1"></i>Detail Donasi
-          <span class="ms-1 badge bg-secondary">
-            {{ txDetail.transaction_details?.length ?? 0 }}
+          <span class="ms-1 badge bg-primary">
+            Sudah donasi -
+            {{
+              txDetail.status === "Pending"
+                ? userHistory?.length + 1
+                : userHistory?.length
+            }}x
           </span>
         </h6>
         <div
@@ -99,50 +104,47 @@
           >
             <div class="d-flex justify-content-between align-items-start mb-2">
               <div class="fw-semibold small">
-                {{ detail.program?.name || "-" }}
+                Program - {{ detail.program?.name || "-" }}
               </div>
-              <span :class="['badge', activityBadgeClass(detail.activity)]">
-                {{ detail.activity }}
-              </span>
             </div>
             <b-row class="g-2">
-              <b-col cols="6">
+              <b-col cols="4">
                 <small class="text-muted d-block">Gross Nominal</small>
                 <small class="fw-semibold">
                   {{ formatCurrency(detail.gross_nominal) }}
                 </small>
               </b-col>
-              <b-col cols="6">
+              <b-col cols="4">
                 <small class="text-muted d-block">Nominal Bersih</small>
                 <small class="fw-semibold text-success">
                   {{ formatCurrency(detail.nominal) }}
                 </small>
               </b-col>
-              <b-col cols="6">
+              <b-col cols="4">
                 <small class="text-muted d-block">Operasional</small>
                 <small class="fw-semibold">
                   {{ formatCurrency(detail.operasional) }}
                 </small>
               </b-col>
-              <b-col cols="6">
+              <b-col cols="4">
                 <small class="text-muted d-block">Komisi</small>
                 <small class="fw-semibold">
                   {{ formatCurrency(detail.komisi) }}
                 </small>
               </b-col>
-              <b-col cols="6">
+              <b-col cols="4">
                 <small class="text-muted d-block">Fee</small>
                 <small class="fw-semibold">
                   {{ formatCurrency(detail.fee) }}
                 </small>
               </b-col>
-              <b-col cols="6">
+              <b-col cols="4">
                 <small class="text-muted d-block">Diskon</small>
                 <small class="fw-semibold">
                   {{ formatCurrency(detail.discount) }}
                 </small>
               </b-col>
-              <b-col v-if="detail.refund" cols="6">
+              <b-col v-if="detail.refund" cols="4">
                 <small class="text-muted d-block">Refund</small>
                 <small class="fw-semibold text-danger">
                   {{ formatCurrency(detail.refund) }}
@@ -164,19 +166,19 @@
           <i class="bx bx-user me-1"></i>Informasi Donatur
         </h6>
         <b-row class="g-2 mb-3 border rounded p-3">
-          <b-col cols="6">
+          <b-col cols="4">
             <small class="text-muted d-block">Nama</small>
             <span class="fw-semibold small">
               {{ txDetail.user.name || "-" }}
             </span>
           </b-col>
-          <b-col cols="6">
+          <b-col cols="4">
             <small class="text-muted d-block">Email</small>
             <span class="fw-semibold small">
               {{ txDetail.user.email || "-" }}
             </span>
           </b-col>
-          <b-col cols="6">
+          <b-col cols="4">
             <small class="text-muted d-block">No. Telepon</small>
             <a
               v-if="txDetail.user.phone"
@@ -189,10 +191,17 @@
               >{{ txDetail.user.phone }}
             </a>
           </b-col>
-          <b-col cols="6">
+          <b-col cols="4">
             <small class="text-muted d-block">ID User</small>
             <span class="fw-semibold small font-monospace">
               {{ txDetail.user.id || "-" }}
+            </span>
+          </b-col>
+
+          <b-col cols="8">
+            <small class="text-muted d-block">Doa</small>
+            <span class="small">
+              {{ txDetail.doa || "-" }}
             </span>
           </b-col>
         </b-row>
@@ -599,7 +608,11 @@ const {
     "user-transaction-history",
     txDetail.value?.user?.id,
   ]),
-  queryFn: () => getAllTransactions({ user_id: txDetail.value?.user?.id || 0 }),
+  queryFn: () =>
+    getAllTransactions({
+      user_id: txDetail.value?.user?.id || 0,
+      status: "Paid",
+    }),
   enabled: computed(() => !!txDetail.value?.user?.id),
 });
 

@@ -193,7 +193,7 @@
 
         <b-col cols="4">
           <div class="bg-light rounded p-2">
-            <small class="text-muted d-block">Claim Donasi</small>
+            <small class="text-muted d-block">Terklaim</small>
             <span class="fw-semibold font-monospace small">
               {{ formatCurrency(projectDetail.claimed_donasi) }}
             </span>
@@ -201,6 +201,19 @@
         </b-col>
 
         <b-col cols="4">
+          <div class="bg-light rounded p-2">
+            <small class="text-muted d-block">Kurang Funding</small>
+            <span class="fw-semibold font-monospace small text-warning">
+              {{
+                formatCurrency(
+                  projectDetail.nominal_acc - projectDetail.claimed_donasi,
+                )
+              }}
+            </span>
+          </div>
+        </b-col>
+
+        <!-- <b-col cols="4">
           <div class="bg-light rounded p-2">
             <small class="text-muted d-block">Total Alokasi</small>
             <span class="fw-semibold font-monospace small">
@@ -216,7 +229,7 @@
               {{ formatCurrency(projectDetail.total_allocated) }}
             </span>
           </div>
-        </b-col>
+        </b-col> 
 
         <b-col cols="4">
           <div class="bg-light rounded p-2">
@@ -225,13 +238,27 @@
               {{ formatCurrency(projectDetail.total_disbursed) }}
             </span>
           </div>
-        </b-col>
+        </b-col> -->
 
         <b-col cols="4">
           <div class="bg-light rounded p-2">
             <small class="text-muted d-block">Transfer ke Mitra</small>
             <span class="fw-semibold font-monospace small">
               {{ formatCurrency(projectDetail.total_tf_ke_mitra) }}
+            </span>
+          </div>
+        </b-col>
+
+        <b-col cols="4">
+          <div class="bg-light rounded p-2">
+            <small class="text-muted d-block">Belum dicairkan</small>
+            <span class="fw-semibold font-monospace small">
+              {{
+                formatCurrency(
+                  projectDetail.claimed_donasi -
+                    projectDetail.total_tf_ke_mitra,
+                )
+              }}
             </span>
           </div>
         </b-col>
@@ -298,6 +325,20 @@
         </div>
       </div>
 
+      <hr class="my-3" />
+      <!-- Link -->
+      <div class="mb-3">
+        <small class="text-muted d-block mb-1">URL detail project</small>
+        <a
+          :href="`https://don.aksiberbagi.com/donasi/project/detail/${projectDetail.link}`"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="small text-break"
+        >
+          don.aksiberbagi.com/donasi/project/detail/{{ projectDetail.link }}
+          <i class="bx bx-link-external ms-1"></i>
+        </a>
+      </div>
       <hr class="my-3" />
 
       <!-- Mitras -->

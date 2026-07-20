@@ -70,7 +70,7 @@ const renderActionButtons = (item: {
   }
 
   // Keuangan Section
-  if (item.activity === "active open") {
+  if (item.activity === "active open" && item.sisaDana) {
     html += `
       <div class="d-flex align-items-center gap-2 p-2 bg-light rounded">
         <button class="btn btn-sm btn-soft-secondary keuangan-btn flex-shrink-0"

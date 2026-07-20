@@ -281,14 +281,14 @@
     <b-row>
       <b-col>
         <UIComponentCard id="basic" title="Daftar Transaksi">
-          <div class="d-flex justify-content-end mb-3">
+          <!-- <div class="d-flex justify-content-end mb-3">
             <b-button
               variant="primary"
               @click="router.push('/transactions/create')"
             >
               <i class="bx bx-plus fs-16 me-1"></i>Tambah Transaksi
             </b-button>
-          </div>
+          </div> -->
 
           <div v-if="isLoading" class="text-center p-4">
             <b-spinner variant="primary" />
@@ -368,7 +368,7 @@ const paymentList = computed(() => {
     { value: "", text: "Payment method" },
     ...paymentMethod.value?.map((item: any) => ({
       value: item.id,
-      text: item.name,
+      text: `${item.bank_reference.name} | ${item.account_number}`,
     })),
   ];
 });
