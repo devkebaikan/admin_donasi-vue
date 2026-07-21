@@ -13,15 +13,15 @@ export interface MenuItem {
   children?: MenuItem[];
 }
 
-export const getRbacMenus = async () => {
-  try {
-    const res = await HttpClient.get("/rbac/me/menus");
-    return res.data;
-  } catch (error) {
-    console.error("Error fetching RBAC menus:", error);
-    return { data: [], status: 500 };
-  }
-};
+// export const getRbacMenus = async () => {
+//   try {
+//     const res = await HttpClient.get("/rbac/me/menus");
+//     return res.data;
+//   } catch (error) {
+//     console.error("Error fetching RBAC menus:", error);
+//     return { data: [], status: 500 };
+//   }
+// };
 
 export const getAll = async (params: { format?: "list" | "tree" } = {}) => {
   try {

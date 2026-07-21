@@ -1,3 +1,11 @@
+export type UserMenuItem = {
+  id: number;
+  name: string;
+  route?: string;
+  icon?: string;
+  children?: UserMenuItem[];
+};
+
 export type User = {
   data: any;
   access_token: any;
@@ -9,4 +17,6 @@ export type User = {
   lastName?: string;
   role?: string;
   token?: string;
+  menus?: UserMenuItem[];
+  permissions?: string[];
 };

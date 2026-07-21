@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { allRoutes } from "./routes";
 import { useAuthStore } from '@/stores/auth'
+import { hasRouteAccess } from '@/helpers/permission'
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -32,11 +33,29 @@ router.beforeEach((routeTo, routeFrom, next) => {
     // If auth is required and the user is NOT currently logged in,
     // redirect to login.
     redirectToLogin()
-  
+
     function redirectToLogin() {
       // Pass the original route to the login component
       next({ name: 'auth.sign-in', query: { redirectedFrom: routeTo.fullPath } })
     }
   })
+
+router.beforeEach((to, from, next) => {
+  // Cek permission halaman berdasarkan menu yang dimiliki user (VUE_USER.menus).
+  // Guard ini hanya jalan untuk route yang lolos pengecekan auth di atas.
+  const authRequired = to.matched.some((route) => route.meta.authRequired)
+  if (!authRequired) return next()
+
+  const routeName = to.name?.toString()
+  if (!routeName) return next()
+
+  const menuModule = to.matched
+    .map((route) => route.meta.menuModule as string | undefined)
+    .find(Boolean)
+
+  if (hasRouteAccess(routeName, menuModule)) return next()
+
+  next({ name: 'error.404' })
+})
 
 export default router;

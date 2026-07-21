@@ -109,6 +109,7 @@ const programRoutes = [
     meta: {
       title: setTitle("Program Project"),
       authRequired: true,
+      menuModule: "programs",
     },
     component: () =>
       import("@/views/programs/projectProgram/listProjectProgram.vue"),
@@ -658,6 +659,7 @@ const projectRoutes = [
     meta: {
       title: setTitle("Project Funding"),
       authRequired: true,
+      menuModule: "project",
     },
     component: () => import("@/views/project-funding/project-funding.vue"),
   },
@@ -733,6 +735,7 @@ const eventTypeRoutes = [
     meta: {
       title: setTitle("Event Types"),
       authRequired: true,
+      menuModule: "event",
     },
     component: () => import("@/views/event/types/listEventTypes.vue"),
   },
@@ -742,6 +745,7 @@ const eventTypeRoutes = [
     meta: {
       title: setTitle("Create Event Types"),
       authRequired: true,
+      menuModule: "event",
     },
     component: () => import("@/views/event/types/createEventTypes.vue"),
   },
@@ -751,6 +755,7 @@ const eventTypeRoutes = [
     meta: {
       title: setTitle("Edit Event Types"),
       authRequired: true,
+      menuModule: "event",
     },
     component: () => import("@/views/event/types/editEventTypes.vue"),
   },
@@ -764,6 +769,7 @@ const eventAttributeRoutes = [
     meta: {
       title: setTitle("Event Attributes"),
       authRequired: true,
+      menuModule: "event",
     },
     component: () => import("@/views/event/attributes/listEventAttribute.vue"),
   },
@@ -773,6 +779,7 @@ const eventAttributeRoutes = [
     meta: {
       title: setTitle("Create Event Attributes"),
       authRequired: true,
+      menuModule: "event",
     },
     component: () =>
       import("@/views/event/attributes/createEventAttribute.vue"),
@@ -783,6 +790,7 @@ const eventAttributeRoutes = [
     meta: {
       title: setTitle("Edit Event Attributes"),
       authRequired: true,
+      menuModule: "event",
     },
     component: () => import("@/views/event/attributes/editEventAttribute.vue"),
   },

@@ -92,6 +92,32 @@ export function useTransactionTable() {
           ),
       },
       {
+        name: "Info donatur",
+        width: "140px",
+        formatter: (item: { phone: number; name: string }) =>
+          html(
+            `<span class="fw-semibold small">${item.name}</span> |
+            <span class="small font-monospace">${item.phone}</span>
+            `,
+          ),
+      },
+      {
+        name: "Donasi ke -",
+        width: "100px",
+        sort: false,
+        formatter: (cell: string) => {
+          return html(`<span class="badge bg-primary">${cell}</span>`);
+        },
+      },
+      {
+        name: "Bank",
+        width: "100px",
+        sort: false,
+        formatter: (cell: string) => {
+          return html(`<span class="small fw-semibold">${cell}</span>`);
+        },
+      },
+      {
         name: "Status",
         width: "100px",
         sort: false,
@@ -144,6 +170,9 @@ export function useTransactionTable() {
       },
       item.date,
       item.total,
+      { name: item.user.name, phone: item.user.phone },
+      item.donation_number,
+      item.payment_method.bank_name,
       item.status,
       item.source,
       item.id,
