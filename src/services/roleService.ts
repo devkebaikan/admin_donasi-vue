@@ -22,8 +22,11 @@ export const getRoleById = async (id: number) => {
 
 export const createRole = async (data: {
   guard_name: string;
-  name: string;
-  permissions: string[];
+  role_name?: string;
+  name?: string;
+  menu_ids?: number[];
+  permission_ids?: number[];
+  permissions?: (string | number)[];
 }) => {
   try {
     const res = await HttpClient.post("/rbac/roles", data);
@@ -36,7 +39,14 @@ export const createRole = async (data: {
 
 export const updateRole = async (
   id: number,
-  data: { guard_name: string; name: string; permissions: string[] },
+  data: {
+    guard_name: string;
+    role_name?: string;
+    name?: string;
+    menu_ids?: number[];
+    permission_ids?: number[];
+    permissions?: (string | number)[];
+  },
 ) => {
   try {
     const res = await HttpClient.put(`/rbac/roles/${id}`, data);
@@ -63,6 +73,19 @@ export const getUsersByRole = async (id: number, params = {}) => {
     return res.data;
   } catch (error) {
     console.error(`Error fetching users by role id ${id}:`, error);
-    return { data: { data: [], meta: { total: 0, last_page: 1, per_page: 10 } }, role: null };
+    return {
+      data: { data: [], meta: { total: 0, last_page: 1, per_page: 10 } },
+      role: null,
+    };
+  }
+};
+
+export const getPermissionsReference = async () => {
+  try {
+    const res = await HttpClient.get("/rbac/roles/create");
+    return res.data.data?.reference ?? null;
+  } catch (error) {
+    console.error("Error fetching permissions reference:", error);
+    return null;
   }
 };

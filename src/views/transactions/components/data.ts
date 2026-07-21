@@ -69,9 +69,10 @@ export function useTransactionTable() {
       {
         name: "Invoice",
         width: "200px",
-        formatter: (cell: string) =>
+        formatter: (item: { program: string; inv: string }) =>
           html(
-            `<span class="font-monospace small fw-semibold">${cell || "-"}</span>`,
+            `<div class="mb-1 fw-semibold">${item.program ?? "-"}</div>
+            <div class="font-monospace small text-primary">${item.inv || "-"}</div>`,
           ),
       },
       {
@@ -137,7 +138,10 @@ export function useTransactionTable() {
 
     rowMapper: (item: any, index: number) => [
       index,
-      item.invoice,
+      {
+        program: item?.transaction_details[0].program?.name,
+        inv: item.invoice,
+      },
       item.date,
       item.total,
       item.status,

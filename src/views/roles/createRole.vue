@@ -1,20 +1,20 @@
 <template>
   <VerticalLayout>
     <b-row>
-      <b-col cols="12" md="8" lg="6">
+      <b-col cols="12" lg="12">
         <UIComponentCard title="Tambah Role">
           <form @submit.prevent="handleSubmit">
             <!-- Nama Role -->
             <div class="mb-3">
               <label class="form-label fw-semibold required">Nama Role</label>
               <b-form-input
-                v-model="formState.name"
+                v-model="formState.role_name"
                 type="text"
                 placeholder="Masukkan nama role"
-                :state="v$.name.$dirty ? !v$.name.$error : null"
+                :state="v$.role_name.$dirty ? !v$.role_name.$error : null"
               />
-              <div v-if="v$.name.$error" class="invalid-feedback d-block">
-                {{ v$.name.$errors[0]?.$message }}
+              <div v-if="v$.role_name.$error" class="invalid-feedback d-block">
+                {{ v$.role_name.$errors[0]?.$message }}
               </div>
             </div>
 
@@ -38,24 +38,135 @@
               </div>
             </div>
 
-            <!-- Permissions -->
+            <hr class="my-4" />
+
+            <!-- Menus Section -->
             <div class="mb-4">
-              <label class="form-label fw-semibold">Permissions</label>
-              <p class="text-muted small mb-2">
-                Masukkan nama permission satu per baris.
-              </p>
-              <b-form-textarea
-                v-model="permissionsText"
-                rows="5"
-                placeholder="Contoh:&#10;view users&#10;create users&#10;edit users"
-              />
-              <div v-if="parsedPermissions.length" class="mt-2">
-                <span
-                  v-for="perm in parsedPermissions"
-                  :key="perm"
-                  class="badge bg-light text-dark me-1 mb-1 font-monospace"
-                  >{{ perm }}</span
-                >
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-semibold mb-0">
+                  <i class="bx bx-menu me-2"></i>Menus
+                </h6>
+                <div class="d-flex gap-2">
+                  <b-button
+                    v-if="selectedMenus.length > 0"
+                    size="sm"
+                    variant="outline-secondary"
+                    @click="clearAllMenus"
+                  >
+                    <i class="bx bx-x me-1"></i>Hapus Semua
+                  </b-button>
+                  <b-button
+                    size="sm"
+                    variant="outline-primary"
+                    @click="selectAllMenus"
+                  >
+                    <i class="bx bx-check me-1"></i>Pilih Semua
+                  </b-button>
+                </div>
+              </div>
+
+              <div v-if="isLoadingPermissions" class="text-center p-4">
+                <b-spinner small class="me-2" />
+                <span class="text-muted">Memuat menus...</span>
+              </div>
+
+              <div v-else-if="availableMenus.length === 0" class="alert alert-warning">
+                Tidak ada menus yang tersedia.
+              </div>
+
+              <div v-else class="menus-list">
+                <div class="d-flex flex-wrap gap-3">
+                  <div
+                    v-for="menu in availableMenus"
+                    :key="`menu-${menu.id}`"
+                    class="form-check"
+                  >
+                    <input
+                      :id="`menu-${menu.id}`"
+                      type="checkbox"
+                      class="form-check-input"
+                      :checked="selectedMenus.includes(menu.id)"
+                      @change="toggleMenu(menu.id)"
+                    />
+                    <label
+                      :for="`menu-${menu.id}`"
+                      class="form-check-label text-muted small"
+                    >
+                      {{ menu.name }}
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="selectedMenus.length > 0" class="mt-3 pt-3 border-top">
+                <small class="text-muted">
+                  {{ selectedMenus.length }} menu dipilih
+                </small>
+              </div>
+            </div>
+
+            <!-- Permissions Section -->
+            <div class="mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-semibold mb-0">
+                  <i class="bx bx-lock-open me-2"></i>Permissions
+                </h6>
+                <div class="d-flex gap-2">
+                  <b-button
+                    v-if="selectedPermissions.length > 0"
+                    size="sm"
+                    variant="outline-secondary"
+                    @click="clearAllPermissions"
+                  >
+                    <i class="bx bx-x me-1"></i>Hapus Semua
+                  </b-button>
+                  <b-button
+                    size="sm"
+                    variant="outline-primary"
+                    @click="selectAllPermissions"
+                  >
+                    <i class="bx bx-check me-1"></i>Pilih Semua
+                  </b-button>
+                </div>
+              </div>
+
+              <div v-if="isLoadingPermissions" class="text-center p-4">
+                <b-spinner small class="me-2" />
+                <span class="text-muted">Memuat permissions...</span>
+              </div>
+
+              <div v-else-if="standalonePermissions.length === 0" class="alert alert-info">
+                Tidak ada standalone permissions.
+              </div>
+
+              <div v-else class="permissions-list">
+                <div class="d-flex flex-wrap gap-3">
+                  <div
+                    v-for="perm in standalonePermissions"
+                    :key="`perm-${perm.id}`"
+                    class="form-check"
+                  >
+                    <input
+                      :id="`perm-${perm.id}`"
+                      type="checkbox"
+                      class="form-check-input"
+                      :checked="selectedPermissions.includes(perm.id)"
+                      @change="togglePermission(perm.id)"
+                    />
+                    <label
+                      :for="`perm-${perm.id}`"
+                      class="form-check-label text-muted small"
+                    >
+                      {{ perm.name }}
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="selectedPermissions.length > 0" class="mt-3 pt-3 border-top">
+                <small class="text-muted">
+                  {{ selectedPermissions.length }} permission dipilih
+                </small>
               </div>
             </div>
 
@@ -85,31 +196,56 @@
 
 <script setup lang="ts">
 import { reactive, computed, ref } from "vue";
-import { useMutation } from "@tanstack/vue-query";
+import { useMutation, useQuery } from "@tanstack/vue-query";
 import { useVuelidate } from "@vuelidate/core";
 import { required, helpers } from "@vuelidate/validators";
 import { toast } from "vue3-toastify";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
-import { createRole } from "@/services/roleService";
+import { createRole, getPermissionsReference } from "@/services/roleService";
 import router from "@/router";
 
+interface Permission {
+  id: number;
+  name: string;
+}
+
+interface Menu {
+  id: number;
+  name: string;
+}
+
 const formState = reactive({
-  name: "",
+  role_name: "",
   guard_name: "",
 });
 
-const permissionsText = ref<string>("");
+const selectedMenus = ref<number[]>([]);
+const selectedPermissions = ref<number[]>([]);
 
-const parsedPermissions = computed(() =>
-  permissionsText.value
-    .split("\n")
-    .map((p) => p.trim())
-    .filter((p) => p.length > 0),
-);
+const { data: permissionsRef, isLoading: isLoadingPermissions } = useQuery({
+  queryKey: ["permissions-reference"],
+  queryFn: getPermissionsReference,
+});
+
+const availableMenus = computed((): Menu[] => {
+  return (permissionsRef.value?.menus ?? []);
+});
+
+const standalonePermissions = computed((): Permission[] => {
+  return (permissionsRef.value?.permissions ?? []);
+});
+
+const allMenuIds = computed(() => {
+  return availableMenus.value.map((m) => m.id);
+});
+
+const allPermissionIds = computed(() => {
+  return standalonePermissions.value.map((p) => p.id);
+});
 
 const rules = {
-  name: { required: helpers.withMessage("Nama role wajib diisi.", required) },
+  role_name: { required: helpers.withMessage("Nama role wajib diisi.", required) },
   guard_name: {
     required: helpers.withMessage("Guard name wajib dipilih.", required),
   },
@@ -117,14 +253,53 @@ const rules = {
 
 const v$ = useVuelidate(rules, formState);
 
+const toggleMenu = (menuId: number) => {
+  const index = selectedMenus.value.indexOf(menuId);
+  if (index > -1) {
+    selectedMenus.value.splice(index, 1);
+  } else {
+    selectedMenus.value.push(menuId);
+  }
+};
+
+const togglePermission = (permId: number) => {
+  const index = selectedPermissions.value.indexOf(permId);
+  if (index > -1) {
+    selectedPermissions.value.splice(index, 1);
+  } else {
+    selectedPermissions.value.push(permId);
+  }
+};
+
+const selectAllMenus = () => {
+  selectedMenus.value = [...allMenuIds.value];
+};
+
+const clearAllMenus = () => {
+  selectedMenus.value = [];
+};
+
+const selectAllPermissions = () => {
+  selectedPermissions.value = [...allPermissionIds.value];
+};
+
+const clearAllPermissions = () => {
+  selectedPermissions.value = [];
+};
+
 const { mutate, isPending } = useMutation({
-  mutationFn: createRole,
+  mutationFn: (payload: {
+    guard_name: string;
+    role_name: string;
+    menu_ids: number[];
+    permission_ids: number[];
+  }) => createRole(payload),
   onSuccess: () => {
     toast.success("Role berhasil ditambahkan.");
     router.push("/roles");
   },
-  onError: () => {
-    toast.error("Gagal menambahkan role. Coba lagi.");
+  onError: (err: any) => {
+    toast.error(err?.response?.data?.message ?? "Gagal menambahkan role. Coba lagi.");
   },
 });
 
@@ -133,9 +308,10 @@ const handleSubmit = async () => {
   if (!isValid) return;
 
   mutate({
-    name: formState.name,
+    role_name: formState.role_name,
     guard_name: formState.guard_name,
-    permissions: parsedPermissions.value,
+    menu_ids: selectedMenus.value,
+    permission_ids: selectedPermissions.value,
   });
 };
 </script>

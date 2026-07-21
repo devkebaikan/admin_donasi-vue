@@ -1,7 +1,7 @@
 <template>
   <VerticalLayout>
     <b-row>
-      <b-col cols="12" md="8" lg="12">
+      <b-col cols="12" lg="12">
         <UIComponentCard title="Edit Role">
           <div v-if="isLoadingRole" class="text-center p-4">
             <b-spinner variant="primary" />
@@ -17,13 +17,13 @@
             <div class="mb-3">
               <label class="form-label fw-semibold required">Nama Role</label>
               <b-form-input
-                v-model="formState.name"
+                v-model="formState.role_name"
                 type="text"
                 placeholder="Masukkan nama role"
-                :state="v$.name.$dirty ? !v$.name.$error : null"
+                :state="v$.role_name.$dirty ? !v$.role_name.$error : null"
               />
-              <div v-if="v$.name.$error" class="invalid-feedback d-block">
-                {{ v$.name.$errors[0]?.$message }}
+              <div v-if="v$.role_name.$error" class="invalid-feedback d-block">
+                {{ v$.role_name.$errors[0]?.$message }}
               </div>
             </div>
 
@@ -47,26 +47,172 @@
               </div>
             </div>
 
-            <!-- Permissions -->
-            <!-- <div class="mb-4">
-              <label class="form-label fw-semibold">Permissions</label>
-              <p class="text-muted small mb-2">
-                Masukkan nama permission satu per baris.
-              </p>
-              <b-form-textarea
-                v-model="permissionsText"
-                rows="5"
-                placeholder="Contoh:&#10;view users&#10;create users&#10;edit users"
-              />
-              <div v-if="parsedPermissions.length" class="mt-2">
-                <span
-                  v-for="perm in parsedPermissions"
-                  :key="perm"
-                  class="badge bg-light text-dark me-1 mb-1 font-monospace"
-                  >{{ perm }}</span
-                >
+            <hr class="my-4" />
+
+            <!-- Menus Section (Tree) -->
+            <div class="mb-4">
+              <div
+                class="d-flex justify-content-between align-items-center mb-3"
+              >
+                <h6 class="fw-semibold mb-0">
+                  <i class="bx bx-menu me-2"></i>Menus
+                </h6>
+                <div class="d-flex gap-2">
+                  <b-button
+                    v-if="selectedMenus.length > 0"
+                    size="sm"
+                    variant="outline-secondary"
+                    @click="clearAllMenus"
+                  >
+                    <i class="bx bx-x me-1"></i>Hapus Semua
+                  </b-button>
+                  <b-button
+                    size="sm"
+                    variant="outline-primary"
+                    @click="selectAllMenus"
+                  >
+                    <i class="bx bx-check me-1"></i>Pilih Semua
+                  </b-button>
+                </div>
               </div>
-            </div> -->
+
+              <div v-if="isLoadingPermissions" class="text-center p-4">
+                <b-spinner small class="me-2" />
+                <span class="text-muted">Memuat menus...</span>
+              </div>
+
+              <div
+                v-else-if="menuTree.length === 0"
+                class="alert alert-warning"
+              >
+                Tidak ada menus yang tersedia.
+              </div>
+
+              <div v-else class="menus-tree border rounded p-3">
+                <MenuTreeNode
+                  v-for="node in menuTree"
+                  :key="node.id"
+                  :node="node"
+                  :selected="selectedMenus"
+                  @toggle="toggleMenu"
+                />
+              </div>
+
+              <div v-if="selectedMenus.length > 0" class="mt-3 pt-3 border-top">
+                <small class="text-muted">
+                  {{ selectedMenus.length }} menu dipilih
+                </small>
+              </div>
+            </div>
+
+            <!-- Permissions Section (Grouped Cards) -->
+            <div class="mb-4">
+              <div
+                class="d-flex justify-content-between align-items-center mb-3"
+              >
+                <h6 class="fw-semibold mb-0">
+                  <i class="bx bx-lock-open me-2"></i>Permissions
+                </h6>
+                <div class="d-flex gap-2">
+                  <b-button
+                    v-if="selectedPermissions.length > 0"
+                    size="sm"
+                    variant="outline-secondary"
+                    @click="clearAllPermissions"
+                  >
+                    <i class="bx bx-x me-1"></i>Hapus Semua
+                  </b-button>
+                  <b-button
+                    size="sm"
+                    variant="outline-primary"
+                    @click="selectAllPermissions"
+                  >
+                    <i class="bx bx-check me-1"></i>Pilih Semua
+                  </b-button>
+                </div>
+              </div>
+
+              <div v-if="isLoadingPermissions" class="text-center p-4">
+                <b-spinner small class="me-2" />
+                <span class="text-muted">Memuat permissions...</span>
+              </div>
+
+              <div
+                v-else-if="standalonePermissions.length === 0"
+                class="alert alert-info"
+              >
+                Tidak ada standalone permissions.
+              </div>
+
+              <b-row v-else>
+                <b-col
+                  v-for="groupItem in groupedPermissions"
+                  :key="groupItem.group"
+                  cols="12"
+                  md="6"
+                  lg="4"
+                  class="mb-3"
+                >
+                  <b-card no-body class="h-100">
+                    <template #header>
+                      <div
+                        class="d-flex justify-content-between align-items-center"
+                      >
+                        <span class="fw-semibold text-capitalize small">{{
+                          groupItem.group
+                        }}</span>
+                        <b-button
+                          size="sm"
+                          variant="link"
+                          class="p-0"
+                          @click="
+                            isGroupFullySelected(groupItem.permissions)
+                              ? clearAllInGroup(groupItem.permissions)
+                              : selectAllInGroup(groupItem.permissions)
+                          "
+                        >
+                          {{
+                            isGroupFullySelected(groupItem.permissions)
+                              ? "Hapus Semua"
+                              : "Pilih Semua"
+                          }}
+                        </b-button>
+                      </div>
+                    </template>
+                    <b-card-body class="d-flex flex-column gap-2 py-2">
+                      <div
+                        v-for="perm in groupItem.permissions"
+                        :key="`perm-${perm.id}`"
+                        class="form-check mb-0"
+                      >
+                        <input
+                          :id="`perm-${perm.id}`"
+                          type="checkbox"
+                          class="form-check-input"
+                          :checked="selectedPermissions.includes(perm.id)"
+                          @change="togglePermission(perm.id)"
+                        />
+                        <label
+                          :for="`perm-${perm.id}`"
+                          class="form-check-label text-muted small"
+                        >
+                          {{ perm.name }}
+                        </label>
+                      </div>
+                    </b-card-body>
+                  </b-card>
+                </b-col>
+              </b-row>
+
+              <div
+                v-if="selectedPermissions.length > 0"
+                class="mt-3 pt-3 border-top"
+              >
+                <small class="text-muted">
+                  {{ selectedPermissions.length }} permission dipilih
+                </small>
+              </div>
+            </div>
 
             <!-- Actions -->
             <div class="d-flex gap-2">
@@ -97,9 +243,30 @@ import { required, helpers } from "@vuelidate/validators";
 import { toast, type ToastOptions } from "vue3-toastify";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
-import { getRoleById, updateRole } from "@/services/roleService";
+import MenuTreeNode, { type MenuNode } from "./components/MenuTreeNode.vue";
+import {
+  getRoleById,
+  updateRole,
+  getPermissionsReference,
+} from "@/services/roleService";
 import router from "@/router";
 import "vue3-toastify/dist/index.css";
+
+interface Permission {
+  id: number;
+  name: string;
+  // Optional if the backend later exposes an explicit grouping field.
+  group?: string;
+}
+
+// Raw shape as it may arrive from the backend: either already nested
+// (has `children`) or flat with a `parent_id` reference.
+interface RawMenu {
+  id: number;
+  name: string;
+  parent_id?: number | null;
+  children?: RawMenu[];
+}
 
 const route = useRoute();
 const roleId = computed(() => Number(route.params.id));
@@ -110,37 +277,140 @@ const { data: roleData, isLoading: isLoadingRole } = useQuery({
   enabled: computed(() => !!roleId.value),
 });
 
+const { data: permissionsRef, isLoading: isLoadingPermissions } = useQuery({
+  queryKey: ["permissions-reference"],
+  queryFn: getPermissionsReference,
+});
+
 const showToast = (message: string, options: ToastOptions) =>
   toast(message, options);
+
 const formState = reactive({
-  name: "",
+  role_name: "",
   guard_name: "",
 });
 
-const permissionsText = ref<string>("");
+const selectedMenus = ref<number[]>([]);
+const selectedPermissions = ref<number[]>([]);
 
-const parsedPermissions = computed(() =>
-  permissionsText.value
-    .split("\n")
-    .map((p) => p.trim())
-    .filter((p) => p.length > 0),
+/**
+ * Normalizes the menu data into a tree regardless of whether the backend
+ * sends it already nested (`children` present) or flat with `parent_id`.
+ * TODO: once the backend contract is confirmed, this can be simplified to
+ * whichever single shape is actually returned.
+ */
+const normalizeMenuTree = (items: RawMenu[]): MenuNode[] => {
+  if (!items || items.length === 0) return [];
+
+  const alreadyNested = items.some((item) => Array.isArray(item.children));
+  if (alreadyNested) {
+    return items.map((item) => ({
+      id: item.id,
+      name: item.name,
+      children: item.children ? normalizeMenuTree(item.children) : [],
+    }));
+  }
+
+  const byId = new Map<number, MenuNode>();
+  items.forEach((item) => {
+    byId.set(item.id, { id: item.id, name: item.name, children: [] });
+  });
+
+  const roots: MenuNode[] = [];
+  items.forEach((item) => {
+    const node = byId.get(item.id)!;
+    if (item.parent_id && byId.has(item.parent_id)) {
+      byId.get(item.parent_id)!.children!.push(node);
+    } else {
+      roots.push(node);
+    }
+  });
+
+  return roots;
+};
+
+const menuTree = computed<MenuNode[]>(() =>
+  normalizeMenuTree(permissionsRef.value?.menu_tree ?? []),
 );
+
+const flattenMenus = (nodes: MenuNode[]): MenuNode[] =>
+  nodes.flatMap((n) => [n, ...(n.children ? flattenMenus(n.children) : [])]);
+
+const findMenuNode = (nodes: MenuNode[], id: number): MenuNode | undefined => {
+  for (const n of nodes) {
+    if (n.id === id) return n;
+    if (n.children) {
+      const found = findMenuNode(n.children, id);
+      if (found) return found;
+    }
+  }
+  return undefined;
+};
+
+const descendantIds = (node: MenuNode): number[] =>
+  (node.children ?? []).flatMap((c) => [c.id, ...descendantIds(c)]);
+
+const standalonePermissions = computed((): Permission[] => {
+  return permissionsRef.value?.standalone_permissions ?? [];
+});
+
+/**
+ * Groups permissions by an explicit `group`/`module` field if the backend
+ * provides one; otherwise falls back to the prefix before the first "."
+ * or "-" in the permission name (e.g. "menu.view" -> "menu").
+ */
+const groupedPermissions = computed(() => {
+  const groups = new Map<string, Permission[]>();
+
+  standalonePermissions.value.forEach((perm) => {
+    const key =
+      perm.group ??
+      (perm.name.includes(":")
+        ? perm.name.split(":")[0]
+        : perm.name.includes(".")
+          ? perm.name.split(".")[0]
+          : perm.name.includes("-")
+            ? perm.name.split("-")[0]
+            : "Lainnya");
+
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(perm);
+  });
+
+  return Array.from(groups.entries()).map(([group, permissions]) => ({
+    group,
+    permissions,
+  }));
+});
+
+const allMenuIds = computed(() =>
+  flattenMenus(menuTree.value).map((m) => m.id),
+);
+
+const allPermissionIds = computed(() => {
+  return standalonePermissions.value.map((p) => p.id);
+});
 
 watch(
   roleData,
   (data) => {
     if (!data) return;
-    formState.name = data.name ?? "";
+    formState.role_name = data.name ?? "";
     formState.guard_name = data.guard_name ?? "";
 
-    const perms: string[] = data.edges?.permissions ?? [];
-    permissionsText.value = perms.join("\n");
+    const menus = data.edges?.menus ?? [];
+    const perms = data.edges?.permissions ?? [];
+
+    selectedMenus.value = menus.map((m: any) => m.id);
+    selectedPermissions.value = perms.map((p: any) => p.id);
   },
   { immediate: true },
 );
 
 const rules = {
-  name: { required: helpers.withMessage("Nama role wajib diisi.", required) },
+  role_name: {
+    required: helpers.withMessage("Nama role wajib diisi.", required),
+  },
   guard_name: {
     required: helpers.withMessage("Guard name wajib dipilih.", required),
   },
@@ -148,11 +418,67 @@ const rules = {
 
 const v$ = useVuelidate(rules, formState);
 
+// Toggling a menu cascades to all of its descendants (select/deselect together).
+const toggleMenu = (menuId: number) => {
+  const node = findMenuNode(menuTree.value, menuId);
+  const ids = node ? [menuId, ...descendantIds(node)] : [menuId];
+  const isCurrentlySelected = selectedMenus.value.includes(menuId);
+
+  if (isCurrentlySelected) {
+    selectedMenus.value = selectedMenus.value.filter((id) => !ids.includes(id));
+  } else {
+    selectedMenus.value = [...new Set([...selectedMenus.value, ...ids])];
+  }
+};
+
+const togglePermission = (permId: number) => {
+  const index = selectedPermissions.value.indexOf(permId);
+  if (index > -1) {
+    selectedPermissions.value.splice(index, 1);
+  } else {
+    selectedPermissions.value.push(permId);
+  }
+};
+
+const selectAllMenus = () => {
+  selectedMenus.value = [...allMenuIds.value];
+};
+
+const clearAllMenus = () => {
+  selectedMenus.value = [];
+};
+
+const selectAllPermissions = () => {
+  selectedPermissions.value = [...allPermissionIds.value];
+};
+
+const clearAllPermissions = () => {
+  selectedPermissions.value = [];
+};
+
+const isGroupFullySelected = (permissions: Permission[]) =>
+  permissions.every((p) => selectedPermissions.value.includes(p.id));
+
+const selectAllInGroup = (permissions: Permission[]) => {
+  const ids = permissions.map((p) => p.id);
+  selectedPermissions.value = [
+    ...new Set([...selectedPermissions.value, ...ids]),
+  ];
+};
+
+const clearAllInGroup = (permissions: Permission[]) => {
+  const ids = permissions.map((p) => p.id);
+  selectedPermissions.value = selectedPermissions.value.filter(
+    (id) => !ids.includes(id),
+  );
+};
+
 const { mutate, isPending } = useMutation({
   mutationFn: (payload: {
     guard_name: string;
-    name: string;
-    permissions: string[];
+    role_name: string;
+    menu_ids: number[];
+    permission_ids: number[];
   }) => updateRole(roleId.value, payload),
   onSuccess: () => {
     showToast("Role berhasil diperbarui.", {
@@ -161,11 +487,14 @@ const { mutate, isPending } = useMutation({
     });
     router.push("/roles");
   },
-  onError: () => {
-    showToast("Gagal memperbarui role. Coba lagi.", {
-      type: "error",
-      position: "top-center",
-    });
+  onError: (err: any) => {
+    showToast(
+      err?.response?.data?.message ?? "Gagal memperbarui role. Coba lagi.",
+      {
+        type: "error",
+        position: "top-center",
+      },
+    );
   },
 });
 
@@ -174,9 +503,10 @@ const handleSubmit = async () => {
   if (!isValid) return;
 
   mutate({
-    name: formState.name,
+    role_name: formState.role_name,
     guard_name: formState.guard_name,
-    permissions: parsedPermissions.value,
+    menu_ids: selectedMenus.value,
+    permission_ids: selectedPermissions.value,
   });
 };
 </script>
