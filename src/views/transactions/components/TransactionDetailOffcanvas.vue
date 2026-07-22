@@ -84,13 +84,8 @@
           style="font-size: 11px; letter-spacing: 0.5px"
         >
           <i class="bx bx-list-ul me-1"></i>Detail Donasi
-          <span class="ms-1 badge bg-primary">
-            Sudah donasi -
-            {{
-              txDetail.status === "Pending"
-                ? userHistory?.length + 1
-                : userHistory?.length
-            }}x
+          <span class="badge bg-primary-subtle text-primary border">
+            Donasi #{{ txDetail.donation_number ?? 1 }}
           </span>
         </h6>
         <div

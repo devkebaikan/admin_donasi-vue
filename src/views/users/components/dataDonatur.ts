@@ -2,6 +2,13 @@ import { computed, ref } from "vue";
 import { html } from "gridjs";
 import { useDataTable } from "@/composables/useDataTable";
 import { getUsers, deleteUser } from "@/services/userService";
+// import { useQuery } from "@tanstack/vue-query";
+// import { getAllRoles } from "@/services/roleService";
+
+// const VERIFIED_BADGE: Record<string, string> = {
+//   verified: "bg-success",
+//   unverified: "bg-warning text-dark",
+// };
 
 export function useUsersTable() {
   const selectedRoleId = ref<string>("");
@@ -14,7 +21,6 @@ export function useUsersTable() {
     ...(selectedHasDonatur.value !== ""
       ? { has_donatur: selectedHasDonatur.value }
       : {}),
-    ...{ exclude_role_id: 7 },
   }));
 
   const table = useDataTable({
@@ -78,12 +84,50 @@ export function useUsersTable() {
                 title="Edit User">
                 <i class="bx bx-edit fs-16"></i>
               </button>
+              <button
+                class="btn btn-sm btn-soft-info transactions-btn"
+                data-action="transactions"
+                data-id="${id}"
+                title="Lihat Transaksi">
+                <i class="bx bx-transfer fs-16"></i>
+              </button>
+
+              <div class="btn-group add-tx-group">
+                <button
+                  class="btn btn-sm btn-soft-success dropdown-toggle add-tx-btn"
+                  data-action="toggle-tx-menu"
+                  data-id="${id}"
+                  title="Tambah Transaksi">
+                  Add transaksi
+                </button>
+                <div class="dropdown-menu dropdown-menu-end tx-dropdown-menu">
+                  <button class="dropdown-item add-tx-item" data-action="add-donation" data-id="${id}">
+                    Donasi
+                  </button>
+                  <button class="dropdown-item add-tx-item" data-action="add-zakat" data-id="${id}">
+                    Zakat
+                  </button>
+                  <button class="dropdown-item add-tx-item" data-action="add-event" data-id="${id}">
+                    Event
+                  </button>
+                  <button class="dropdown-item add-tx-item" data-action="add-qurban" data-id="${id}">
+                    Qurban
+                  </button>
+                </div>
+              </div>
               
             </div>
           `),
       },
     ],
 
+    // <button
+    //   class="btn btn-sm btn-soft-danger delete-btn"
+    //   data-action="delete"
+    //   data-id="${id}"
+    //   title="Hapus User">
+    //   <i class="bx bx-trash fs-16"></i>
+    // </button>
     rowMapper: (item: any, index: number) => [
       index,
       item.name,

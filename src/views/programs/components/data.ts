@@ -44,20 +44,16 @@ export function useProgramsTable() {
         sort: false,
         formatter: (cell: string) =>
           html(
-            `<a href="https://don.aksiberbagi.com/donasi/${cell}" target="_blank" rel="noopener noreferrer">${cell}</a>`,
+            `<a href="https://don.aksiberbagi.com/donasi/${cell}" target="_blank" rel="noopener noreferrer text-truncate">${cell}</a>`,
           ),
       },
       {
-        name: "Category",
+        name: "Type & Category",
         width: "140px",
-        formatter: (cell: string) =>
-          html(`<span class="badge bg-info text-dark">${cell}</span>`),
-      },
-      {
-        name: "Tipe",
-        width: "100px",
-        formatter: (cell: string) =>
-          html(`<span class="badge bg-warning text-dark">${cell}</span>`),
+        formatter: (item: { category: string; tipe: string }) =>
+          html(`
+            <span class="badge bg-warning text-dark">${item.tipe}</span>
+            <span class="badge bg-info text-dark">${item.category}</span>`),
       },
       {
         name: "Mitra",
@@ -82,7 +78,7 @@ export function useProgramsTable() {
           ),
       },
       {
-        name: "Remaining Days",
+        name: "Sisa hari",
         width: "120px",
         formatter: (cell: number | null) => {
           if (cell === null) return html(`<span class="text-muted">∞</span>`);
@@ -143,8 +139,10 @@ export function useProgramsTable() {
       index,
       program.title,
       program.link,
-      program.category?.name ?? "-",
-      program.tipe?.name ?? "-",
+      {
+        category: program.category?.name ?? "-",
+        tipe: program.tipe?.name ?? "-",
+      },
       program.mitra?.name ?? "-",
       program.nominal_target,
       program.nominal_achieved,

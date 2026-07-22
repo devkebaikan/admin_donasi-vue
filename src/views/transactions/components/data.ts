@@ -70,10 +70,17 @@ export function useTransactionTable() {
         name: "Invoice",
         width: "200px",
         formatter: (item: { program: string; inv: string }) =>
-          html(
-            `<div class="mb-1 fw-semibold">${item.program ?? "-"}</div>
-            <div class="font-monospace small text-primary">${item.inv || "-"}</div>`,
-          ),
+          html(`
+          <small class="d-flex flex-column">
+            <span class="fw-semibold text-dark">
+              ${item.program ?? "-"}
+            </span>
+
+            <span class="text-primary font-monospace">
+              ${item.inv || "-"}
+            </span>
+          </small>
+      `),
       },
       {
         name: "Tanggal",
@@ -88,26 +95,36 @@ export function useTransactionTable() {
         width: "140px",
         formatter: (cell: number) =>
           html(
-            `<span class="fw-semibold small">${formatCurrency(cell)}</span>`,
+            `<span class="fw-bold small font-monospace">${formatCurrency(cell)}</span>`,
           ),
       },
       {
-        name: "Info donatur",
-        width: "140px",
-        formatter: (item: { phone: number; name: string }) =>
-          html(
-            `<span class="fw-semibold small">${item.name}</span> |
-            <span class="small font-monospace">${item.phone}</span>
-            `,
-          ),
-      },
-      {
-        name: "Donasi ke -",
-        width: "100px",
-        sort: false,
-        formatter: (cell: string) => {
-          return html(`<span class="badge bg-primary">${cell}</span>`);
-        },
+        name: "Donatur",
+        width: "180px",
+        formatter: (item: {
+          phone: string;
+          name: string;
+          donation_number: number;
+        }) =>
+          html(`
+          <div class="d-flex flex-column">
+
+            <span class="fw-semibold text-dark small">
+              ${item.name}
+            </span>
+
+            <small class="text-muted font-monospace small">
+              ${item.phone}
+            </small>
+
+            <div class="mt-1">
+              <span class="badge bg-primary-subtle text-primary border">
+                Donasi #${item.donation_number}
+              </span>
+            </div>
+
+          </div>
+        `),
       },
       {
         name: "Bank",
@@ -170,8 +187,11 @@ export function useTransactionTable() {
       },
       item.date,
       item.total,
-      { name: item.user.name, phone: item.user.phone },
-      item.donation_number,
+      {
+        name: item.user.name,
+        phone: item.user.phone,
+        donation_number: item.donation_number,
+      },
       item.payment_method.bank_name,
       item.status,
       item.source,

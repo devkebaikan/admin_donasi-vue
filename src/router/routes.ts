@@ -624,6 +624,40 @@ const transactionRoutes = [
   },
 ];
 
+// Transaction Type Routes
+const transactionTypeRoutes = [
+  {
+    path: "/transaction-type",
+    name: "transaction-type.list",
+    meta: {
+      title: setTitle("Tipe Transaksi"),
+      authRequired: true,
+    },
+    component: () =>
+      import("@/views/transaction-types/listTransactionType.vue"),
+  },
+  {
+    path: "/transaction-type/create",
+    name: "transaction-type.create",
+    meta: {
+      title: setTitle("Buat Tipe Transaksi"),
+      authRequired: true,
+    },
+    component: () =>
+      import("@/views/transaction-types/createTransactionType.vue"),
+  },
+  {
+    path: "/transaction-type/:id/edit",
+    name: "transaction-type.edit",
+    meta: {
+      title: setTitle("Edit Tipe Transaksi"),
+      authRequired: true,
+    },
+    component: () =>
+      import("@/views/transaction-types/editTransactionType.vue"),
+  },
+];
+
 // Project Routes
 const projectRoutes = [
   {
@@ -1798,4 +1832,5 @@ export const allRoutes = [
   ...paymentMethodRoutes,
   ...projectReportRoutes,
   ...menuRoutes,
+  ...transactionTypeRoutes,
 ];

@@ -130,3 +130,17 @@ export const getProgramPercentages = async (params = {}) => {
     return [];
   }
 };
+
+// get transaction unclaimed
+export const getTransactionUnclaimed = async (data: Record<string, any>) => {
+  try {
+    const res = await HttpClient.post(
+      "/admin/transactions/unclaimed/search",
+      data,
+    );
+    return res.data.data;
+  } catch (error) {
+    console.error("Error fetching all programs:", error);
+    return [];
+  }
+};

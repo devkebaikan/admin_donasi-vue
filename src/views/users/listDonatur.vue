@@ -136,15 +136,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onBeforeUnmount, watch } from "vue";
+import { computed, ref, onMounted, onBeforeUnmount } from "vue";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
-import { useUsersTable } from "./components/data";
+import { useUsersTable } from "./components/dataDonatur";
 import router from "@/router";
 import { useQuery } from "@tanstack/vue-query";
 import { getUserById } from "@/services/userService";
-import { formatDateTime } from "@/helpers/format";
+// import { formatDateTime } from "@/helpers/format";
 import DonaturDetailOffcanvas from "./components/DonaturDetailOffcanvas.vue";
 
 const {
@@ -216,6 +216,43 @@ const handleGlobalClick = (event: Event) => {
   const deleteBtn = target.closest<HTMLElement>(
     '#table-gridjs .delete-btn[data-action="delete"]',
   );
+  const toggleTxBtn = target.closest<HTMLElement>(
+    '#table-gridjs .add-tx-btn[data-action="toggle-tx-menu"]',
+  );
+  const addTxItem = target.closest<HTMLElement>("#table-gridjs .add-tx-item");
+
+  const closeAllTxMenus = () => {
+    document
+      .querySelectorAll("#table-gridjs .tx-dropdown-menu.show")
+      .forEach((el) => el.classList.remove("show"));
+  };
+
+  if (toggleTxBtn) {
+    event.preventDefault();
+    const menu = toggleTxBtn.nextElementSibling as HTMLElement | null;
+    const wasOpen = menu?.classList.contains("show");
+    closeAllTxMenus();
+    if (menu && !wasOpen) menu.classList.add("show");
+    return;
+  }
+
+  if (addTxItem) {
+    event.preventDefault();
+    closeAllTxMenus();
+    const id = addTxItem.getAttribute("data-id");
+    const action = addTxItem.getAttribute("data-action");
+    const typeMap: Record<string, string> = {
+      "add-donation": "donation",
+      "add-event": "event",
+      "add-zakat": "zakat",
+      "add-qurban": "qurban",
+    };
+    const type = action ? typeMap[action] : undefined;
+    if (id && type) {
+      router.push(`/transactions/create?user_id=${id}&type=${type}`);
+    }
+    return;
+  }
 
   if (detailBtn) {
     event.preventDefault();
@@ -239,7 +276,10 @@ const handleGlobalClick = (event: Event) => {
     event.preventDefault();
     const id = deleteBtn.getAttribute("data-id");
     if (id) handleDelete(Number(id));
+    return;
   }
+
+  closeAllTxMenus();
 };
 
 onMounted(() => document.addEventListener("click", handleGlobalClick));

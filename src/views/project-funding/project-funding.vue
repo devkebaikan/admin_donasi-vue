@@ -165,12 +165,12 @@
                   {{ p.program_name }}
                 </b-form-select-option>
               </b-form-select>
-              <div v-if="selectedProgramId !== 0">
+              <small v-if="selectedProgramId !== 0" class="text-muted">
                 Yang bisa diclaim
                 <span class="fw-semibold text-success">{{
                   formatCurrency(canClaim)
                 }}</span>
-              </div>
+              </small>
             </b-col>
           </b-row>
           <b-row class="g-3 mb-3">
