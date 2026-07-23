@@ -34,52 +34,75 @@ export function useProgramsTable() {
       },
       {
         name: "Title",
-        width: "360px",
-        formatter: (cell: string) =>
-          html(`<span class="fw-semibold">${cell}</span>`),
-      },
-      {
-        name: "Link",
-        width: "80px",
-        sort: false,
-        formatter: (cell: string) =>
-          html(
-            `<a href="https://don.aksiberbagi.com/donasi/${cell}" target="_blank" rel="noopener noreferrer text-truncate">${cell}</a>`,
-          ),
+        width: "300px",
+        formatter: (item: { title: string; link: string; mitra: string }) =>
+          html(`
+            <div style="max-width: 280px">
+              <div class="fw-semibold text-dark text-truncate" title="${item.title}">${item.title}</div>
+              <div class="text-muted text-truncate" style="font-size: 11px">
+                ${item.mitra}
+              </div>
+              <div class="text-truncate" style="font-size: 11px">
+                <i class="bx bx-link me-1"></i><a href="https://don.aksiberbagi.com/donasi/${item.link}" target="_blank" rel="noopener noreferrer">${item.link}</a>
+              </div>
+            </div>
+          `),
       },
       {
         name: "Type & Category",
-        width: "140px",
+        width: "130px",
         formatter: (item: { category: string; tipe: string }) =>
           html(`
-            <span class="badge bg-warning text-dark">${item.tipe}</span>
-            <span class="badge bg-info text-dark">${item.category}</span>`),
+            <div class="d-flex flex-column gap-1 align-items-start">
+              <div class="badge bg-warning text-dark">${item.tipe}</div>
+              <div class="badge bg-info text-dark">${item.category}</div>
+            </div>
+            `),
       },
       {
-        name: "Mitra",
-        width: "160px",
-        formatter: (cell: string) =>
-          html(`<span class="text-muted small">${cell}</span>`),
+        name: "Summary Project",
+        width: "170px",
+        formatter: (cell: { status: string; count: number }[]) =>
+          html(`
+            <div class="d-flex flex-wrap gap-1" style="max-width: 160px">
+              ${cell
+                .map(
+                  (item) => `
+                <span class="badge badge-outline-primary">
+                  ${item.status}: ${item.count}
+                </span>`,
+                )
+                .join("")}
+            </div>
+          `),
       },
       {
-        name: "Target",
-        width: "160px",
-        formatter: (cell: number) =>
-          html(
-            `<span class="font-monospace small fw-semibold">${formatCurrency(cell)}</span>`,
-          ),
-      },
-      {
-        name: "Achieved",
-        width: "160px",
-        formatter: (cell: string) =>
-          html(
-            `<span class="font-monospace small fw-semibold">${formatCurrency(Number(cell))}</span>`,
-          ),
+        name: "Progress Dana",
+        width: "190px",
+        formatter: (cell: { target: number; achieved: number }) => {
+          const target = Number(cell.target) || 0;
+          const achieved = Number(cell.achieved) || 0;
+          const pct = target > 0 ? Math.min((achieved / target) * 100, 100) : 0;
+          return html(`
+            <div style="min-width: 170px">
+              <div class="d-flex justify-content-between mb-1">
+                <small class="text-muted" style="font-size: 10px">Target</small>
+                <span class="font-monospace fw-semibold" style="font-size: 11px">${formatCurrency(target)}</span>
+              </div>
+              <div class="progress" style="height: 6px">
+                <div class="progress-bar bg-success" style="width: ${pct}%"></div>
+              </div>
+              <div class="d-flex justify-content-between mt-1">
+                <small class="font-monospace fw-semibold text-success" style="font-size: 11px">${formatCurrency(achieved)}</small>
+                <small class="text-muted fw-semibold" style="font-size: 10px">${pct.toFixed(0)}%</small>
+              </div>
+            </div>
+          `);
+        },
       },
       {
         name: "Sisa hari",
-        width: "120px",
+        width: "100px",
         formatter: (cell: number | null) => {
           if (cell === null) return html(`<span class="text-muted">∞</span>`);
           const color =
@@ -89,11 +112,11 @@ export function useProgramsTable() {
       },
       {
         name: "Actions",
-        width: "90px",
+        width: "120px",
         sort: false,
         formatter: (program: { id: number; link: string }) =>
           html(`
-            <div class="d-flex flex-column gap-1 justify-content-center">
+            <div class="d-flex gap-1 justify-content-center">
               <button
                 class="btn btn-sm btn-soft-primary detail-btn"
                 data-action="detail"
@@ -117,35 +140,27 @@ export function useProgramsTable() {
                 title="Projects">
                 <i class="bx bx-folder-open fs-16"></i>
               </button>
-              
             </div>
           `),
       },
     ],
 
-    // <button class="btn btn-sm btn-soft-danger delete-btn" data-action="delete" data-id="${program.id}" title="Hapus">
-    //   <i class="bx bx-trash fs-16"></i>
-    // </button>
-
-    // <button
-    //   class="btn btn-sm btn-soft-info news-btn"
-    //   data-action="news"
-    //   data-id="${program.id}"
-    //   title="News">
-    //   <i class="bx bx-news fs-16"></i>
-    // </button>
-
     rowMapper: (program: any, index: number) => [
       index,
-      program.title,
-      program.link,
+      {
+        title: program.title,
+        link: program.link,
+        mitra: program.mitra?.name ?? "-",
+      },
       {
         category: program.category?.name ?? "-",
         tipe: program.tipe?.name ?? "-",
       },
-      program.mitra?.name ?? "-",
-      program.nominal_target,
-      program.nominal_achieved,
+      program.project_summary,
+      {
+        target: program.nominal_target,
+        achieved: program.nominal_achieved,
+      },
       program.remaining_days,
       { id: program.id, link: program.link },
     ],

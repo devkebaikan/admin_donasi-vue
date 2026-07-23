@@ -398,6 +398,68 @@ const blogRoutes = [
   },
 ];
 
+// Blog Category Routes
+const blogCategoryRoutes = [
+  {
+    path: "/blog-category",
+    name: "blog-category.list",
+    meta: {
+      title: setTitle("Kategori Blog"),
+      authRequired: true,
+    },
+    component: () => import("@/views/blog-category/listBlogCategory.vue"),
+  },
+  {
+    path: "/blog-category/create",
+    name: "blog-category.create",
+    meta: {
+      title: setTitle("Buat Kategori Blog"),
+      authRequired: true,
+    },
+    component: () => import("@/views/blog-category/createBlogCategory.vue"),
+  },
+  {
+    path: "/blog-category/:id/edit",
+    name: "blog-category.edit",
+    meta: {
+      title: setTitle("Edit Kategori Blog"),
+      authRequired: true,
+    },
+    component: () => import("@/views/blog-category/editBlogCategory.vue"),
+  },
+];
+
+// Blog Tag Routes
+const blogTagRoutes = [
+  {
+    path: "/blog-tag",
+    name: "blog-tag.list",
+    meta: {
+      title: setTitle("Tag Blog"),
+      authRequired: true,
+    },
+    component: () => import("@/views/blog-tags/listBlogTag.vue"),
+  },
+  {
+    path: "/blog-tag/create",
+    name: "blog-tag.create",
+    meta: {
+      title: setTitle("Buat Tag Blog"),
+      authRequired: true,
+    },
+    component: () => import("@/views/blog-tags/createBlogTag.vue"),
+  },
+  {
+    path: "/blog-tag/:id/edit",
+    name: "blog-tag.edit",
+    meta: {
+      title: setTitle("Edit Tag Blog"),
+      authRequired: true,
+    },
+    component: () => import("@/views/blog-tags/editBlogTag.vue"),
+  },
+];
+
 // Program Show Routes
 const programShowRoutes = [
   {
@@ -1811,6 +1873,8 @@ export const allRoutes = [
   ...bankReferenceRoutes,
   ...LeadRoutes,
   ...blogRoutes,
+  ...blogCategoryRoutes,
+  ...blogTagRoutes,
   ...programShowRoutes,
   ...settingRoutes,
   ...roleRoutes,

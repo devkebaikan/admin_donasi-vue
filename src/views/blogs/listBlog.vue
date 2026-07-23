@@ -203,8 +203,8 @@ const { data: categories } = useQuery({
 const categoryOptions = computed(() => {
   if (!categories) return [];
   return categories.value?.map((lead: any) => ({
-    value: lead.value,
-    text: lead.label,
+    value: lead.id,
+    text: lead.nama,
   }));
 });
 
