@@ -184,7 +184,6 @@ onBeforeUnmount(() => document.removeEventListener("click", handleGlobalClick));
 
 <style scoped>
 .menu-tree {
-  background: #f8f9fa;
   padding: 1.5rem;
   border-radius: 0.5rem;
 }

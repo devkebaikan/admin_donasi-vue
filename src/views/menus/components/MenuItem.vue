@@ -73,7 +73,6 @@ defineEmits<{
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 1rem;
-  background: white;
   border: 1px solid #dee2e6;
   border-radius: 0.375rem;
   gap: 1rem;

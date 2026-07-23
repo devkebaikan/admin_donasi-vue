@@ -1,61 +1,63 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory } from "vue-router";
 import { allRoutes } from "./routes";
-import { useAuthStore } from '@/stores/auth'
-import { hasRouteAccess } from '@/helpers/permission'
+import { useAuthStore } from "@/stores/auth";
+import { hasRouteAccess } from "@/helpers/permission";
 
 const router = createRouter({
-    history: createWebHistory(import.meta.env.BASE_URL),
-    routes: allRoutes
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: allRoutes,
 });
 
 router.beforeEach((to, from, next) => {
-    const title = to.meta.title;
-    if (title) {
-        document.title = title.toString();
-    }
-    next();
+  const title = to.meta.title;
+  if (title) {
+    document.title = title.toString();
+  }
+  next();
 });
 
 router.beforeEach((routeTo, routeFrom, next) => {
-    // Check if auth is required on this route
-    // (including nested routes).
-    const authRequired = routeTo.matched.some((route) => route.meta.authRequired)
-  
-    // If auth isn't required for the route, just continue.
-    if (!authRequired) return next()
-  
-    // If auth is required and the user is logged in...
-    const useAuth = useAuthStore()
-    if (useAuth.isAuthenticated()) {
-      return next()
-    }
-  
-    // If auth is required and the user is NOT currently logged in,
-    // redirect to login.
-    redirectToLogin()
+  // Check if auth is required on this route
+  // (including nested routes).
+  const authRequired = routeTo.matched.some((route) => route.meta.authRequired);
 
-    function redirectToLogin() {
-      // Pass the original route to the login component
-      next({ name: 'auth.sign-in', query: { redirectedFrom: routeTo.fullPath } })
-    }
-  })
+  // If auth isn't required for the route, just continue.
+  if (!authRequired) return next();
 
-router.beforeEach((to, from, next) => {
-  // Cek permission halaman berdasarkan menu yang dimiliki user (VUE_USER.menus).
-  // Guard ini hanya jalan untuk route yang lolos pengecekan auth di atas.
-  const authRequired = to.matched.some((route) => route.meta.authRequired)
-  if (!authRequired) return next()
+  // If auth is required and the user is logged in...
+  const useAuth = useAuthStore();
+  if (useAuth.isAuthenticated()) {
+    return next();
+  }
 
-  const routeName = to.name?.toString()
-  if (!routeName) return next()
+  // If auth is required and the user is NOT currently logged in,
+  // redirect to login.
+  redirectToLogin();
 
-  const menuModule = to.matched
-    .map((route) => route.meta.menuModule as string | undefined)
-    .find(Boolean)
+  function redirectToLogin() {
+    // Pass the original route to the login component
+    next({ name: "auth.sign-in", query: { redirectedFrom: routeTo.fullPath } });
+  }
+});
 
-  if (hasRouteAccess(routeName, menuModule)) return next()
+// middlerware permissions
 
-  next({ name: 'error.404' })
-})
+// router.beforeEach((to, from, next) => {
+//   // Cek permission halaman berdasarkan menu yang dimiliki user (VUE_USER.menus).
+//   // Guard ini hanya jalan untuk route yang lolos pengecekan auth di atas.
+//   const authRequired = to.matched.some((route) => route.meta.authRequired);
+//   if (!authRequired) return next();
+
+//   const routeName = to.name?.toString();
+//   if (!routeName) return next();
+
+//   const menuModule = to.matched
+//     .map((route) => route.meta.menuModule as string | undefined)
+//     .find(Boolean);
+
+//   if (hasRouteAccess(routeName, menuModule)) return next();
+
+//   next({ name: "error.404" });
+// });
 
 export default router;
