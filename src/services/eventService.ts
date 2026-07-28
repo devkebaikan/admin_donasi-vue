@@ -115,8 +115,8 @@ export const getEventAttributes = async (params = {}) => {
     const res = await HttpClient.get("/event-attributes", { params });
     return res.data;
   } catch (error) {
-    console.error("Error fetching event types:", error);
-    return [];
+    console.error("Error fetching event attributes:", error);
+    return { data: [], meta: { total: 0, last_page: 1 } };
   }
 };
 
@@ -125,31 +125,30 @@ export const getEventAttributeById = async (id: number) => {
     const res = await HttpClient.get(`/event-attributes/${id}`);
     return res.data.data;
   } catch (error) {
-    console.error(`Error fetching event with id ${id}:`, error);
+    console.error(`Error fetching event attribute with id ${id}:`, error);
     return null;
   }
 };
 
-export const createEventAttribute = async (data: FormData) => {
+export const createEventAttribute = async (data: Record<string, any>) => {
   try {
-    const res = await HttpClient.post("/event-attributes", data, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    const res = await HttpClient.post("/event-attributes", data);
     return res.data.data;
   } catch (error) {
-    console.error("Error creating event type:", error);
+    console.error("Error creating event attribute:", error);
     throw error;
   }
 };
 
-export const updateEventAttribute = async (id: number, data: FormData) => {
+export const updateEventAttribute = async (
+  id: number,
+  data: Record<string, any>,
+) => {
   try {
-    const res = await HttpClient.post(`/event-attributes/${id}`, data, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    const res = await HttpClient.put(`/event-attributes/${id}`, data);
     return res.data.data;
   } catch (error) {
-    console.error(`Error updating event type with id ${id}:`, error);
+    console.error(`Error updating event attribute with id ${id}:`, error);
     throw error;
   }
 };
@@ -159,7 +158,7 @@ export const deleteEventAttribute = async (id: number) => {
     await HttpClient.delete(`/event-attributes/${id}`);
     return true;
   } catch (error) {
-    console.error(`Error deleting event type with id ${id}:`, error);
+    console.error(`Error deleting event attribute with id ${id}:`, error);
     throw error;
   }
 };

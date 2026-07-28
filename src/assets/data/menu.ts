@@ -208,16 +208,16 @@ export const MENU_ITEMS: MenuItemType[] = [
         route: { name: "event.list" },
         parentKey: "events",
       },
+      {
+        key: "event-attribute",
+        label: "Attribute",
+        route: { name: "event-attribute.list" },
+        parentKey: "events",
+      },
       // {
       //   key: "event-types",
       //   label: "Types",
       //   route: { name: "event-type.list" },
-      //   parentKey: "events",
-      // },
-      // {
-      //   key: "event-attribute",
-      //   label: "Attribute",
-      //   route: { name: "event-attribute.list" },
       //   parentKey: "events",
       // },
     ],

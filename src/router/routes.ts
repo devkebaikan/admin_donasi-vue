@@ -824,38 +824,38 @@ const eventRoutes = [
 ];
 
 // Event Types Routes
-const eventTypeRoutes = [
-  {
-    path: "/event-types",
-    name: "event-type.list",
-    meta: {
-      title: setTitle("Event Types"),
-      authRequired: true,
-      menuModule: "event",
-    },
-    component: () => import("@/views/event/types/listEventTypes.vue"),
-  },
-  {
-    path: "/event-types/create",
-    name: "event-type.create",
-    meta: {
-      title: setTitle("Create Event Types"),
-      authRequired: true,
-      menuModule: "event",
-    },
-    component: () => import("@/views/event/types/createEventTypes.vue"),
-  },
-  {
-    path: "/event-types/:id/edit",
-    name: "event-type.edit",
-    meta: {
-      title: setTitle("Edit Event Types"),
-      authRequired: true,
-      menuModule: "event",
-    },
-    component: () => import("@/views/event/types/editEventTypes.vue"),
-  },
-];
+// const eventTypeRoutes = [
+//   {
+//     path: "/event-types",
+//     name: "event-type.list",
+//     meta: {
+//       title: setTitle("Event Types"),
+//       authRequired: true,
+//       menuModule: "event",
+//     },
+//     component: () => import("@/views/event/types/listEventTypes.vue"),
+//   },
+//   {
+//     path: "/event-types/create",
+//     name: "event-type.create",
+//     meta: {
+//       title: setTitle("Create Event Types"),
+//       authRequired: true,
+//       menuModule: "event",
+//     },
+//     component: () => import("@/views/event/types/createEventTypes.vue"),
+//   },
+//   {
+//     path: "/event-types/:id/edit",
+//     name: "event-type.edit",
+//     meta: {
+//       title: setTitle("Edit Event Types"),
+//       authRequired: true,
+//       menuModule: "event",
+//     },
+//     component: () => import("@/views/event/types/editEventTypes.vue"),
+//   },
+// ];
 
 // Event Attribute Routes
 const eventAttributeRoutes = [
@@ -867,7 +867,7 @@ const eventAttributeRoutes = [
       authRequired: true,
       menuModule: "event",
     },
-    component: () => import("@/views/event/attributes/listEventAttribute.vue"),
+    component: () => import("@/views/event-attributes/listEventtribute.vue"),
   },
   {
     path: "/event-attribute/create",
@@ -877,8 +877,7 @@ const eventAttributeRoutes = [
       authRequired: true,
       menuModule: "event",
     },
-    component: () =>
-      import("@/views/event/attributes/createEventAttribute.vue"),
+    component: () => import("@/views/event-attributes/createEventtribute.vue"),
   },
   {
     path: "/event-attribute/:id/edit",
@@ -888,7 +887,7 @@ const eventAttributeRoutes = [
       authRequired: true,
       menuModule: "event",
     },
-    component: () => import("@/views/event/attributes/editEventAttribute.vue"),
+    component: () => import("@/views/event-attributes/editEventtribute.vue"),
   },
 ];
 
@@ -1152,6 +1151,19 @@ const projectReportRoutes = [
       authRequired: true,
     },
     component: () => import("@/views/project-report/editReport.vue"),
+  },
+];
+
+// CRM Plan Routes
+const crmPlanRoutes = [
+  {
+    path: "/crm-plan",
+    name: "crm-plan.list",
+    meta: {
+      title: setTitle("CRM Plan"),
+      authRequired: true,
+    },
+    component: () => import("@/views/CRM-plan/plan.vue"),
   },
 ];
 
@@ -1885,7 +1897,7 @@ export const allRoutes = [
   ...financeAccountRoutes,
   ...financeAccountMasterRoutes,
   ...financeJournalRoutes,
-  ...eventTypeRoutes,
+  // ...eventTypeRoutes,
   ...eventAttributeRoutes,
   ...userRoutes,
   ...adsScriptRoutes,
@@ -1897,4 +1909,5 @@ export const allRoutes = [
   ...projectReportRoutes,
   ...menuRoutes,
   ...transactionTypeRoutes,
+  ...crmPlanRoutes,
 ];
