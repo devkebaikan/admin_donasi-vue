@@ -3,12 +3,16 @@ import { html } from "gridjs";
 import { useDataTable } from "@/composables/useDataTable";
 import { getEvents, deleteEvent } from "@/services/eventService";
 import { formatCurrency } from "@/helpers/format";
+import { hasPermission } from "@/helpers/permission";
 
 const STORAGE_BASE =
   (import.meta.env.VITE_API_BASE_URL as string).replace("/api/v1", "") +
   "/storage/";
 
-const buildImageUrl = (path: string) => (path ? `${STORAGE_BASE}${path}` : "");
+// const buildImageUrl = (path: string) => (path ? `${STORAGE_BASE}${path}` : "");
+
+const isCanEdit = hasPermission("event:update");
+const isCanDelete = hasPermission("event:delete");
 
 const MODE_BADGE: Record<string, string> = {
   online: "bg-info",
@@ -109,20 +113,31 @@ export function useEventTable() {
         formatter: (id: number) =>
           html(`
             <div class="d-flex gap-2 justify-content-center">
+            ${
+              isCanEdit
+                ? `<button
+              class="btn btn-sm btn-soft-warning edit-btn"
+              data-action="edit"
+              data-id="${id}"
+              title="Edit Event">
+              <i class="bx bx-edit fs-16"></i>
+              </button> `
+                : ""
+            }
+
+            ${
+              isCanDelete
+                ? `
               <button
-                class="btn btn-sm btn-soft-warning edit-btn"
-                data-action="edit"
-                data-id="${id}"
-                title="Edit Event">
-                <i class="bx bx-edit fs-16"></i>
+              class="btn btn-sm btn-soft-danger delete-btn"
+              data-action="delete"
+              data-id="${id}"
+              title="Hapus Event">
+              <i class="bx bx-trash fs-16"></i>
               </button>
-              <button
-                class="btn btn-sm btn-soft-danger delete-btn"
-                data-action="delete"
-                data-id="${id}"
-                title="Hapus Event">
-                <i class="bx bx-trash fs-16"></i>
-              </button>
+              `
+                : ""
+            }
             </div>
           `),
       },

@@ -46,3 +46,11 @@ export const hasRouteAccess = (
   const module = menuModule || routeName.split(".")[0];
   return getAccessibleModules().has(module);
 };
+
+// Cek permission granular (mis. "event:create", "event:update") dari user.permissions.
+// Dipakai untuk guard aksi (create/edit/delete) yang tidak tercakup oleh akses menu.
+export const hasPermission = (permission?: string): boolean => {
+  if (!permission) return true;
+  const user = getStoredUser();
+  return user?.permissions?.includes(permission) ?? false;
+};

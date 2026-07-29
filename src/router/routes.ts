@@ -1,3 +1,5 @@
+import { auth, menuAccess, permission } from "./middlewares";
+
 const setTitle = (title: string) => {
   return title
     ? `${title} | Admin Beramalbersama.com`
@@ -809,6 +811,7 @@ const eventRoutes = [
     meta: {
       title: setTitle("Create Event"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("event:create")],
     },
     component: () => import("@/views/event/createEvent.vue"),
   },
@@ -818,6 +821,7 @@ const eventRoutes = [
     meta: {
       title: setTitle("Edit Event"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("event:update")],
     },
     component: () => import("@/views/event/editEvent.vue"),
   },

@@ -1,7 +1,10 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { allRoutes } from "./routes";
-import { useAuthStore } from "@/stores/auth";
-import { hasRouteAccess } from "@/helpers/permission";
+import {
+  DEFAULT_MIDDLEWARE,
+  middlewarePipeline,
+  type Middleware,
+} from "./middlewares";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -16,48 +19,22 @@ router.beforeEach((to, from, next) => {
   next();
 });
 
-router.beforeEach((routeTo, routeFrom, next) => {
-  // Check if auth is required on this route
-  // (including nested routes).
-  const authRequired = routeTo.matched.some((route) => route.meta.authRequired);
-
-  // If auth isn't required for the route, just continue.
+// Guard tunggal: menjalankan meta.middleware milik route lewat pipeline.
+// Route yang authRequired: true tapi belum deklarasikan middleware sendiri
+// otomatis pakai DEFAULT_MIDDLEWARE (auth + akses menu), jadi route lama
+// tidak perlu diubah satu-satu.
+router.beforeEach((to, from, next): any => {
+  const authRequired = to.matched.some((route) => route.meta.authRequired);
   if (!authRequired) return next();
 
-  // If auth is required and the user is logged in...
-  const useAuth = useAuthStore();
-  if (useAuth.isAuthenticated()) {
-    return next();
-  }
+  const middleware =
+    (to.meta.middleware as Middleware[] | undefined) ?? DEFAULT_MIDDLEWARE;
 
-  // If auth is required and the user is NOT currently logged in,
-  // redirect to login.
-  redirectToLogin();
+  if (!middleware.length) return next();
 
-  function redirectToLogin() {
-    // Pass the original route to the login component
-    next({ name: "auth.sign-in", query: { redirectedFrom: routeTo.fullPath } });
-  }
+  const context = { to, from, next };
+  const pipeline = middlewarePipeline(context, middleware, 1);
+  return middleware[0]({ ...context, next: pipeline });
 });
-
-// middlerware permissions
-
-// router.beforeEach((to, from, next) => {
-//   // Cek permission halaman berdasarkan menu yang dimiliki user (VUE_USER.menus).
-//   // Guard ini hanya jalan untuk route yang lolos pengecekan auth di atas.
-//   const authRequired = to.matched.some((route) => route.meta.authRequired);
-//   if (!authRequired) return next();
-
-//   const routeName = to.name?.toString();
-//   if (!routeName) return next();
-
-//   const menuModule = to.matched
-//     .map((route) => route.meta.menuModule as string | undefined)
-//     .find(Boolean);
-
-//   if (hasRouteAccess(routeName, menuModule)) return next();
-
-//   next({ name: "error.404" });
-// });
 
 export default router;
