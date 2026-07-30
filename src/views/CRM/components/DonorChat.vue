@@ -11,13 +11,13 @@
       </div>
       <b-form-select
         v-model="waAccount"
-        :options="[card.waAccount, 'CS Pribadi']"
+        :options="[card.waAccount ?? 'Official WA', 'CS Pribadi']"
         size="sm"
         class="w-auto"
       />
     </div>
 
-    <div class="p-3 border-bottom">
+    <div v-if="card.quickTemplates?.length" class="p-3 border-bottom">
       <p class="text-muted fs-13 mb-2">Template Pesan Cepat</p>
       <div class="d-flex flex-wrap gap-2">
         <b-button
@@ -36,14 +36,10 @@
     <simplebar
       class="flex-grow-1 p-3"
       data-simplebar
-      style="
-        max-height: calc(100vh - 470px);
-        min-height: 200px;
-        background: #efeae2;
-      "
+      style="min-height: 0; background: #efeae2"
     >
       <div
-        v-if="!card.chatMessages.length"
+        v-if="!card.chatMessages?.length"
         class="d-flex flex-column justify-content-center align-items-center h-100 text-muted"
       >
         <i class="bxl-whatsapp fs-1 text-success mb-2"></i>
@@ -102,10 +98,10 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import simplebar from "simplebar-vue";
-import type { PlanCardType } from "@/views/plan/components/types";
+import type { CrmCaseCard } from "./types";
 
 const props = defineProps<{
-  card: PlanCardType;
+  card: CrmCaseCard;
 }>();
 
 const emit = defineEmits<{

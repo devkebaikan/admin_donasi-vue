@@ -53,14 +53,14 @@
       </nav> -->
       <b-col>
         <UIComponentCard id="basic" title="Daftar Program Shows">
-          <div class="d-flex justify-content-end mb-3">
+          <!-- <div class="d-flex justify-content-end mb-3">
             <b-button
               variant="primary"
               @click="router.push('/programs/show/create')"
             >
               <i class="bx bx-plus fs-16 me-1"></i>Create New Show
             </b-button>
-          </div>
+          </div> -->
 
           <!-- Type Tabs -->
           <b-tabs

@@ -23,18 +23,19 @@ router.beforeEach((to, from, next) => {
 // Route yang authRequired: true tapi belum deklarasikan middleware sendiri
 // otomatis pakai DEFAULT_MIDDLEWARE (auth + akses menu), jadi route lama
 // tidak perlu diubah satu-satu.
-router.beforeEach((to, from, next): any => {
-  const authRequired = to.matched.some((route) => route.meta.authRequired);
-  if (!authRequired) return next();
 
-  const middleware =
-    (to.meta.middleware as Middleware[] | undefined) ?? DEFAULT_MIDDLEWARE;
+// router.beforeEach((to, from, next): any => {
+//   const authRequired = to.matched.some((route) => route.meta.authRequired);
+//   if (!authRequired) return next();
 
-  if (!middleware.length) return next();
+//   const middleware =
+//     (to.meta.middleware as Middleware[] | undefined) ?? DEFAULT_MIDDLEWARE;
 
-  const context = { to, from, next };
-  const pipeline = middlewarePipeline(context, middleware, 1);
-  return middleware[0]({ ...context, next: pipeline });
-});
+//   if (!middleware.length) return next();
+
+//   const context = { to, from, next };
+//   const pipeline = middlewarePipeline(context, middleware, 1);
+//   return middleware[0]({ ...context, next: pipeline });
+// });
 
 export default router;

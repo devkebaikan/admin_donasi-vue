@@ -39,14 +39,14 @@
     <b-row>
       <b-col>
         <UIComponentCard id="basic" title="Settings">
-          <div class="d-flex justify-content-end mb-3">
+          <!-- <div class="d-flex justify-content-end mb-3">
             <b-button
               variant="primary"
               @click="router.push('/settings/create')"
             >
               <i class="bx bx-plus fs-16 me-1"></i>Create New Setting
             </b-button>
-          </div>
+          </div> -->
 
           <!-- Type Tabs -->
           <b-tabs

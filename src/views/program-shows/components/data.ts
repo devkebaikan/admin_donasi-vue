@@ -99,23 +99,23 @@ export function useProgramShowsTable(programId?: number) {
           return html(`<span class="text-muted small">${formatted}</span>`);
         },
       },
-      {
-        name: "Actions",
-        width: "70px",
-        sort: false,
-        formatter: (id: number) =>
-          html(`
-            <div class="d-flex gap-1 justify-content-center">
-              <button
-                class="btn btn-sm btn-soft-danger delete-btn"
-                data-action="delete"
-                data-id="${id}"
-                title="Delete">
-                <i class="bx bx-trash fs-16"></i>
-              </button>
-            </div>
-          `),
-      },
+      // {
+      //   name: "Actions",
+      //   width: "70px",
+      //   sort: false,
+      //   formatter: (id: number) =>
+      //     html(`
+      //       <div class="d-flex gap-1 justify-content-center">
+      //         <button
+      //           class="btn btn-sm btn-soft-danger delete-btn"
+      //           data-action="delete"
+      //           data-id="${id}"
+      //           title="Delete">
+      //           <i class="bx bx-trash fs-16"></i>
+      //         </button>
+      //       </div>
+      //     `),
+      // },
     ],
 
     rowMapper: (item: any, index: number) => [

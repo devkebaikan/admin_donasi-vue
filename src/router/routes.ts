@@ -1158,16 +1158,16 @@ const projectReportRoutes = [
   },
 ];
 
-// CRM Plan Routes
-const crmPlanRoutes = [
+// CRM Routes
+const crmRoutes = [
   {
-    path: "/crm-plan",
-    name: "crm-plan.list",
+    path: "/crm",
+    name: "crm.list",
     meta: {
-      title: setTitle("CRM Plan"),
+      title: setTitle("CRM"),
       authRequired: true,
     },
-    component: () => import("@/views/CRM-plan/plan.vue"),
+    component: () => import("@/views/CRM/donors.vue"),
   },
 ];
 
@@ -1913,5 +1913,5 @@ export const allRoutes = [
   ...projectReportRoutes,
   ...menuRoutes,
   ...transactionTypeRoutes,
-  ...crmPlanRoutes,
+  ...crmRoutes,
 ];
