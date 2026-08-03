@@ -42,7 +42,7 @@
         v-if="!card.chatMessages?.length"
         class="d-flex flex-column justify-content-center align-items-center h-100 text-muted"
       >
-        <i class="bxl-whatsapp fs-1 text-success mb-2"></i>
+        <i class="bx bx-message-detail fs-1 text-success mb-2"></i>
         <p class="mb-0">Belum ada chat</p>
       </div>
 
@@ -98,10 +98,10 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import simplebar from "simplebar-vue";
-import type { CrmCaseCard } from "./types";
+import type { CrmChatCard } from "./types";
 
 const props = defineProps<{
-  card: CrmCaseCard;
+  card: CrmChatCard;
 }>();
 
 const emit = defineEmits<{

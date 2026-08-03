@@ -5,37 +5,15 @@ export type TagType = {
   variant: string
 }
 
-export type DonationHistoryItem = {
-  amount: string
-  bank: string
-  project: string
-  date: string
-  status: 'sukses' | 'pending' | 'gagal'
-}
-
-export type FollowUpItem = {
-  title: string
-  date?: string
-  note?: string
-  sent?: boolean
-}
-
 export type ChatMessageItem = {
   text: string
   isSender: boolean
   timeStamp?: string
 }
 
-export type CardStatItem = {
-  label: string
-  value: string
-}
-
 /**
- * Normalized shape consumed by CardList / DetailTab / ChatTab.
- * Only `id`, `initials`, `colorVariant`, `name` and `phone` are guaranteed —
- * everything else is optional so the same components work for the static
- * demo board (index.vue) and real CRM API data (donors.vue).
+ * Kartu ringkas untuk DonorList (list kiri) — hanya field yang tersedia dari
+ * endpoint list (GET /crm/donors), bukan detail.
  */
 export type CrmCaseCard = {
   id: number
@@ -44,20 +22,24 @@ export type CrmCaseCard = {
   name: string
   nickname?: string
   phone: string
-  city?: string
-  occupation?: string
   amount?: string
   days?: number
   isUrgent?: boolean
   stage?: string
   tags?: TagType[]
-  hardRules?: string[]
-  note?: string
-  stats?: CardStatItem[]
-  project?: string | null
-  projectNote?: string
-  donationHistory?: DonationHistoryItem[]
-  followUps?: FollowUpItem[]
+}
+
+/**
+ * Kartu minimal untuk DonorChat — dibangun langsung dari CrmDonorDetail di
+ * DonorDetail.vue (lihat computed `chatCard`), bukan dari CrmCaseCard.
+ */
+export type CrmChatCard = {
+  id: number
+  initials: string
+  colorVariant: string
+  name: string
+  nickname?: string
+  phone: string
   waAccount?: string
   quickTemplates?: string[]
   chatMessages?: ChatMessageItem[]
@@ -106,6 +88,32 @@ export type CrmPipelineCase = {
   updated_at?: string
 }
 
+export type CrmAssignedCs = {
+  id: number
+  nama: string
+}
+
+export type CrmAssignedUser = {
+  id: number
+  name: string
+}
+
+export type CrmFollowUp = {
+  id: number
+  jenis: string
+  scheduled_date: string
+  waktu_slot: string
+  channel: string
+  status: string
+  note?: string
+  assigned_user?: CrmAssignedUser
+  donor_profile_id: number
+}
+
+/**
+ * Response asli GET /crm/donors/:id — dipakai langsung apa adanya di
+ * DonorDetail.vue, tanpa di-merge dengan CrmCaseCard dari list.
+ */
 export type CrmDonorDetail = {
   id: number
   donatur_id: number
@@ -116,6 +124,8 @@ export type CrmDonorDetail = {
   cycle_status: string
   poin: number
   hari_tidak_aktif: number
-  follow_ups: FollowUpItem[]
+  color_tag?: string
+  assigned_cs?: CrmAssignedCs
+  follow_ups: CrmFollowUp[]
   chat_messages: ChatMessageItem[]
 }

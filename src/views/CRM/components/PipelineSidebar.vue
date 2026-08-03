@@ -41,6 +41,14 @@
           <span class="d-block fs-11 fw-semibold">{{ stage.label }}</span>
           <span class="d-block fs-10 text-muted">{{ stage.description }}</span>
         </span>
+
+        <span v-if="stage" class="ms-auto">
+          <span
+            :class="`badge fs-8 rounded-pill bg-soft-primary text-primary fw-semibold`"
+          >
+            {{ stage.id }}
+          </span>
+        </span>
       </a>
     </simplebar>
     <b-card-footer class="py-2 flex-shrink-0">

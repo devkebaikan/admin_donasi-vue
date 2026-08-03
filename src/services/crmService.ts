@@ -32,3 +32,47 @@ export const getDonorDetail = async (id: number) => {
     return null;
   }
 };
+
+// transaction detail by invoice
+export const getCrmTransactionById = async (id: number) => {
+  try {
+    const res = await HttpClient.get(`/admin/transactions/${id}`);
+    return res.data.data;
+  } catch (error) {
+    console.error(`Error fetching transaction ${id}:`, error);
+    return null;
+  }
+};
+
+// list project by id user
+export const getCrmProjects = async (params = {}) => {
+  try {
+    const res = await HttpClient.get("/program/projects", { params });
+    return res.data.data;
+  } catch (error) {
+    console.error("Error fetching projects:", error);
+    return { data: [], meta: { total: 0, last_page: 1 } };
+  }
+};
+
+// list kegiatan filter by projectid
+export const getCrmKegiatans = async (params = {}) => {
+  try {
+    const res = await HttpClient.get("/program/kegiatan", { params });
+    return res.data.data;
+  } catch (error) {
+    console.error("Error fetching kegiatans:", error);
+    return { data: [], meta: { total: 0, last_page: 1 } };
+  }
+};
+
+// list riwayat transaction by userId
+export const getCrmTransactions = async (params = {}) => {
+  try {
+    const res = await HttpClient.get("/admin/transactions", { params });
+    return res.data.data;
+  } catch (error) {
+    console.error("Error fetching transactions:", error);
+    return { data: [], meta: { total: 0, last_page: 1 } };
+  }
+};

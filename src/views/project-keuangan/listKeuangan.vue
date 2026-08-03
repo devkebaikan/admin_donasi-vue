@@ -336,7 +336,7 @@ import GridJsTable from "@/components/GridJsTable.vue";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
 import { useKeuanganTable } from "./components/data";
 import { getKeuanganById } from "@/services/projectKeuanganService";
-import { getAllProjects } from "@/services/projectService";
+import { getProjects } from "@/services/projectService";
 import { getAllKegiatan } from "@/services/kegiatanService";
 import { getAllMitra } from "@/services/mitraService";
 import { formatCurrency, formatDateTime } from "@/helpers/format";
@@ -399,7 +399,7 @@ const clearFilters = () => {
 
 const { data: projectList, isLoading: isProjectLoading } = useQuery({
   queryKey: ["projects-list"],
-  queryFn: () => getAllProjects({ mode: "list" }),
+  queryFn: () => getProjects({ mode: "list" }),
 });
 
 const { data: kegiatanList, isLoading: isKegiatanLoading } = useQuery({

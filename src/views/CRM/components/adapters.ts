@@ -1,5 +1,5 @@
-import { formatCurrency, formatDate } from "@/helpers/format";
-import type { CrmCaseCard, CrmDonorDetail, CrmPipelineCase } from "./types";
+import { formatCurrency } from "@/helpers/format";
+import type { CrmCaseCard, CrmPipelineCase } from "./types";
 
 const COLOR_TAG_VARIANT: Record<string, string> = {
   blue: "info",
@@ -17,7 +17,7 @@ const STAGE_COLOR_VARIANT: Record<string, string> = {
   ta: "warning",
   tg: "success",
   tb: "info",
-  tt: "purple",
+  tt: "cyan",
   tp: "primary",
   tr: "danger",
 };
@@ -47,12 +47,6 @@ export const stageColorVariant = (color?: string) =>
 export const cycleStatusVariant = (status?: string) =>
   CYCLE_STATUS_VARIANT[status ?? ""] ?? "secondary";
 
-// Data seed sering berisi timestamp kosong ("0001-01-01..."), jangan ditampilkan sebagai tanggal.
-const safeFormatDate = (value?: string) => {
-  if (!value || new Date(value).getFullYear() <= 1900) return "-";
-  return formatDate(value);
-};
-
 export const toCaseCard = (item: CrmPipelineCase): CrmCaseCard => ({
   id: item.id,
   initials: initialsOf(item.donor.name),
@@ -62,40 +56,9 @@ export const toCaseCard = (item: CrmPipelineCase): CrmCaseCard => ({
   phone: item.donor.phone,
   amount: formatCurrency(item.transaction.total),
   stage: item.pipeline_stage.label,
-  note: item.keterangan,
   tags: [
     { label: item.donor.level, variant: "secondary" },
     { label: item.donor.cycle_status, variant: cycleStatusVariant(item.donor.cycle_status) },
     { label: item.pipeline_stage.label, variant: stageColorVariant(item.pipeline_stage.color) },
   ],
-  stats: [
-    { label: "Level", value: item.donor.level },
-    { label: "Status Siklus", value: item.donor.cycle_status },
-    { label: "Invoice", value: item.transaction.invoice },
-  ],
-  donationHistory: [
-    {
-      amount: formatCurrency(item.transaction.total),
-      bank: "-",
-      project: item.pipeline_stage.label,
-      date: safeFormatDate(item.created_at),
-      status: item.transaction.status === "Paid" ? "sukses" : "pending",
-    },
-  ],
-});
-
-export const mergeDonorDetail = (
-  base: CrmCaseCard,
-  detail: CrmDonorDetail,
-): CrmCaseCard => ({
-  ...base,
-  nickname: detail.nick ?? base.nickname,
-  stats: [
-    ...(base.stats ?? []),
-    { label: "Poin", value: String(detail.poin) },
-    { label: "Hari Tidak Aktif", value: `${detail.hari_tidak_aktif} hari` },
-  ],
-  followUps: detail.follow_ups ?? [],
-  chatMessages: detail.chat_messages ?? [],
-  waAccount: base.waAccount ?? "Official WA",
 });

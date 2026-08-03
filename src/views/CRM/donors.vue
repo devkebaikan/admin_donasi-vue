@@ -1,7 +1,7 @@
 <template>
   <div class="crm-donors-shell d-flex flex-column">
     <b-row class="g-2 flex-grow-1" style="min-height: 0">
-      <!-- Pipeline stage menu — stacked next to the main app sidebar, page-local only -->
+      <!-- Pipeline stage menu -->
       <b-col xxl="2" lg="3" class="d-flex flex-column" style="min-height: 0">
         <PipelineSidebar :active-code="selectedStage" @select="setStage" />
       </b-col>
@@ -32,8 +32,6 @@
               </b-input-group>
             </b-col>
           </b-row>
-
-          <!-- Filter level / status siklus / CS — disembunyikan sementara, logic tetap ada di useDonorsBoard -->
         </b-card>
 
         <div v-if="isError" class="alert alert-danger flex-shrink-0">
@@ -85,7 +83,7 @@
             class="d-flex flex-column"
             style="min-height: 0"
           >
-            <DonorDetail :card="selectedCase" />
+            <DonorDetail :donor-id="selectedId" />
           </b-col>
         </b-row>
       </b-col>
@@ -123,7 +121,6 @@ const {
   error,
   selectedId,
   selectCase,
-  selectedCase,
 } = useDonorsBoard();
 
 const { data: pipelineData } = useQuery({
@@ -143,8 +140,6 @@ const boardDescription = computed(
 </script>
 
 <style scoped>
-/* min-height (bukan height + overflow:hidden) supaya kalau isi lebih tinggi
-   dari layar, halaman yang scroll — bukan memotong tombol/konten di bawah. */
 .crm-donors-shell {
   min-height: 100vh;
 }
