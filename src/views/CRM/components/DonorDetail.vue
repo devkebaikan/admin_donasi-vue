@@ -507,16 +507,19 @@ watch(
   },
 );
 
-// Fetch detail
-const { data: detail, isLoading } = useQuery({
-  queryKey: computed(() => ["crm-donor-detail", props.donorId]),
-  queryFn: () => getDonorDetail(props.donorId),
-  enabled: computed(() => props.donorId > 0),
-});
-
-// Kartu pipeline mentah (untuk keterangan & transaction_id) — lihat data.ts
+// Kartu pipeline mentah (untuk keterangan, donor_profile_id & transaction_id) — lihat data.ts
 const pipelineCase = computed(() => props.case);
 const transactionId = computed(() => props.case?.transaction_id ?? 0);
+
+// Detail donatur dipanggil pakai donor_profile_id
+const donorProfileId = computed(() => props.case?.donor_profile_id ?? 0);
+
+// Fetch detail
+const { data: detail, isLoading } = useQuery({
+  queryKey: computed(() => ["crm-donor-detail", donorProfileId.value]),
+  queryFn: () => getDonorDetail(donorProfileId.value),
+  enabled: computed(() => donorProfileId.value > 0),
+});
 
 // Transaksi yang sedang berjalan di kartu pipeline ini
 const { data: transaction, isLoading: isTransactionLoading } = useQuery({
