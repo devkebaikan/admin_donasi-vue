@@ -76,3 +76,14 @@ export const getCrmTransactions = async (params = {}) => {
     return { data: [], meta: { total: 0, last_page: 1 } };
   }
 };
+
+// list template chat crm
+export const getCrmChatTemplates = async (params = {}) => {
+  try {
+    const res = await HttpClient.get("/crm/whatsapp-templates", { params });
+    return res.data.data;
+  } catch (error) {
+    console.error("Error fetching chat templates:", error);
+    return { data: [], meta: { total: 0, last_page: 1 } };
+  }
+};

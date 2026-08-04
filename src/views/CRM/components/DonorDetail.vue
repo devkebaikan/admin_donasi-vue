@@ -272,25 +272,40 @@
             >
               <i class="bx bx-folder-open me-1"></i>Sudah Masuk Project
             </h6>
-            <div
-              class="d-flex align-items-center justify-content-between p-3 rounded-1"
-              style="background-color: #eaf7f8"
-            >
-              <div>
-                <h6 class="mb-0 fs-13 fw-semibold">{{ dummyProject.name }}</h6>
-                <p class="mb-0 text-muted fs-11">
-                  {{ dummyProject.program }} ·
-                  {{ dummyProject.allocatedAmount }} · disalurkan
-                  {{ formatDate(dummyProject.allocatedAt) }}
-                </p>
-              </div>
-              <b-badge
-                :variant="null"
-                class="fw-medium fs-10 badge-soft-cyan flex-shrink-0 ms-2"
-              >
-                {{ dummyProject.status }}
-              </b-badge>
+            <div v-if="isTransactionLoading" class="text-center p-3">
+              <b-spinner small variant="primary" />
             </div>
+            <template
+              v-else-if="
+                currentTransactionDetails.length > 0 &&
+                currentTransactionDetails[0].project
+              "
+            >
+              <div
+                v-for="(td, idx) in currentTransactionDetails"
+                :key="td.id"
+                class="d-flex align-items-center justify-content-between p-3 rounded-1"
+                :class="idx ? 'mt-2' : ''"
+                style="background-color: #eaf7f8"
+              >
+                <div>
+                  <h6 class="mb-0 fs-13 fw-semibold">
+                    {{ td.project?.judul ?? "-" }}
+                  </h6>
+                  <p class="mb-0 text-muted fs-11">
+                    Program : {{ td.program?.name ?? "-" }} ·
+                    {{ formatCurrency(td.nominal) }}
+                  </p>
+                </div>
+                <b-badge
+                  :variant="null"
+                  class="fw-medium fs-10 badge-soft-cyan flex-shrink-0 ms-2"
+                >
+                  {{ td.project?.status ?? td.activity }}
+                </b-badge>
+              </div>
+            </template>
+            <p v-else class="text-muted fs-13 mb-0">Belum masuk project</p>
           </div>
 
           <!-- Update Kegiatan — soft mint -->
@@ -301,18 +316,26 @@
             >
               <i class="bx bx-news me-1"></i>Update Kegiatan
             </h6>
-            <div
-              v-for="(act, idx) in dummyActivities"
-              :key="idx"
-              class="py-1 p-3 rounded-1"
-              :style="idx ? 'border-top: 1px solid rgba(0,0,0,0.06)' : ''"
-              style="background-color: #eaf8f3"
-            >
-              <p class="mb-0 fs-12 fw-semibold">{{ act.title }}</p>
-              <p class="mb-0 text-muted fs-11">
-                {{ formatDate(act.date) }} — {{ act.note }}
-              </p>
+            <div v-if="isKegiatanLoading" class="text-center p-3">
+              <b-spinner small variant="primary" />
             </div>
+            <template v-else-if="kegiatanList.length">
+              <div
+                v-for="(act, idx) in kegiatanList"
+                :key="act.id"
+                class="py-1 p-3 rounded-1"
+                :style="idx ? 'border-top: 1px solid rgba(0,0,0,0.06)' : ''"
+                style="background-color: #eaf8f3"
+              >
+                <p class="mb-0 fs-12 fw-semibold">{{ act.judul }}</p>
+                <p class="mb-0 text-muted fs-11">
+                  {{ formatDate(act.date) }} · {{ act.type }}
+                </p>
+              </div>
+            </template>
+            <p v-else class="text-muted fs-13 mb-0">
+              Belum ada update kegiatan
+            </p>
           </div>
 
           <!-- Riwayat Follow Up — soft amber -->
@@ -481,12 +504,14 @@ import {
   getDonorDetail,
   getCrmTransactionById,
   getCrmTransactions,
+  getCrmKegiatans,
 } from "@/services/crmService";
 import { colorTagVariant, cycleStatusVariant, initialsOf } from "./adapters";
 import DonorChat from "./DonorChat.vue";
 import type {
   ChatMessageItem,
   CrmChatCard,
+  CrmKegiatan,
   CrmPipelineCase,
   CrmTransactionHistoryItem,
 } from "./types";
@@ -541,6 +566,23 @@ const { data: donationHistoryRaw, isLoading: isHistoryLoading } = useQuery({
 const donationHistory = computed<CrmTransactionHistoryItem[]>(
   () => donationHistoryRaw.value ?? [],
 );
+
+// Project/program tempat transaksi saat ini disalurkan — dari transaction_details
+const currentTransactionDetails = computed(
+  () => transaction.value?.transaction_details ?? [],
+);
+
+// Ambil project_id pertama untuk cari update kegiatannya (umumnya 1 transaksi = 1 project)
+const currentProjectId = computed(
+  () => currentTransactionDetails.value[0]?.project_id ?? 0,
+);
+
+const { data: kegiatanListRaw, isLoading: isKegiatanLoading } = useQuery({
+  queryKey: computed(() => ["crm-kegiatan", currentProjectId.value]),
+  queryFn: () => getCrmKegiatans({ project_id: currentProjectId.value }),
+  enabled: computed(() => currentProjectId.value > 0),
+});
+const kegiatanList = computed<CrmKegiatan[]>(() => kegiatanListRaw.value ?? []);
 
 const totalDonasiLifetime = computed(() =>
   donationHistory.value
@@ -616,29 +658,4 @@ const FOLLOW_UP_STATUS_VARIANT: Record<string, string> = {
 };
 const followUpStatusVariant = (status: string) =>
   FOLLOW_UP_STATUS_VARIANT[status] ?? "secondary";
-
-// ─── Dummy sementara ─────────────────────────────────────────────────────────
-// Endpoint project/kegiatan belum siap di backend.
-// Ganti dengan getCrmProjects/getCrmKegiatans (sudah ada di crmService.ts)
-// begitu API-nya siap.
-const dummyProject = {
-  name: "Beasiswa Yatim Sem. 1 2026",
-  program: "Pendidikan",
-  allocatedAmount: "Rp 500.000",
-  allocatedAt: "2026-07-21",
-  status: "Berjalan",
-};
-
-const dummyActivities = [
-  {
-    title: "Distribusi Bantuan Tahap 1",
-    date: "2026-07-22",
-    note: "Bantuan telah disalurkan ke 20 penerima manfaat.",
-  },
-  {
-    title: "Distribusi Bantuan Tahap 1",
-    date: "2026-07-22",
-    note: "Bantuan telah disalurkan ke 20 penerima manfaat.",
-  },
-];
 </script>

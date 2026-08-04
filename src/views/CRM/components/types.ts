@@ -137,10 +137,21 @@ export type CrmTransactionProgram = {
   slug: string
 }
 
+/**
+ * Project penyaluran yang terkait satu detail transaksi — dipakai untuk
+ * section "Sudah Masuk Project" & sebagai sumber project_id GET /program/kegiatan.
+ */
+export type CrmTransactionProject = {
+  id: number
+  judul: string
+  status: string
+}
+
 export type CrmTransactionDetailItem = {
   id: number
   transaction_id: number
   program_id: number
+  project_id?: number
   detail_type: string
   quantity: number
   gross_nominal: number
@@ -152,6 +163,7 @@ export type CrmTransactionDetailItem = {
   refund: number
   activity: string
   program?: CrmTransactionProgram
+  project?: CrmTransactionProject
 }
 
 /**
@@ -174,21 +186,39 @@ export type CrmTransactionDetail = {
   status: string
   amin: number
   anonim: number
+  updated_at?: string
   user: CrmTransactionUser
   transaction_type: CrmTransactionType
   payment_method: CrmPaymentMethod
+  transaction_details?: CrmTransactionDetailItem[]
+  donation_number?: number
 }
 
 /**
- * Item GET /admin/transactions?user_id=... — riwayat transaksi donatur,
- * lebih lengkap dari CrmTransactionDetail (termasuk transaction_details/program).
+ * Item GET /admin/transactions?user_id=... — riwayat transaksi donatur.
  */
 export type CrmTransactionHistoryItem = CrmTransactionDetail & {
   notes?: string
   created_at?: string
+}
+
+/**
+ * Item GET /program/kegiatan?project_id=... — update kegiatan penyaluran
+ * project tempat donasi donatur ini masuk.
+ */
+export type CrmKegiatan = {
+  id: number
+  mitra_id: number
+  mitra_name: string
+  project_id: number
+  judul: string
+  deskripsi: string
+  thumbnail?: string
+  thumbnail_url?: string
+  date: string
+  type: string
+  created_at?: string
   updated_at?: string
-  transaction_details?: CrmTransactionDetailItem[]
-  donation_number?: number
 }
 
 /**
