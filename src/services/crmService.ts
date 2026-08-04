@@ -87,3 +87,47 @@ export const getCrmChatTemplates = async (params = {}) => {
     return { data: [], meta: { total: 0, last_page: 1 } };
   }
 };
+
+// template by stage pipeline
+export const getCrmChatTemplatesByStage = async (stageId: number) => {
+  try {
+    const res = await HttpClient.get(
+      `/crm/whatsapp-templates/by-pipeline/${stageId}`,
+    );
+    return res.data.data;
+  } catch (error) {
+    console.error("Error fetching chat templates by stage:", error);
+    return [];
+  }
+};
+
+// render template chat by template id
+export const getCrmChatTemplateById = async (
+  templateId: number,
+  params = {},
+) => {
+  try {
+    const res = await HttpClient.post(
+      `/crm/whatsapp-templates/${templateId}/render`,
+      params,
+    );
+    return res.data.data;
+  } catch (error) {
+    console.error("Error fetching chat template by id:", error);
+    return null;
+  }
+};
+
+// send chat to donor
+export const sendCrmChatToDonor = async (
+  id: number,
+  data: Record<string, any>,
+) => {
+  try {
+    const res = await HttpClient.post(`/crm/donors/${id}/chat`, data);
+    return res.data.data;
+  } catch (error) {
+    console.error("Error sending chat to donor:", error);
+    throw error;
+  }
+};

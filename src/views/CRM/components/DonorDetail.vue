@@ -499,12 +499,15 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useQuery } from "@tanstack/vue-query";
+import { toast, type ToastOptions } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 import { formatCurrency, formatDate } from "@/helpers/format";
 import {
   getDonorDetail,
   getCrmTransactionById,
   getCrmTransactions,
   getCrmKegiatans,
+  sendCrmChatToDonor,
 } from "@/services/crmService";
 import { colorTagVariant, cycleStatusVariant, initialsOf } from "./adapters";
 import DonorChat from "./DonorChat.vue";
@@ -515,6 +518,9 @@ import type {
   CrmPipelineCase,
   CrmTransactionHistoryItem,
 } from "./types";
+
+const showToast = (message: string, options: ToastOptions) =>
+  toast(message, options);
 
 const props = defineProps<{
   donorId: number;
@@ -629,7 +635,9 @@ const chatCard = computed<CrmChatCard | null>(() => {
     colorVariant: colorTagVariant(detail.value.color_tag),
     name: detail.value.name,
     nickname: detail.value.nick,
+    transactionId: transactionId.value,
     phone: detail.value.phone,
+    pipelineStageId: pipelineCase.value?.pipeline_stage?.id,
     chatMessages: [
       ...(detail.value.chat_messages ?? []),
       ...localMessages.value,
@@ -637,16 +645,32 @@ const chatCard = computed<CrmChatCard | null>(() => {
   };
 });
 
-// Belum ada endpoint kirim pesan — pesan baru ditampilkan optimis di sisi klien saja.
-const handleSend = (text: string) => {
-  localMessages.value.push({
+// Kirim pesan WA ke donatur — optimis tampil dulu, rollback jika API gagal.
+const handleSend = async (text: string, templateId: number | null) => {
+  const optimisticMessage: ChatMessageItem = {
     text,
     isSender: true,
     timeStamp: new Date().toLocaleTimeString("id-ID", {
       hour: "2-digit",
       minute: "2-digit",
     }),
-  });
+  };
+  localMessages.value.push(optimisticMessage);
+
+  try {
+    await sendCrmChatToDonor(donorProfileId.value, {
+      message: text,
+      template_id: templateId,
+    });
+  } catch (err: any) {
+    localMessages.value = localMessages.value.filter(
+      (m) => m !== optimisticMessage,
+    );
+    showToast(err?.response?.data?.message ?? "Gagal mengirim pesan", {
+      type: "error",
+      position: "top-center",
+    });
+  }
 };
 
 const FOLLOW_UP_STATUS_VARIANT: Record<string, string> = {

@@ -4,31 +4,47 @@
       class="p-3 border-bottom d-flex flex-wrap align-items-center justify-content-between gap-2"
     >
       <div class="d-flex align-items-center">
-        <i class="bxl-whatsapp text-success fs-20 me-2"></i>
+        <i class="bx bx-chat text-success fs-20 me-2"></i>
         <h6 class="mb-0 fs-14 fw-semibold">
-          WA — {{ card.nickname || card.name }} ({{ card.phone }})
+          {{ card.nickname || card.name }}
+          <span class="text-muted fw-normal fs-12 d-block">{{
+            card.phone
+          }}</span>
         </h6>
       </div>
       <b-form-select
         v-model="waAccount"
-        :options="[card.waAccount ?? 'Official WA', 'CS Pribadi']"
+        :options="['Official WA', 'CS Pribadi']"
         size="sm"
         class="w-auto"
       />
     </div>
 
-    <div v-if="card.quickTemplates?.length" class="p-3 border-bottom">
-      <p class="text-muted fs-13 mb-2">Template Pesan Cepat</p>
+    <div v-if="templates.length" class="p-3 border-bottom">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <p class="text-muted fs-12 mb-0 d-flex align-items-center">
+          <i class="bx bx-message-square-dots fs-15 me-1"></i>Template Pesan
+          Cepat
+        </p>
+
+        <b-spinner v-if="isRendering" small variant="primary" />
+      </div>
+
       <div class="d-flex flex-wrap gap-2">
         <b-button
-          v-for="tpl in card.quickTemplates"
-          :key="tpl"
+          v-for="tpl in templates"
+          :key="tpl.id"
           size="sm"
-          :variant="null"
-          class="btn-outline-secondary rounded-pill fs-12"
-          @click="message = tpl"
+          :variant="selectedTemplateId === tpl.id ? 'primary' : 'light'"
+          class="rounded-pill fs-11 border d-inline-flex align-items-center"
+          :disabled="isRendering"
+          @click="selectedTemplateId = tpl.id"
         >
-          {{ tpl }}
+          <i
+            :class="selectedTemplateId === tpl.id ? 'bx bx-check' : ''"
+            class="me-1"
+          ></i>
+          {{ tpl.name }}
         </b-button>
       </div>
     </div>
@@ -52,18 +68,21 @@
           :key="idx"
           class="d-flex mb-3"
           :class="
-            msg.isSender ? 'justify-content-end' : 'justify-content-start'
+            msg.from_role !== `donor`
+              ? 'justify-content-end'
+              : 'justify-content-start'
           "
         >
           <div
             class="rounded-3 shadow-sm px-3 py-2"
             style="max-width: 75%"
             :style="{
-              backgroundColor: msg.isSender ? '#d9fdd3' : '#ffffff',
+              backgroundColor:
+                msg.from_role !== `donor` ? '#d9fdd3' : '#ffffff',
               color: '#111b21',
             }"
           >
-            <p class="mb-1">{{ msg.text }}</p>
+            <p class="mb-1">{{ msg.message || msg.text }}</p>
 
             <div v-if="msg.timeStamp" class="small text-muted text-end">
               {{ msg.timeStamp }}
@@ -77,14 +96,25 @@
       <form @submit.prevent="handleSend">
         <b-row class="align-items-center g-2">
           <b-col>
-            <b-form-input v-model="message" placeholder="Tulis pesan..." />
+            <!-- <b-form-input
+              v-model="message"
+              placeholder="Tulis pesan..."
+              style="height: 48px"
+            /> -->
+            <b-form-textarea
+              v-model="message"
+              placeholder="Tulis pesan..."
+              rows="4"
+              max-rows="5"
+              no-resize
+            />
           </b-col>
-          <b-col cols="auto">
+          <b-col cols="auto" class="align-self-end">
             <b-button-group>
-              <b-button :variant="null" class="btn-light">
+              <b-button :variant="null" class="btn-light" title="Salin pesan">
                 <i class="bx bx-copy fs-18"></i>
               </b-button>
-              <b-button type="submit" variant="primary">
+              <b-button type="submit" variant="primary" title="Kirim pesan">
                 <i class="bx bx-send fs-18"></i>
               </b-button>
             </b-button-group>
@@ -96,32 +126,78 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
+import { useQuery } from "@tanstack/vue-query";
 import simplebar from "simplebar-vue";
-import type { CrmChatCard } from "./types";
+import { toast, type ToastOptions } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
+import {
+  getCrmChatTemplateById,
+  getCrmChatTemplatesByStage,
+} from "@/services/crmService";
+import type { CrmChatCard, CrmChatTemplate } from "./types";
+
+const showToast = (message: string, options: ToastOptions) =>
+  toast(message, options);
 
 const props = defineProps<{
   card: CrmChatCard;
 }>();
 
 const emit = defineEmits<{
-  send: [text: string];
+  send: [text: string, templateId: number | null];
 }>();
 
 const message = ref("");
-const waAccount = ref(props.card.waAccount);
+const waAccount = ref(props.card.waAccount || "Official WA");
+
+const stageId = computed(() => props.card.pipelineStageId ?? 0);
+
+const { data: templatesRaw } = useQuery({
+  queryKey: computed(() => ["crm-chat-templates", stageId.value]),
+  queryFn: () => getCrmChatTemplatesByStage(stageId.value),
+  enabled: computed(() => stageId.value > 0),
+});
+const templates = computed<CrmChatTemplate[]>(() =>
+  Array.isArray(templatesRaw.value) ? templatesRaw.value : [],
+);
+
+const selectedTemplateId = ref<number | null>(null);
+const isRendering = ref(false);
+
+watch(selectedTemplateId, async (templateId) => {
+  if (!templateId) return;
+  isRendering.value = true;
+  try {
+    const rendered = await getCrmChatTemplateById(templateId, {
+      transaction_id: props.card.transactionId,
+    });
+    if (rendered?.rendered_content) {
+      message.value = rendered.rendered_content;
+    } else {
+      showToast("Gagal memuat template pesan", {
+        type: "error",
+        position: "top-center",
+      });
+    }
+  } finally {
+    isRendering.value = false;
+  }
+});
 
 watch(
   () => props.card.id,
   () => {
-    waAccount.value = props.card.waAccount;
+    waAccount.value = props.card.waAccount || "Official WA";
     message.value = "";
+    selectedTemplateId.value = null;
   },
 );
 
 const handleSend = () => {
   if (!message.value.trim()) return;
-  emit("send", message.value.trim());
+  emit("send", message.value.trim(), selectedTemplateId.value);
   message.value = "";
+  selectedTemplateId.value = null;
 };
 </script>
