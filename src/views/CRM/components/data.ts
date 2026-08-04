@@ -111,6 +111,12 @@ export function useDonorsBoard() {
     () => cases.value.find((item) => item.id === selectedId.value) ?? null,
   );
 
+  // Case mentah (belum di-map ke CrmCaseCard) — dipakai DonorDetail untuk
+  // ambil transaction_id & keterangan yang tidak ada di CrmCaseCard.
+  const selectedPipelineCase = computed<CrmPipelineCase | null>(
+    () => loadedCases.value.find((item) => item.id === selectedId.value) ?? null,
+  );
+
   const selectCase = (id: number) => {
     selectedId.value = id;
   };
@@ -137,5 +143,6 @@ export function useDonorsBoard() {
     selectedId,
     selectCase,
     selectedCase,
+    selectedPipelineCase,
   };
 }

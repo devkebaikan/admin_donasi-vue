@@ -83,7 +83,7 @@
             class="d-flex flex-column"
             style="min-height: 0"
           >
-            <DonorDetail :donor-id="selectedId" />
+            <DonorDetail :donor-id="selectedId" :case="selectedPipelineCase" />
           </b-col>
         </b-row>
       </b-col>
@@ -121,6 +121,7 @@ const {
   error,
   selectedId,
   selectCase,
+  selectedPipelineCase,
 } = useDonorsBoard();
 
 const { data: pipelineData } = useQuery({

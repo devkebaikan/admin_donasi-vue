@@ -110,6 +110,87 @@ export type CrmFollowUp = {
   donor_profile_id: number
 }
 
+// ─── Transaksi (GET /admin/transactions & /admin/transactions/:id) ──────────
+
+export type CrmTransactionUser = {
+  id: number
+  name: string
+  phone: string
+}
+
+export type CrmTransactionType = {
+  id: number
+  name: string
+}
+
+export type CrmPaymentMethod = {
+  id: number
+  account_behalf: string
+  account_number: string
+  bank_provider: string
+  bank_name?: string
+}
+
+export type CrmTransactionProgram = {
+  id: number
+  name: string
+  slug: string
+}
+
+export type CrmTransactionDetailItem = {
+  id: number
+  transaction_id: number
+  program_id: number
+  detail_type: string
+  quantity: number
+  gross_nominal: number
+  fee: number
+  discount: number
+  operasional: number
+  komisi: number
+  nominal: number
+  refund: number
+  activity: string
+  program?: CrmTransactionProgram
+}
+
+/**
+ * Response asli GET /admin/transactions/:id — transaksi yang sedang berjalan
+ * di kartu pipeline (dari CrmPipelineCase.transaction_id).
+ */
+export type CrmTransactionDetail = {
+  id: number
+  source: string
+  user_id: number
+  transaction_type_id: number
+  payment_method_id: number
+  invoice: string
+  date: string
+  time: string
+  application_fee: number
+  discount: number
+  price: number
+  total: number
+  status: string
+  amin: number
+  anonim: number
+  user: CrmTransactionUser
+  transaction_type: CrmTransactionType
+  payment_method: CrmPaymentMethod
+}
+
+/**
+ * Item GET /admin/transactions?user_id=... — riwayat transaksi donatur,
+ * lebih lengkap dari CrmTransactionDetail (termasuk transaction_details/program).
+ */
+export type CrmTransactionHistoryItem = CrmTransactionDetail & {
+  notes?: string
+  created_at?: string
+  updated_at?: string
+  transaction_details?: CrmTransactionDetailItem[]
+  donation_number?: number
+}
+
 /**
  * Response asli GET /crm/donors/:id — dipakai langsung apa adanya di
  * DonorDetail.vue, tanpa di-merge dengan CrmCaseCard dari list.
