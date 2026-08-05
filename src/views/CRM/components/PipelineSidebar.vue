@@ -16,40 +16,74 @@
       data-simplebar
       style="min-height: 0"
     >
-      <a
-        href="javascript:void(0);"
-        class="d-flex align-items-start gap-2 rounded-2 px-2 py-1 mb-1 text-body crm-pipeline-item"
-        :class="{ active: !activeCode }"
-        @click="$emit('select', '')"
+      <!-- Section: Antrian (dinamis dari API) -->
+      <div class="px-2 pt-2 pb-1 fs-10 fw-bold text-muted text-uppercase">
+        Antrian
+      </div>
+      <router-link
+        :to="{ path: '/crm', query: {} }"
+        custom
+        v-slot="{ navigate }"
       >
-        <i class="bx bx-grid-alt fs-14 flex-shrink-0 mt-1"></i>
-        <span class="fs-11 fw-semibold">Semua Stage</span>
-      </a>
-
-      <a
-        v-for="stage in stages"
+        <a
+          href="javascript:void(0);"
+          class="d-flex align-items-start gap-2 rounded-2 px-2 py-1 mb-1 text-body crm-pipeline-item"
+          :class="{ active: !currentStageQuery }"
+          @click="navigate"
+        >
+          <i class="bx bx-grid-alt fs-14 flex-shrink-0 mt-1"></i>
+          <span class="fs-11 fw-semibold">Semua Stage</span>
+        </a>
+      </router-link>
+      <router-link
+        v-for="stage in pipelineStages"
         :key="stage.id"
-        href="javascript:void(0);"
-        class="d-flex align-items-start gap-2 rounded-2 px-2 py-1 mb-1 text-body crm-pipeline-item"
-        :class="{ active: activeCode === stage.code }"
-        @click="$emit('select', stage.code)"
+        :to="{ path: '/crm', query: { stage: stage.code } }"
+        custom
+        v-slot="{ navigate }"
       >
-        <i
-          :class="`bx ${stageIcon(stage.code)} fs-14 flex-shrink-0 mt-1 text-${stageColorVariant(stage.color)}`"
-        ></i>
-        <span class="lh-sm">
-          <span class="d-block fs-11 fw-semibold">{{ stage.label }}</span>
-          <span class="d-block fs-10 text-muted">{{ stage.description }}</span>
-        </span>
-
-        <span v-if="stage" class="ms-auto">
-          <span
-            :class="`badge fs-8 rounded-pill bg-soft-primary text-primary fw-semibold`"
-          >
-            {{ stage.id }}
+        <a
+          href="javascript:void(0);"
+          class="d-flex align-items-start gap-2 rounded-2 px-2 py-1 mb-1 text-body crm-pipeline-item"
+          :class="{ active: currentStageQuery === stage.code }"
+          @click="navigate"
+        >
+          <i
+            :class="`bx ${stageIcon(stage.code)} fs-14 flex-shrink-0 mt-1 text-${stageColorVariant(stage.color)}`"
+          ></i>
+          <span class="lh-sm">
+            <span class="d-block fs-11 fw-semibold">{{ stage.label }}</span>
+            <span class="d-block fs-10 text-muted">{{
+              stage.description
+            }}</span>
           </span>
+          <span class="ms-auto">
+            <span
+              class="badge fs-10 rounded-pill bg-soft-primary text-primary fw-semibold"
+            >
+              {{ stage.id }}
+            </span>
+          </span>
+        </a>
+      </router-link>
+
+      <!-- Section: Modul (halaman terpisah) -->
+      <div class="px-2 pt-2 pb-1 fs-10 fw-bold text-muted text-uppercase">
+        Modul
+      </div>
+      <router-link
+        v-for="mod in modules"
+        :key="mod.to"
+        :to="mod.to"
+        class="d-flex align-items-start gap-2 rounded-2 px-2 py-1 mb-1 text-body crm-pipeline-item"
+        active-class="active"
+      >
+        <i :class="`bx ${mod.icon} fs-14 flex-shrink-0 mt-1`"></i>
+        <span class="lh-sm">
+          <span class="d-block fs-11 fw-semibold">{{ mod.label }}</span>
+          <span class="d-block fs-10 text-muted">{{ mod.description }}</span>
         </span>
-      </a>
+      </router-link>
     </simplebar>
     <b-card-footer class="py-2 flex-shrink-0">
       <b-card-title class="mb-0 fs-12">
@@ -65,6 +99,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useQuery } from "@tanstack/vue-query";
+import { useRoute } from "vue-router";
 import simplebar from "simplebar-vue";
 import { getPipeline } from "@/services/crmService";
 import { stageColorVariant } from "./adapters";
@@ -78,15 +113,30 @@ defineEmits<{
   select: [code: string];
 }>();
 
+// Menu modul manual — masing-masing memiliki halaman sendiri
+const modules = [
+  {
+    to: "/crm/wa-template",
+    label: "WA Template",
+    description: "Kelola template pesan WhatsApp",
+    icon: "bxl-whatsapp",
+  },
+  // tambahkan modul lain di sini
+];
+
 const { data, isLoading } = useQuery({
   queryKey: ["crm-pipeline-stages"],
   queryFn: () => getPipeline(),
 });
 
-const stages = computed<PipelineStage[]>(() =>
-  ((data.value ?? []) as PipelineStage[])
-    .filter((stage) => stage.is_active)
-    .sort((a, b) => a.sort_order - b.sort_order),
+// Hanya stage dinamis dari API
+const pipelineStages = computed<PipelineStage[]>(
+  () => (data.value ?? []) as PipelineStage[],
+);
+
+const route = useRoute();
+const currentStageQuery = computed(
+  () => (route.query.stage as string | undefined) ?? undefined,
 );
 
 const STAGE_ICON: Record<string, string> = {

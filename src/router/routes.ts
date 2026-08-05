@@ -1169,6 +1169,12 @@ const crmRoutes = [
     },
     component: () => import("@/views/CRM/donors.vue"),
   },
+  {
+    path: "/crm/wa-template",
+    name: "crm-wa-template",
+    meta: { title: "WA Template", authRequired: true },
+    component: () => import("@/views/crm-wa-template/listTemplate.vue"),
+  },
 ];
 
 // ========================================================================== All Routes not use ==========================================================================
