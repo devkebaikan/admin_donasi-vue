@@ -69,7 +69,7 @@
             :style="activeTab !== 'chat' && 'background-color: transparent'"
             @click="activeTab = 'chat'"
           >
-            <i class="bx bx-chat me-1"></i>Chat WA
+            <i class="bx bxl-whatsapp fs-4 me-1"></i>Chat WA
           </button>
         </div>
       </b-card-header>
@@ -509,7 +509,11 @@ import {
   getCrmKegiatans,
   sendCrmChatToDonor,
 } from "@/services/crmService";
-import { colorTagVariant, cycleStatusVariant, initialsOf } from "./adapters";
+import {
+  colorTagVariant,
+  cycleStatusVariant,
+  initialsOf,
+} from "@/utils/crmAdapters";
 import DonorChat from "./DonorChat.vue";
 import type {
   ChatMessageItem,
@@ -517,7 +521,7 @@ import type {
   CrmKegiatan,
   CrmPipelineCase,
   CrmTransactionHistoryItem,
-} from "./types";
+} from "@/types/crm";
 
 const showToast = (message: string, options: ToastOptions) =>
   toast(message, options);
@@ -648,6 +652,8 @@ const chatCard = computed<CrmChatCard | null>(() => {
 // Kirim pesan WA ke donatur — optimis tampil dulu, rollback jika API gagal.
 const handleSend = async (text: string, templateId: number | null) => {
   const optimisticMessage: ChatMessageItem = {
+    message: text,
+    from_role: "cs" as ChatMessageItem["from_role"],
     text,
     isSender: true,
     timeStamp: new Date().toLocaleTimeString("id-ID", {

@@ -96,12 +96,11 @@ import { computed } from "vue";
 import { useQuery } from "@tanstack/vue-query";
 import { getPipeline } from "@/services/crmService";
 
-import PipelineSidebar from "./components/PipelineSidebar.vue";
 import DonorList from "./components/DonorList.vue";
 import DonorDetail from "./components/DonorDetail.vue";
 
 import { useDonorsBoard } from "./components/data";
-import type { PipelineStage } from "./components/types";
+import type { PipelineStage } from "@/types/crm";
 
 const {
   selectedLevel,

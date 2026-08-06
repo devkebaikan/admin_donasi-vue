@@ -2,8 +2,8 @@ import { computed, ref, watch } from "vue";
 import { keepPreviousData, useQuery } from "@tanstack/vue-query";
 import { useRoute, useRouter } from "vue-router";
 import { getDonorCases } from "@/services/crmService";
-import { toCaseCard } from "./adapters";
-import type { CrmCaseCard, CrmPipelineCase } from "./types";
+import { toCaseCard } from "@/utils/crmAdapters";
+import type { CrmCaseCard, CrmPipelineCase } from "@/types/crm";
 
 /**
  * Board donatur CRM berbasis data asli: daftar kasus pipeline (donasi + stage

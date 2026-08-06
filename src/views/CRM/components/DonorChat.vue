@@ -1,10 +1,11 @@
 <template>
-  <div class="d-flex flex-column h-100">
+  <div class="d-flex flex-column h-100 overflow-hidden">
     <div
       class="p-3 border-bottom d-flex flex-wrap align-items-center justify-content-between gap-2"
     >
       <div class="d-flex align-items-center">
-        <i class="bx bx-chat text-success fs-20 me-2"></i>
+        <!-- <i class="bx bxl-whatsapp text-success fs-2 me-2"></i> -->
+
         <h6 class="mb-0 fs-14 fw-semibold">
           {{ card.nickname || card.name }}
           <span class="text-muted fw-normal fs-12 d-block">{{
@@ -58,7 +59,7 @@
         v-if="!card.chatMessages?.length"
         class="d-flex flex-column justify-content-center align-items-center h-100 text-muted"
       >
-        <i class="bx bx-message-detail fs-1 text-success mb-2"></i>
+        <i class="bx bxl-whatsapp fs-1 text-success mb-2"></i>
         <p class="mb-0">Belum ada chat</p>
       </div>
 
@@ -75,14 +76,14 @@
         >
           <div
             class="rounded-3 shadow-sm px-3 py-2"
-            style="max-width: 75%"
+            style="max-width: 75%; white-space: pre-line"
             :style="{
               backgroundColor:
                 msg.from_role !== `donor` ? '#d9fdd3' : '#ffffff',
               color: '#111b21',
             }"
           >
-            <p class="mb-1">{{ msg.message || msg.text }}</p>
+            <p class="mb-1" v-html="formatWhatsAppMessage(msg.message)"></p>
 
             <div v-if="msg.timeStamp" class="small text-muted text-end">
               {{ msg.timeStamp }}
@@ -135,7 +136,7 @@ import {
   getCrmChatTemplateById,
   getCrmChatTemplatesByStage,
 } from "@/services/crmService";
-import type { CrmChatCard, CrmChatTemplate } from "./types";
+import type { CrmChatCard, CrmChatTemplate } from "@/types/crm";
 
 const showToast = (message: string, options: ToastOptions) =>
   toast(message, options);
@@ -152,6 +153,14 @@ const message = ref("");
 const waAccount = ref(props.card.waAccount || "Official WA");
 
 const stageId = computed(() => props.card.pipelineStageId ?? 0);
+
+const formatWhatsAppMessage = (text: string) => {
+  return text
+    .replace(/\*(.*?)\*/g, "<strong>$1</strong>")
+    .replace(/_(.*?)_/g, "<em>$1</em>")
+    .replace(/~(.*?)~/g, "<del>$1</del>")
+    .replace(/\n/g, "<br>");
+};
 
 const { data: templatesRaw } = useQuery({
   queryKey: computed(() => ["crm-chat-templates", stageId.value]),

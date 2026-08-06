@@ -1,5 +1,5 @@
 import { formatCurrency } from "@/helpers/format";
-import type { CrmCaseCard, CrmPipelineCase } from "./types";
+import type { CrmCaseCard, CrmPipelineCase } from "../types/crm";
 
 const COLOR_TAG_VARIANT: Record<string, string> = {
   blue: "info",
@@ -58,7 +58,13 @@ export const toCaseCard = (item: CrmPipelineCase): CrmCaseCard => ({
   stage: item.pipeline_stage.label,
   tags: [
     { label: item.donor.level, variant: "secondary" },
-    { label: item.donor.cycle_status, variant: cycleStatusVariant(item.donor.cycle_status) },
-    { label: item.pipeline_stage.label, variant: stageColorVariant(item.pipeline_stage.color) },
+    {
+      label: item.donor.cycle_status,
+      variant: cycleStatusVariant(item.donor.cycle_status),
+    },
+    {
+      label: item.pipeline_stage.label,
+      variant: stageColorVariant(item.pipeline_stage.color),
+    },
   ],
 });

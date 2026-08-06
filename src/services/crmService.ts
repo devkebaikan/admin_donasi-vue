@@ -88,6 +88,52 @@ export const getCrmChatTemplates = async (params = {}) => {
   }
 };
 
+// detail template chat crm
+export const getCrmChatTemplateDetail = async (id: number) => {
+  try {
+    const res = await HttpClient.get(`/crm/whatsapp-templates/${id}`);
+    return res.data.data;
+  } catch (error) {
+    console.error(`Error fetching chat template ${id}:`, error);
+    return null;
+  }
+};
+
+// buat template chat baru (khusus type "crm")
+export const createCrmChatTemplate = async (data: any) => {
+  try {
+    const res = await HttpClient.post("/crm/whatsapp-templates", data);
+    return res.data.data;
+  } catch (error) {
+    console.error("Error creating chat template:", error);
+    throw error;
+  }
+};
+
+// update template chat
+export const updateCrmChatTemplate = async (id: number, data: FormData) => {
+  try {
+    const res = await HttpClient.post(`/crm/whatsapp-templates/${id}`, data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data.data;
+  } catch (error) {
+    console.error(`Error updating chat template ${id}:`, error);
+    throw error;
+  }
+};
+
+// hapus template chat
+export const deleteCrmChatTemplate = async (id: number) => {
+  try {
+    await HttpClient.delete(`/crm/whatsapp-templates/${id}`);
+    return true;
+  } catch (error) {
+    console.error(`Error deleting chat template ${id}:`, error);
+    throw error;
+  }
+};
+
 // template by stage pipeline
 export const getCrmChatTemplatesByStage = async (stageId: number) => {
   try {

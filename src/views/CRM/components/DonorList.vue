@@ -85,7 +85,7 @@
 
 <script setup lang="ts">
 import simplebar from "simplebar-vue";
-import type { CrmCaseCard } from "./types";
+import type { CrmCaseCard } from "@/types/crm";
 
 withDefaults(
   defineProps<{

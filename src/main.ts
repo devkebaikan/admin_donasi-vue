@@ -33,12 +33,15 @@ import "@/assets/scss/app.scss";
 import "@/assets/scss/icons.scss";
 
 import { setupVueQuery } from "@/helpers/query";
+import PipelineSidebar from "@/components/PipelineSidebar.vue";
 
 const app = createApp(App);
 app.use(createPinia());
 app.use(router);
 app.use(createBootstrap());
 app.use(VueApexCharts);
+
+app.component("PipelineSidebar", PipelineSidebar);
 
 setupVueQuery(app);
 

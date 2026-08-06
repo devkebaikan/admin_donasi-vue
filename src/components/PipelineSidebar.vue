@@ -28,7 +28,7 @@
         <a
           href="javascript:void(0);"
           class="d-flex align-items-start gap-2 rounded-2 px-2 py-1 mb-1 text-body crm-pipeline-item"
-          :class="{ active: !currentStageQuery }"
+          :class="{ active: isOnCrmDashboard && !currentStageQuery }"
           @click="navigate"
         >
           <i class="bx bx-grid-alt fs-14 flex-shrink-0 mt-1"></i>
@@ -45,7 +45,7 @@
         <a
           href="javascript:void(0);"
           class="d-flex align-items-start gap-2 rounded-2 px-2 py-1 mb-1 text-body crm-pipeline-item"
-          :class="{ active: currentStageQuery === stage.code }"
+          :class="{ active: isOnCrmDashboard && currentStageQuery === stage.code }"
           @click="navigate"
         >
           <i
@@ -102,15 +102,11 @@ import { useQuery } from "@tanstack/vue-query";
 import { useRoute } from "vue-router";
 import simplebar from "simplebar-vue";
 import { getPipeline } from "@/services/crmService";
-import { stageColorVariant } from "./adapters";
-import type { PipelineStage } from "./types";
+import { stageColorVariant } from "@/utils/crmAdapters";
+import type { PipelineStage } from "@/types/crm";
 
 defineProps<{
   activeCode?: string;
-}>();
-
-defineEmits<{
-  select: [code: string];
 }>();
 
 // Menu modul manual — masing-masing memiliki halaman sendiri
@@ -135,6 +131,10 @@ const pipelineStages = computed<PipelineStage[]>(
 );
 
 const route = useRoute();
+
+// Hanya aktifkan highlight stage saat berada di halaman dashboard CRM (bukan modul lain)
+const isOnCrmDashboard = computed(() => route.path === "/crm");
+
 const currentStageQuery = computed(
   () => (route.query.stage as string | undefined) ?? undefined,
 );

@@ -1175,6 +1175,18 @@ const crmRoutes = [
     meta: { title: "WA Template", authRequired: true },
     component: () => import("@/views/crm-wa-template/listTemplate.vue"),
   },
+  {
+    path: "/crm/wa-template/create",
+    name: "crm-wa-template.create",
+    meta: { title: "Buat WA Template", authRequired: true },
+    component: () => import("@/views/crm-wa-template/createTemplate.vue"),
+  },
+  {
+    path: "/crm/wa-template/:id/edit",
+    name: "crm-wa-template.edit",
+    meta: { title: "Edit WA Template", authRequired: true },
+    component: () => import("@/views/crm-wa-template/editTemplate.vue"),
+  },
 ];
 
 // ========================================================================== All Routes not use ==========================================================================
