@@ -1,6 +1,9 @@
 import { html } from "gridjs";
 import { useDataTable } from "@/composables/useDataTable";
 import { getAllAccountMaster } from "@/services/financeAccountMasterService";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanEdit = hasPermission("finance_akun:master");
 
 const TYPE_BADGE: Record<string, string> = {
   D: "bg-primary",
@@ -61,14 +64,17 @@ export function useFinanceAccountMasterTable() {
         formatter: (id: number) =>
           html(`
             <div class="d-flex gap-1 justify-content-center align-items-center">
-              <button
+            ${
+              isCanEdit
+                ? `<button
                 class="btn btn-sm btn-soft-warning edit-btn"
                 data-action="edit"
                 data-id="${id}"
                 title="Edit Akun">
                 <i class="bx bx-edit fs-16"></i>
-              </button>
-             
+              </button>`
+                : ""
+            }
             </div>
           `),
       },

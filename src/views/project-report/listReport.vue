@@ -297,7 +297,7 @@
     <b-row>
       <b-col>
         <UIComponentCard id="basic" title="Daftar Laporan Project">
-          <div class="d-flex justify-content-end mb-3">
+          <div v-if="isCanCreate" class="d-flex justify-content-end mb-3">
             <b-button
               v-if="selectedProjectId"
               variant="primary"
@@ -364,6 +364,9 @@ import { getProjects } from "@/services/projectService";
 import { getAllKegiatan } from "@/services/kegiatanService";
 import router from "@/router";
 import { useRoute } from "vue-router";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanCreate = hasPermission("finance:report");
 
 const {
   tableOptions,

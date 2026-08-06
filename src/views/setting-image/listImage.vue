@@ -39,7 +39,7 @@
     <b-row>
       <b-col>
         <UIComponentCard id="basic" title="Daftar Page Setting Image">
-          <div class="d-flex justify-content-end mb-3">
+          <div v-if="isCanCreate" class="d-flex justify-content-end mb-3">
             <b-button variant="primary" @click="router.push('/image/create')">
               <i class="bx bx-plus fs-16 me-1"></i>Tambah Gambar
             </b-button>
@@ -109,7 +109,10 @@ import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
 import { useSettingImageTable } from "./components/data";
+import { hasPermission } from "@/helpers/permission";
 import router from "@/router";
+
+const isCanCreate = hasPermission("setting:image");
 
 const {
   tableOptions,

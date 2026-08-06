@@ -2,6 +2,9 @@ import { computed, ref } from "vue";
 import { html } from "gridjs";
 import { useDataTable } from "@/composables/useDataTable";
 import { getAllRoles, deleteRole } from "@/services/roleService";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanEdit = hasPermission("role:update");
 
 export function useRoleTable() {
   const selectedGuardName = ref<string>("");
@@ -70,13 +73,17 @@ export function useRoleTable() {
                 title="Lihat Users">
                 <i class="bx bx-group fs-16"></i>
               </button>
-              <button
+              ${
+                isCanEdit
+                  ? `<button
                 class="btn btn-sm btn-soft-warning edit-btn"
                 data-action="edit"
                 data-id="${item.id}"
                 title="Edit Role">
                 <i class="bx bx-edit fs-16"></i>
-              </button>
+                </button>`
+                  : ""
+              }
             </div>
           `),
       },

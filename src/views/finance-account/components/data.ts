@@ -6,6 +6,9 @@ import {
   deleteFinanceAccount,
 } from "@/services/financeAccountService";
 import { formatCurrency } from "@/helpers/format";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanEdit = hasPermission("finance_akun:update");
 
 const TYPE_BADGE: Record<string, string> = {
   D: "bg-primary",
@@ -92,13 +95,17 @@ export function useFinanceAccountsTable() {
         formatter: (id: number) =>
           html(`
             <div class="d-flex gap-1 justify-content-center align-items-center">
-              <button
+            ${
+              isCanEdit
+                ? `<button
                 class="btn btn-sm btn-soft-warning edit-btn"
                 data-action="edit"
                 data-id="${id}"
                 title="Edit Akun">
                 <i class="bx bx-edit fs-16"></i>
-              </button>
+              </button> `
+                : ""
+            }
               <button
                 class="btn btn-sm btn-soft-danger delete-btn"
                 data-action="delete"

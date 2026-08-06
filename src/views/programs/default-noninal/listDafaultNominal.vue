@@ -39,7 +39,7 @@
     <b-row>
       <b-col>
         <UIComponentCard id="basic" title="Daftar Default Nominal">
-          <div class="d-flex justify-content-end mb-3">
+          <div v-if="isCanCreate" class="d-flex justify-content-end mb-3">
             <b-button variant="primary" @click="router.push('/nominal/create')">
               <i class="bx bx-plus fs-16 me-1"></i>Tambah Nominal
             </b-button>
@@ -110,6 +110,9 @@ import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
 import { useDefaultNominalTable } from "./data";
 import router from "@/router";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanCreate = hasPermission("program:create");
 
 const {
   tableOptions,

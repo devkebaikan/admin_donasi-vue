@@ -93,6 +93,7 @@ const programRoutes = [
     meta: {
       title: setTitle("Create Program"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("program:create")],
     },
     component: () => import("@/views/programs/createProgram.vue"),
   },
@@ -102,6 +103,7 @@ const programRoutes = [
     meta: {
       title: setTitle("Edit Program"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("program:update")],
     },
     component: () => import("@/views/programs/editProgram.vue"),
   },
@@ -135,6 +137,7 @@ const mitraRoutes = [
     meta: {
       title: setTitle("CreateMitra"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("mitra:create")],
     },
     component: () => import("@/views/mitra/createMitra.vue"),
   },
@@ -144,6 +147,7 @@ const mitraRoutes = [
     meta: {
       title: setTitle("Edit Mitra"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("mitra:update")],
     },
     component: () => import("@/views/mitra/editMitra.vue"),
   },
@@ -166,6 +170,7 @@ const categoryRoutes = [
     meta: {
       title: setTitle("Create Category"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("program:create")],
     },
     component: () => import("@/views/programs/categories/createCategory.vue"),
   },
@@ -175,6 +180,7 @@ const categoryRoutes = [
     meta: {
       title: setTitle("Edit Category"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("program:update")],
     },
     component: () => import("@/views/programs/categories/editCategory.vue"),
   },
@@ -197,6 +203,7 @@ const percentageRoutes = [
     meta: {
       title: setTitle("Create Percentage"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("program:create")],
     },
     component: () => import("@/views/programs/percentage/createPercentage.vue"),
   },
@@ -206,6 +213,7 @@ const percentageRoutes = [
     meta: {
       title: setTitle("Edit Percentage"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("program:update")],
     },
     component: () => import("@/views/programs/percentage/editPercentage.vue"),
   },
@@ -229,6 +237,7 @@ const defaultNominalRoutes = [
     meta: {
       title: setTitle("Create Default Nominal"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("program:create")],
     },
     component: () =>
       import("@/views/programs/default-noninal/createDafaultNominal.vue"),
@@ -239,6 +248,7 @@ const defaultNominalRoutes = [
     meta: {
       title: setTitle("Edit Default Nominal"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("program:update")],
     },
     component: () =>
       import("@/views/programs/default-noninal/editDafaultNominal.vue"),
@@ -262,6 +272,7 @@ const programTypeRoutes = [
     meta: {
       title: setTitle("Create Program Type"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("program:create")],
     },
     component: () => import("@/views/programs/type/createType.vue"),
   },
@@ -271,6 +282,7 @@ const programTypeRoutes = [
     meta: {
       title: setTitle("Edit Program Type"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("program:update")],
     },
     component: () => import("@/views/programs/type/edit.vue"),
   },
@@ -293,6 +305,7 @@ const settingImageRoutes = [
     meta: {
       title: setTitle("Create Image"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("setting:image")],
     },
     component: () => import("@/views/setting-image/createImage.vue"),
   },
@@ -302,6 +315,7 @@ const settingImageRoutes = [
     meta: {
       title: setTitle("Edit Image"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("setting:image")],
     },
     component: () => import("@/views/setting-image/editImage.vue"),
   },
@@ -324,6 +338,7 @@ const bankReferenceRoutes = [
     meta: {
       title: setTitle("Create Bank Reference"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("bank:create")],
     },
     component: () => import("@/views/bank-reference/createBankReference.vue"),
   },
@@ -333,6 +348,7 @@ const bankReferenceRoutes = [
     meta: {
       title: setTitle("Edit Bank Reference"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("bank:update")],
     },
     component: () => import("@/views/bank-reference/editBankReference.vue"),
   },
@@ -354,8 +370,9 @@ const LeadRoutes = [
     name: "leads.create",
     meta: {
       title: setTitle("Create Leads"),
+      authRequired: true,
+      middleware: [auth, menuAccess, permission("setting:leads")],
     },
-    authRequired: true,
     component: () => import("@/views/leads/createLead.vue"),
   },
   {
@@ -364,6 +381,7 @@ const LeadRoutes = [
     meta: {
       title: setTitle("Edit Leads"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("setting:leads")],
     },
     component: () => import("@/views/leads/editLead.vue"),
   },
@@ -386,6 +404,7 @@ const blogRoutes = [
     meta: {
       title: setTitle("Create Blogs"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("blog:create")],
     },
     component: () => import("@/views/blogs/createBlog.vue"),
   },
@@ -395,6 +414,7 @@ const blogRoutes = [
     meta: {
       title: setTitle("Edit Blogs"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("blog:update")],
     },
     component: () => import("@/views/blogs/editBlog.vue"),
   },
@@ -417,6 +437,7 @@ const blogCategoryRoutes = [
     meta: {
       title: setTitle("Buat Kategori Blog"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("blog:create")],
     },
     component: () => import("@/views/blog-category/createBlogCategory.vue"),
   },
@@ -426,6 +447,7 @@ const blogCategoryRoutes = [
     meta: {
       title: setTitle("Edit Kategori Blog"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("blog:update")],
     },
     component: () => import("@/views/blog-category/editBlogCategory.vue"),
   },
@@ -448,6 +470,7 @@ const blogTagRoutes = [
     meta: {
       title: setTitle("Buat Tag Blog"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("blog:create")],
     },
     component: () => import("@/views/blog-tags/createBlogTag.vue"),
   },
@@ -457,6 +480,7 @@ const blogTagRoutes = [
     meta: {
       title: setTitle("Edit Tag Blog"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("blog:update")],
     },
     component: () => import("@/views/blog-tags/editBlogTag.vue"),
   },
@@ -479,6 +503,7 @@ const programShowRoutes = [
     meta: {
       title: setTitle("Create Program Show"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("setting:showing")],
     },
     component: () => import("@/views/program-shows/createProgramShow.vue"),
   },
@@ -488,6 +513,7 @@ const programShowRoutes = [
     meta: {
       title: setTitle("Edit Program Show"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("setting:showing")],
     },
     component: () => import("@/views/program-shows/editProgramShow.vue"),
   },
@@ -523,6 +549,7 @@ const roleRoutes = [
     meta: {
       title: setTitle("Create Role"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("role:create")],
     },
     component: () => import("@/views/roles/createRole.vue"),
   },
@@ -532,6 +559,7 @@ const roleRoutes = [
     meta: {
       title: setTitle("Edit Role"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("role:update")],
     },
     component: () => import("@/views/roles/editRole.vue"),
   },
@@ -563,6 +591,7 @@ const permissionRoutes = [
     meta: {
       title: setTitle("Create Permission"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("permission:create")],
     },
     component: () => import("@/views/permissions/createPermissions.vue"),
   },
@@ -594,6 +623,7 @@ const menuRoutes = [
     meta: {
       title: setTitle("Buat Menu"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("menu:create")],
     },
     component: () => import("@/views/menus/createMenu.vue"),
   },
@@ -603,6 +633,7 @@ const menuRoutes = [
     meta: {
       title: setTitle("Edit Menu"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("menu:update")],
     },
     component: () => import("@/views/menus/editMenu.vue"),
   },
@@ -625,6 +656,7 @@ const userRoutes = [
     meta: {
       title: setTitle("Tambah User"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("user:create")],
     },
     component: () => import("@/views/users/createUser.vue"),
   },
@@ -634,6 +666,7 @@ const userRoutes = [
     meta: {
       title: setTitle("Edit User"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("user:update")],
     },
     component: () => import("@/views/users/editUser.vue"),
   },
@@ -665,6 +698,7 @@ const transactionRoutes = [
     meta: {
       title: setTitle("Tambah Transaksi"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("transaction:create")],
     },
     component: () => import("@/views/transactions/createTransaction.vue"),
   },
@@ -683,6 +717,7 @@ const transactionRoutes = [
     meta: {
       title: setTitle("Edit Transaksi"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("transaction:update")],
     },
     component: () => import("@/views/transactions/editTransaction.vue"),
   },
@@ -739,6 +774,7 @@ const projectRoutes = [
     meta: {
       title: setTitle("Create Project"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("project:create")],
     },
     component: () => import("@/views/projects/createProject.vue"),
   },
@@ -748,6 +784,7 @@ const projectRoutes = [
     meta: {
       title: setTitle("Edit Project"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("project:update")],
     },
     component: () => import("@/views/projects/editProject.vue"),
   },
@@ -780,6 +817,7 @@ const bannerRoutes = [
     meta: {
       title: setTitle("Create Banner"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("setting:banner")],
     },
     component: () => import("@/views/setting-banner/createBanner.vue"),
   },
@@ -789,6 +827,7 @@ const bannerRoutes = [
     meta: {
       title: setTitle("Edit Banner"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("setting:banner")],
     },
     component: () => import("@/views/setting-banner/editBanner.vue"),
   },
@@ -912,6 +951,7 @@ const financeAccountRoutes = [
     meta: {
       title: setTitle("Create Finance Account"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("finance_akun:create")],
     },
     component: () => import("@/views/finance-account/createAccount.vue"),
   },
@@ -921,6 +961,7 @@ const financeAccountRoutes = [
     meta: {
       title: setTitle("Edit Finance Account"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("finance_akun:update")],
     },
     component: () => import("@/views/finance-account/editAccount.vue"),
   },
@@ -944,6 +985,7 @@ const financeAccountMasterRoutes = [
     meta: {
       title: setTitle("Edit Finance Account Master"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("finance_akun:master")],
     },
     component: () =>
       import("@/views/finance-account-master/editAccountMaster.vue"),
@@ -980,6 +1022,7 @@ const adsScriptRoutes = [
     meta: {
       title: setTitle("Tambah Ads Script"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("setting:ads")],
     },
     component: () => import("@/views/setting-ads-scripts/createAdsScript.vue"),
   },
@@ -998,6 +1041,7 @@ const adsScriptRoutes = [
     meta: {
       title: setTitle("Edit Ads Script"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("setting:ads")],
     },
     component: () => import("@/views/setting-ads-scripts/editAdsScript.vue"),
   },
@@ -1020,6 +1064,7 @@ const kegiatanRoutes = [
     meta: {
       title: setTitle("Create Program Kegiatan"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("program:create")],
     },
     component: () => import("@/views/program-kegiatan/createKegiatan.vue"),
   },
@@ -1029,6 +1074,7 @@ const kegiatanRoutes = [
     meta: {
       title: setTitle("Edit Program Kegiatan"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("program:update")],
     },
     component: () => import("@/views/program-kegiatan/editKegiatan.vue"),
   },
@@ -1051,6 +1097,7 @@ const projectAjuanRoutes = [
     meta: {
       title: setTitle("Create Project Ajuan"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("project:ajuan")],
     },
     component: () => import("@/views/project-ajuan/createAjuan.vue"),
   },
@@ -1060,6 +1107,7 @@ const projectAjuanRoutes = [
     meta: {
       title: setTitle("Edit Project Ajuan"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("project:ajuan")],
     },
     component: () => import("@/views/project-ajuan/editAjuan.vue"),
   },
@@ -1082,6 +1130,7 @@ const projectKeuanganRoutes = [
     meta: {
       title: setTitle("Create Project Keuangan"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("project:keuangan")],
     },
     component: () => import("@/views/project-keuangan/createKeuangan.vue"),
   },
@@ -1091,6 +1140,7 @@ const projectKeuanganRoutes = [
     meta: {
       title: setTitle("Edit Project Keuangan"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("project:keuangan")],
     },
     component: () => import("@/views/project-keuangan/editKeuangan.vue"),
   },
@@ -1113,6 +1163,7 @@ const paymentMethodRoutes = [
     meta: {
       title: setTitle("Create Payment Methods"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("payment:create")],
     },
     component: () => import("@/views/payment-methods/createPaymentMethod.vue"),
   },
@@ -1122,6 +1173,7 @@ const paymentMethodRoutes = [
     meta: {
       title: setTitle("Edit Payment Methods"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("payment:update")],
     },
     component: () => import("@/views/payment-methods/editPaymentMethod.vue"),
   },
@@ -1144,6 +1196,7 @@ const projectReportRoutes = [
     meta: {
       title: setTitle("Create Project Report"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("finance:report")],
     },
     component: () => import("@/views/project-report/createReport.vue"),
   },
@@ -1153,6 +1206,7 @@ const projectReportRoutes = [
     meta: {
       title: setTitle("Edit Project Report"),
       authRequired: true,
+      middleware: [auth, menuAccess, permission("finance:report")],
     },
     component: () => import("@/views/project-report/editReport.vue"),
   },
@@ -1178,13 +1232,21 @@ const crmRoutes = [
   {
     path: "/crm/wa-template/create",
     name: "crm-wa-template.create",
-    meta: { title: "Buat WA Template", authRequired: true },
+    meta: {
+      title: "Buat WA Template",
+      authRequired: true,
+      middleware: [auth, menuAccess, permission("crm:whatsapp_template")],
+    },
     component: () => import("@/views/crm-wa-template/createTemplate.vue"),
   },
   {
     path: "/crm/wa-template/:id/edit",
     name: "crm-wa-template.edit",
-    meta: { title: "Edit WA Template", authRequired: true },
+    meta: {
+      title: "Edit WA Template",
+      authRequired: true,
+      middleware: [auth, menuAccess, permission("crm:whatsapp_template")],
+    },
     component: () => import("@/views/crm-wa-template/editTemplate.vue"),
   },
 ];

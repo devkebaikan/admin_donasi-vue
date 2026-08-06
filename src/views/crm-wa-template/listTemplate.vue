@@ -230,7 +230,7 @@
         <b-row class="flex-grow-1" style="min-height: 0">
           <b-col>
             <UIComponentCard id="basic" title="Daftar Template">
-              <div class="d-flex justify-content-end mb-3">
+              <div v-if="isCanCreate" class="d-flex justify-content-end mb-3">
                 <b-button
                   variant="primary"
                   :to="{ name: 'crm-wa-template.create' }"
@@ -290,11 +290,14 @@ import {
   typeBadgeClass,
   typeLabel,
 } from "./components/data";
+import { hasPermission } from "@/helpers/permission";
 import router from "@/router";
 
 const STORAGE_BASE =
   (import.meta.env.VITE_API_BASE_URL as string).replace("/api/v1", "") +
   "/storage/";
+
+const isCanCreate = hasPermission("crm:whatsapp_template");
 
 const {
   tableOptions,

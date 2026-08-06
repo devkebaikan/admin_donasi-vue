@@ -70,7 +70,7 @@
     <b-row>
       <b-col>
         <UIComponentCard id="basic" title="Daftar Ads Script">
-          <div class="d-flex justify-content-end mb-3">
+          <div v-if="isCanCreate" class="d-flex justify-content-end mb-3">
             <b-button variant="primary" :to="{ name: 'ads-script.create' }">
               <i class="bx bx-plus fs-16 me-1"></i>Tambah Ads
             </b-button>
@@ -124,7 +124,10 @@ import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
 import { useAdsScriptsTable } from "./components/data";
+import { hasPermission } from "@/helpers/permission";
 import router from "@/router";
+
+const isCanCreate = hasPermission("setting:ads");
 
 const {
   tableOptions,

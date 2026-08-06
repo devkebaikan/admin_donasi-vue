@@ -258,7 +258,7 @@
     <b-row>
       <b-col>
         <UIComponentCard id="basic" title="Daftar User">
-          <div class="d-flex justify-content-end mb-3">
+          <div v-if="isCanCreate" class="d-flex justify-content-end mb-3">
             <b-button variant="primary" :to="{ name: 'user.create' }">
               <i class="bx bx-plus fs-16 me-1"></i>Tambah User
             </b-button>
@@ -319,6 +319,9 @@ import { getAllRoles } from "@/services/roleService";
 import { getUserById } from "@/services/userService";
 import { formatDateTime } from "@/helpers/format";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanCreate = hasPermission("user:create");
 
 const {
   tableOptions,

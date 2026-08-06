@@ -1,12 +1,16 @@
 import { html } from "gridjs";
 import { useDataTable } from "@/composables/useDataTable";
 import { getBanners, deleteBanner } from "@/services/bannerService";
+import { hasPermission } from "@/helpers/permission";
 
 const STORAGE_BASE =
   (import.meta.env.VITE_API_BASE_URL as string).replace("/api/v1", "") +
   "/storage/";
 
 const buildImageUrl = (path: string) => (path ? `${STORAGE_BASE}${path}` : "");
+
+const isCanEdit = hasPermission("setting:banner");
+const isCanDelete = hasPermission("setting:banner");
 
 export function useSettingBannerTable() {
   const table = useDataTable({
@@ -71,20 +75,28 @@ export function useSettingBannerTable() {
         formatter: (id: number) =>
           html(`
             <div class="d-flex gap-2 justify-content-center">
-              <button
+            ${
+              isCanEdit
+                ? `<button
                 class="btn btn-sm btn-soft-warning edit-btn"
                 data-action="edit"
                 data-id="${id}"
                 title="Edit Banner">
                 <i class="bx bx-edit fs-16"></i>
-              </button>
-              <button
+              </button>`
+                : ""
+            }
+            ${
+              isCanDelete
+                ? `<button
                 class="btn btn-sm btn-soft-danger delete-btn"
                 data-action="delete"
                 data-id="${id}"
                 title="Hapus Banner">
                 <i class="bx bx-trash fs-16"></i>
-              </button>
+              </button>`
+                : ""
+            }
             </div>
           `),
       },

@@ -203,7 +203,7 @@
     <b-row>
       <b-col>
         <UIComponentCard id="basic" title="Daftar Kegiatan">
-          <div class="d-flex justify-content-end mb-3">
+          <div v-if="isCanCreate" class="d-flex justify-content-end mb-3">
             <b-button
               v-if="selectedProjectId"
               variant="primary"
@@ -267,12 +267,15 @@ import { getKegiatanById } from "@/services/kegiatanService";
 import { getProjects } from "@/services/projectService";
 import { getAllMitra } from "@/services/mitraService";
 import { formatDate, formatDateTime } from "@/helpers/format";
+import { hasPermission } from "@/helpers/permission";
 import router from "@/router";
 import { useRoute } from "vue-router";
 
 const STORAGE_BASE =
   (import.meta.env.VITE_API_BASE_URL as string).replace("/api/v1", "") +
   "/storage/";
+
+const isCanCreate = hasPermission("program:create");
 
 const {
   tableOptions,

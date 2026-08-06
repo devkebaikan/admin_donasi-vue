@@ -2,6 +2,10 @@ import { computed, ref } from "vue";
 import { html } from "gridjs";
 import { useDataTable } from "@/composables/useDataTable";
 import { getAdsScripts, deleteAdsScript } from "@/services/adsScriptService";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanEdit = hasPermission("setting:ads");
+const isCanDelete = hasPermission("setting:ads");
 
 const TYPE_BADGE: Record<string, string> = {
   google: "bg-danger",
@@ -97,21 +101,28 @@ export function useAdsScriptsTable() {
         formatter: (id: number) =>
           html(`
             <div class="d-flex gap-1 justify-content-center">
-             
-              <button
+            ${
+              isCanEdit
+                ? `<button
                 class="btn btn-sm btn-soft-warning edit-btn"
                 data-action="edit"
                 data-id="${id}"
                 title="Edit">
                 <i class="bx bx-edit fs-16"></i>
-              </button>
-              <button
+              </button>`
+                : ""
+            }
+            ${
+              isCanDelete
+                ? `<button
                 class="btn btn-sm btn-soft-danger delete-btn"
                 data-action="delete"
                 data-id="${id}"
                 title="Hapus">
                 <i class="bx bx-trash fs-16"></i>
-              </button>
+              </button>`
+                : ""
+            }
             </div>
           `),
       },

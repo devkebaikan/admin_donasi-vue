@@ -1,12 +1,16 @@
 import { html } from "gridjs";
 import { useDataTable } from "@/composables/useDataTable";
 import { getAllImages, deleteImage } from "@/services/imageService";
+import { hasPermission } from "@/helpers/permission";
 
 const STORAGE_BASE =
   (import.meta.env.VITE_API_BASE_URL as string).replace("/api/v1", "") +
   "/storage/";
 
 const buildImageUrl = (path: string) => (path ? `${STORAGE_BASE}${path}` : "");
+
+const isCanEdit = hasPermission("setting:image");
+const isCanDelete = hasPermission("setting:image");
 
 export function useSettingImageTable() {
   const table = useDataTable({
@@ -72,20 +76,28 @@ export function useSettingImageTable() {
         formatter: (item: { id: number }) =>
           html(`
             <div class="d-flex gap-2 justify-content-center">
-              <button
+            ${
+              isCanEdit
+                ? `<button
                 class="btn btn-sm btn-soft-warning edit-btn"
                 data-action="edit"
                 data-id="${item.id}"
                 title="Edit Image">
                 <i class="bx bx-edit fs-16"></i>
-              </button>
-              <button
+              </button>`
+                : ""
+            }
+            ${
+              isCanDelete
+                ? `<button
                 class="btn btn-sm btn-soft-danger delete-btn"
                 data-action="delete"
                 data-id="${item.id}"
                 title="Hapus Gambar">
                 <i class="bx bx-trash fs-16"></i>
-              </button>
+              </button>`
+                : ""
+            }
             </div>
           `),
       },

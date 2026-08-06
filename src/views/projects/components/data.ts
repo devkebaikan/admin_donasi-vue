@@ -3,6 +3,9 @@ import { html } from "gridjs";
 import { useDataTable } from "@/composables/useDataTable";
 import { getProjects, deleteProject } from "@/services/projectService";
 import { formatCurrency, formatDate } from "@/helpers/format";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanApprove = hasPermission("project:approve");
 
 const STATUS_BADGE: Record<string, string> = {
   draft: "bg-secondary",
@@ -33,7 +36,7 @@ const renderActionButtons = (item: {
   let html = '<div class="d-flex flex-column gap-2">';
 
   // Funding Section
-  if (item.activity === "active open") {
+  if (isCanApprove && item.activity === "active open") {
     html += `
       <div class="d-flex align-items-center gap-2 p-2 bg-light rounded">
         <button class="btn btn-sm btn-soft-success funding-btn flex-shrink-0"
@@ -51,6 +54,7 @@ const renderActionButtons = (item: {
 
   // Ajuan Section
   if (
+    isCanApprove &&
     item.claimed > 0 &&
     (item.activity === "active open" || item.activity === "active close")
   ) {
@@ -70,7 +74,7 @@ const renderActionButtons = (item: {
   }
 
   // Keuangan Section
-  if (item.activity === "active open" && item.sisaDana) {
+  if (isCanApprove && item.activity === "active open" && item.sisaDana) {
     html += `
       <div class="d-flex align-items-center gap-2 p-2 bg-light rounded">
         <button class="btn btn-sm btn-soft-secondary keuangan-btn flex-shrink-0"
@@ -88,6 +92,7 @@ const renderActionButtons = (item: {
 
   // Refund Section
   if (
+    isCanApprove &&
     item.sisaDana > 0 &&
     (item.activity === "active open" ||
       item.activity === "active close" ||
@@ -240,93 +245,6 @@ export function useProjectsTable() {
           return html(renderActionButtons(data));
         },
       },
-      // {
-      //   name: "Actions",
-      //   width: "40px",
-      //   sort: false,
-      //   formatter: (item: {
-      //     activity: string;
-      //     id: number;
-      //     total_claim: number;
-      //     sisaDana: number;
-      //   }) =>
-      //     html(`
-      //       <div
-      //         class="d-grid gap-0 justify-content-center"
-      //         style="grid-template-columns: repeat(2, auto);"
-      //       >
-      //           ${
-      //             item.activity === "active open"
-      //               ? `
-      //               <button
-      //                 class="btn btn-sm btn-soft-success funding-btn"
-      //                 style="width:48px"
-      //                 data-action="funding"
-      //                 data-id="${item.id}"
-      //                 title="Funding Project"
-      //               >
-      //                 <i class="bx bx-dollar-circle fs-16"></i>
-      //               </button>
-      //               <button
-      //                 class="btn btn-sm btn-soft-secondary keuangan-btn"
-      //                 style="width:48px"
-      //                 data-action="keuangan"
-      //                 data-id="${item.id}"
-      //                 title="Keuangan Project"
-      //               >
-      //                 <i class="bx bx-money fs-16"></i>
-      //               </button>
-      //             `
-      //               : ""
-      //           }
-
-      //           ${
-      //             item.total_claim > 0 &&
-      //             (item.activity === "active open" ||
-      //               item.activity === "active close")
-      //               ? `
-      //               <button
-      //                 class="btn btn-sm btn-soft-primary ajuan-btn"
-      //                 style="width:48px"
-      //                 data-action="ajuan"
-      //                 data-id="${item.id}"
-      //                 title="Ajuan Project"
-      //               >
-      //                 <i class="bx bx-receipt fs-16"></i>
-      //               </button>
-      //             `
-      //               : ""
-      //           }
-      //           <button
-      //             class="btn btn-sm btn-soft-primary ajuan-btn"
-      //             style="width:48px"
-      //             data-action="ajuan"
-      //             data-id="${item.id}"
-      //             title="Laporkan keuangan"
-      //           >
-      //             <i class="bx bx-receipt fs-16"></i>
-      //           </button>
-      //           ${
-      //             item.sisaDana > 0 &&
-      //             (item.activity === "active open" ||
-      //               item.activity === "active close" ||
-      //               item.activity === "selesai")
-      //               ? `
-      //               <button
-      //                 class="btn btn-sm btn-soft-danger refund-btn"
-      //                 style="width:48px"
-      //                 data-action="refund"
-      //                 data-id="${item.id}"
-      //                 title="Refund Project"
-      //               >
-      //                <i class="bx bx-revision fs-16"></i>
-      //               </button>
-      //             `
-      //               : ""
-      //           }
-      //         </div>
-      //         `),
-      // },
     ],
 
     rowMapper: (project: any, index: number) => [

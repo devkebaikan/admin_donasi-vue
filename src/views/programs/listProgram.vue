@@ -503,7 +503,7 @@
     <b-row>
       <b-col>
         <UIComponentCard id="basic" title="Programs List">
-          <div class="d-flex justify-content-end mb-3">
+          <div v-if="isCanCreate" class="d-flex justify-content-end mb-3">
             <b-button
               variant="primary"
               @click="router.push('/programs/create')"
@@ -571,6 +571,9 @@ import {
   getProgramTypes,
 } from "@/services/programService";
 import { formatCurrency, formatDate, formatDateTime } from "@/helpers/format";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanCreate = hasPermission("program:create");
 
 // const sortOrderOptions = [
 //   { value: "id", text: "ID" },

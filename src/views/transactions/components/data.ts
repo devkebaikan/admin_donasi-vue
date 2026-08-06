@@ -72,9 +72,11 @@ export function useTransactionTable() {
         formatter: (item: { program: string; inv: string }) =>
           html(`
           <small class="d-flex flex-column">
-            <span class="fw-semibold text-dark">
-              ${item.program ?? "-"}
-            </span>
+             ${
+               item.program?.trim()
+                 ? `<span class="fw-semibold text-dark">${item.program}</span>`
+                 : `<span class="fw-semibold text-secondary">Belum ada program</span>`
+             }
 
             <span class="text-primary font-monospace">
               ${item.inv || "-"}
@@ -182,7 +184,7 @@ export function useTransactionTable() {
     rowMapper: (item: any, index: number) => [
       index,
       {
-        program: item?.transaction_details[0].program?.name,
+        program: item?.transaction_details?.[0]?.program?.name,
         inv: item.invoice,
       },
       item.date,

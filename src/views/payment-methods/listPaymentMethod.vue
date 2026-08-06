@@ -290,7 +290,7 @@
     <b-row>
       <b-col>
         <UIComponentCard id="basic" title="Daftar Metode Pembayaran">
-          <div class="d-flex justify-content-end mb-3">
+          <div v-if="isCanCreate" class="d-flex justify-content-end mb-3">
             <b-button variant="primary" :to="{ name: 'payment-method.create' }">
               <i class="bx bx-plus fs-16 me-1"></i>Tambah Metode Pembayaran
             </b-button>
@@ -349,6 +349,7 @@ import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
 import { formatCurrency, formatDateTime } from "@/helpers/format";
+import { hasPermission } from "@/helpers/permission";
 import { usePaymentMethodTable } from "./components/data";
 import {
   getPaymentMethodById,
@@ -358,6 +359,8 @@ import { getAllBankReferences } from "@/services/bankReferenceService";
 import router from "@/router";
 
 const queryClient = useQueryClient();
+
+const isCanCreate = hasPermission("payment:create");
 
 const {
   tableOptions,

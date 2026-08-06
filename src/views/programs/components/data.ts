@@ -3,6 +3,9 @@ import { html } from "gridjs";
 import { useDataTable } from "@/composables/useDataTable";
 import { getAllPrograms, deleteProgram } from "@/services/programService";
 import { formatCurrency } from "@/helpers/format";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanEdit = hasPermission("program:update");
 
 export function useProgramsTable() {
   const selectedCategory = ref<string | number>("");
@@ -125,13 +128,17 @@ export function useProgramsTable() {
                 <i class="bx bx-show fs-16"></i>
               </button>
 
-              <button
+              ${
+                isCanEdit
+                  ? `<button
                 class="btn btn-sm btn-soft-warning edit-btn"
                 data-action="edit"
                 data-link="${program.link}"
                 title="Edit Program">
                 <i class="bx bx-edit fs-16"></i>
-              </button>
+              </button>`
+                  : ""
+              }
 
               <button
                 class="btn btn-sm btn-soft-success projects-btn"

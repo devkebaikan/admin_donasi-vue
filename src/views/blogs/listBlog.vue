@@ -66,7 +66,7 @@
     <b-row>
       <b-col>
         <UIComponentCard id="basic" title="Daftar Blog">
-          <div class="d-flex justify-content-end mb-3">
+          <div v-if="isCanCreate" class="d-flex justify-content-end mb-3">
             <b-button variant="primary" @click="router.push('/blog/create')">
               <i class="bx bx-plus fs-16 me-1"></i>Tambah Blog
             </b-button>
@@ -165,6 +165,9 @@ import { useBlogTable } from "./components/data";
 import { getBlogCategories } from "@/services/blogService";
 import router from "@/router";
 import { useQuery } from "@tanstack/vue-query";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanCreate = hasPermission("blog:create");
 
 onBeforeUnmount(() => document.removeEventListener("click", handleGlobalClick));
 

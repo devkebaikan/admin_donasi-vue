@@ -2,6 +2,10 @@ import { computed, ref } from "vue";
 import { html } from "gridjs";
 import { useDataTable } from "@/composables/useDataTable";
 import { getAllBlogs, deleteBlog } from "@/services/blogService";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanEdit = hasPermission("blog:update");
+const isCanDelete = hasPermission("blog:delete");
 
 export function useBlogTable() {
   const selectedIsActive = ref<string>("");
@@ -80,20 +84,28 @@ export function useBlogTable() {
         formatter: (blog: { id: number }) =>
           html(`
             <div class="d-flex gap-2 justify-content-center">
-              <button
+            ${
+              isCanEdit
+                ? `<button
                 class="btn btn-sm btn-soft-warning edit-btn"
                 data-action="edit"
                 data-id="${blog.id}"
                 title="Edit Blog">
                 <i class="bx bx-edit fs-16"></i>
-              </button>
-              <button
+              </button> `
+                : ""
+            }
+            ${
+              isCanDelete
+                ? `<button
                 class="btn btn-sm btn-soft-danger delete-btn"
                 data-action="delete"
                 data-id="${blog.id}"
                 title="Hapus Blog">
                 <i class="bx bx-trash fs-16"></i>
-              </button>
+              </button>`
+                : ""
+            }
             </div>
           `),
       },

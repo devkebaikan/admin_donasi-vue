@@ -1,6 +1,10 @@
 import { html } from "gridjs";
 import { useDataTable } from "@/composables/useDataTable";
 import { getProgramTypes, deleteProgramType } from "@/services/programService";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanEdit = hasPermission("program:update");
+const isCanDelete = hasPermission("program:delete");
 
 export function useProgramTypeTable() {
   const table = useDataTable({
@@ -55,12 +59,20 @@ export function useProgramTypeTable() {
         formatter: (id: number) =>
           html(`
             <div class="d-flex gap-1 justify-content-center">
-              <button class="btn btn-sm btn-soft-warning edit-btn" data-action="edit" data-id="${id}" title="Edit">
+              ${
+                isCanEdit
+                  ? `<button class="btn btn-sm btn-soft-warning edit-btn" data-action="edit" data-id="${id}" title="Edit">
                 <i class="bx bx-edit fs-16"></i>
-              </button>
-              <button class="btn btn-sm btn-soft-danger delete-btn" data-action="delete" data-id="${id}" title="Hapus">
+              </button>`
+                  : ""
+              }
+              ${
+                isCanDelete
+                  ? `<button class="btn btn-sm btn-soft-danger delete-btn" data-action="delete" data-id="${id}" title="Hapus">
                 <i class="bx bx-trash fs-16"></i>
-              </button>
+              </button>`
+                  : ""
+              }
             </div>
           `),
       },
