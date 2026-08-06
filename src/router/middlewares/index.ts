@@ -1,9 +1,9 @@
 import { auth } from "./auth";
-import { menuAccess } from "./menuAccess";
+import { menuAccess, ALWAYS_ACCESSIBLE } from "./menuAccess";
 import { permission } from "./permission";
 import type { Middleware } from "./middlewarePipeline";
 
-export { auth, menuAccess, permission };
+export { auth, menuAccess, permission, ALWAYS_ACCESSIBLE };
 export { middlewarePipeline } from "./middlewarePipeline";
 export type { Middleware, MiddlewareContext } from "./middlewarePipeline";
 
