@@ -111,11 +111,9 @@ export const createCrmChatTemplate = async (data: any) => {
 };
 
 // update template chat
-export const updateCrmChatTemplate = async (id: number, data: FormData) => {
+export const updateCrmChatTemplate = async (id: number, data: any) => {
   try {
-    const res = await HttpClient.post(`/crm/whatsapp-templates/${id}`, data, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    const res = await HttpClient.post(`/crm/whatsapp-templates/${id}`, data);
     return res.data.data;
   } catch (error) {
     console.error(`Error updating chat template ${id}:`, error);
