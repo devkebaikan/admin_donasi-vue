@@ -330,11 +330,103 @@
         </UIComponentCard>
       </b-col>
     </b-row>
+
+    <b-modal
+      v-model="showVerifikasiModal"
+      title="Verifikasi Transaksi"
+      size="lg"
+      centered
+      no-close-on-backdrop
+      @hidden="resetVerificationModal"
+    >
+      <div v-if="isLoadingVerificationData" class="text-center py-3">
+        <b-spinner small variant="primary" class="me-2" />
+        Memuat data transaksi...
+      </div>
+
+      <div v-else-if="!selectedTransaction" class="text-center py-3 text-muted">
+        Data transaksi tidak tersedia.
+      </div>
+
+      <div v-else>
+        <div class="mb-3">
+          <div class="small text-muted mb-1">Invoice</div>
+          <div class="fw-semibold">
+            {{ selectedTransaction.invoice || "-" }}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <div class="small text-muted mb-1">Total</div>
+          <div class="fw-semibold">
+            {{ formatCurrency(selectedTransaction.total ?? 0) }}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Jurnal ID</label>
+          <div class="d-flex gap-2">
+            <div class="flex-grow-1">
+              <ChoicesSelect
+                id="verification-jurnal-id"
+                :modelValue="String(selectedJurnalId)"
+                @update:modelValue="
+                  (val) => (selectedJurnalId = Number(val) || 0)
+                "
+                :options="jurnalOptions"
+                :isLoading="isCheckingMutation"
+                :key="jurnalOptions.length"
+              />
+            </div>
+            <b-button
+              variant="outline-primary"
+              size="sm"
+              :disabled="isCheckingMutation"
+              @click="checkMutation"
+            >
+              <i class="bx bx-refresh me-1"></i>
+              Cek Mutasi
+            </b-button>
+          </div>
+          <small class="text-muted">
+            Jurnal diambil dari pencocokan payment method dan total nominal.
+          </small>
+        </div>
+
+        <div class="mb-0">
+          <label class="form-label fw-semibold">Catatan</label>
+          <b-form-textarea
+            v-model="verificationNotes"
+            rows="3"
+            placeholder="Masukkan catatan verifikasi..."
+          />
+        </div>
+      </div>
+
+      <template #footer>
+        <b-button variant="light" @click="showVerifikasiModal = false">
+          Batal
+        </b-button>
+        <b-button
+          variant="success"
+          :disabled="
+            isSubmittingVerification ||
+            isLoadingVerificationData ||
+            !selectedTransaction
+          "
+          @click="submitVerificationModal"
+        >
+          <b-spinner v-if="isSubmittingVerification" small class="me-2" />
+          Verifikasi
+        </b-button>
+      </template>
+    </b-modal>
   </VerticalLayout>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
@@ -342,19 +434,155 @@ import FlatPicker from "@/components/FlatPicker.vue";
 import TransactionDetailOffcanvas from "./components/TransactionDetailOffcanvas.vue";
 import { useTransactionTable } from "./components/data";
 import router from "@/router";
-import { useQuery } from "@tanstack/vue-query";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
 import { getAllPaymentMethods } from "@/services/paymentMethodService";
 import { useRoute } from "vue-router";
+import { getTransactionUnclaimed } from "@/services/programService";
+import {
+  getTransactionById,
+  verifTransaction,
+} from "@/services/transactionService";
+import { formatCurrency } from "@/helpers/format";
 
 // --- Detail Offcanvas ---
 const showDetailOffcanvas = ref(false);
 const selectedId = ref(0);
 const route = useRoute();
 
+const showVerifikasiModal = ref(false);
+const selectedTransaction = ref<any>(null);
+const verificationNotes = ref("");
+const selectedJurnalId = ref(0);
+const jurnalOptions = ref<Array<{ value: number; text: string }>>([
+  { value: 0, text: "Klik Cek Mutasi..." },
+]);
+const isCheckingMutation = ref(false);
+const isLoadingVerificationData = ref(false);
+const queryClient = useQueryClient();
+
 const openDetail = (id: number) => {
   selectedId.value = id;
   showDetailOffcanvas.value = true;
+};
+
+const resetVerificationModal = () => {
+  selectedTransaction.value = null;
+  verificationNotes.value = "";
+  selectedJurnalId.value = 0;
+  jurnalOptions.value = [{ value: 0, text: "Klik Cek Mutasi..." }];
+};
+
+const openModal = async (id: number) => {
+  selectedId.value = id;
+  resetVerificationModal();
+  showVerifikasiModal.value = true;
+  await loadVerificationData(id);
+};
+
+const loadVerificationData = async (id: number) => {
+  if (!id) return;
+
+  isLoadingVerificationData.value = true;
+  try {
+    const transaction = await getTransactionById(id);
+    selectedTransaction.value = transaction;
+
+    if (!transaction) return;
+
+    const paymentMethodId =
+      transaction.payment_method?.id ?? transaction.payment_method_id ?? null;
+    const total = transaction.total ?? null;
+
+    if (!paymentMethodId || total === null || total === undefined) {
+      toast.warning("Data payment method atau total transaksi belum tersedia.");
+      return;
+    }
+
+    await checkMutation(paymentMethodId, Number(total));
+  } catch (error) {
+    console.error("Gagal memuat data transaksi:", error);
+    toast.error("Gagal memuat data transaksi.");
+  } finally {
+    isLoadingVerificationData.value = false;
+  }
+};
+
+const checkMutation = async (
+  methodId?: number | null,
+  nominal?: number | null,
+) => {
+  const paymentMethodId = selectedTransaction.value?.payment_method?.id ?? null;
+  const total = selectedTransaction.value?.total ?? null;
+
+  if (!paymentMethodId || total === null || total === undefined) {
+    toast.warning("Tidak bisa cek mutasi tanpa payment method dan total.");
+    return;
+  }
+
+  isCheckingMutation.value = true;
+
+  try {
+    const result = await getTransactionUnclaimed({
+      method: paymentMethodId,
+      nominal: Number(total),
+    });
+
+    const list = Array.isArray(result)
+      ? result
+      : Array.isArray(result?.data)
+        ? result.data
+        : [];
+
+    jurnalOptions.value = [
+      {
+        value: 0,
+        text: list.length ? "Pilih jurnal..." : "Tidak ada jurnal yang cocok",
+      },
+      ...list.map((item: any) => ({
+        value: item.id,
+        text: item.akun_name || `Jurnal #${item.id}`,
+      })),
+    ];
+
+    selectedJurnalId.value = list.length ? Number(list[0]?.id ?? 0) : 0;
+  } catch (error) {
+    console.error("Gagal cek mutasi:", error);
+    toast.error("Gagal mengecek mutasi.");
+  } finally {
+    isCheckingMutation.value = false;
+  }
+};
+
+const { mutate: submitVerification, isPending: isSubmittingVerification } =
+  useMutation({
+    mutationFn: (payload: Record<string, any>) =>
+      verifTransaction(selectedId.value, payload),
+    onSuccess: async () => {
+      toast.success("Transaksi berhasil diverifikasi.");
+      showVerifikasiModal.value = false;
+      resetVerificationModal();
+      await queryClient.invalidateQueries({
+        queryKey: ["transactions"],
+        exact: false,
+      });
+    },
+    onError: () => {
+      toast.error("Gagal memverifikasi transaksi.");
+    },
+  });
+
+const submitVerificationModal = () => {
+  if (!selectedTransaction.value) return;
+
+  const payload = {
+    // jurnal_id: Number(selectedJurnalId.value || 0),
+    // notes: verificationNotes.value.trim(),
+    status: "Paid",
+  };
+
+  submitVerification(payload);
 };
 
 const { data: paymentMethod, isLoading: loadingPaymentMethod } = useQuery({
@@ -445,6 +673,9 @@ const handleGlobalClick = (event: Event) => {
   const deleteBtn = target.closest<HTMLElement>(
     '#table-gridjs .delete-btn[data-action="delete"]',
   );
+  const verifikasiBtn = target.closest<HTMLElement>(
+    '#table-gridjs .verifikasi-btn[data-action="verifikasi"]',
+  );
 
   if (detailBtn) {
     event.preventDefault();
@@ -463,6 +694,11 @@ const handleGlobalClick = (event: Event) => {
     event.preventDefault();
     const id = deleteBtn.getAttribute("data-id");
     if (id) handleDelete(Number(id));
+  }
+  if (verifikasiBtn) {
+    event.preventDefault();
+    const id = verifikasiBtn.getAttribute("data-id");
+    if (id) void openModal(Number(id));
   }
 };
 

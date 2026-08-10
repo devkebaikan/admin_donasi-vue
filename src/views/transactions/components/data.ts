@@ -160,18 +160,28 @@ export function useTransactionTable() {
         name: "Actions",
         width: "90px",
         sort: false,
-        formatter: (cell) =>
+        formatter: (item: { id: number; status: string }) =>
           html(`
             <div class="d-flex gap-1 justify-content-center">
               <button class="btn btn-sm btn-soft-info detail-btn w-fit"
-                data-action="detail" data-id="${cell}" title="Detail">
+                data-action="detail" data-id="${item.id}" title="Detail">
                 <i class="bx bx-show fs-16"></i>
               </button>
               
               <button class="btn btn-sm btn-soft-danger delete-btn"
-                data-action="delete" data-id="${cell}" title="Hapus">
+                data-action="delete" data-id="${item.id}" title="Hapus">
                 <i class="bx bx-trash fs-16"></i>
               </button>
+              ${
+                item.status === "Pending"
+                  ? `<button class="btn btn-sm btn-soft-success verifikasi-btn"
+                data-action="verifikasi" data-id="${item.id}" title="verifikasi">
+                <i class="bx bx-check fs-16"></i>
+                </button>`
+                  : ""
+              }
+
+
             </div>
           `),
       },
@@ -197,7 +207,7 @@ export function useTransactionTable() {
       item.payment_method.bank_name,
       item.status,
       item.source,
-      item.id,
+      { id: item.id, status: item.status },
     ],
   });
 
