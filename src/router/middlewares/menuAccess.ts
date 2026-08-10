@@ -4,7 +4,13 @@ import type { Middleware } from "./middlewarePipeline";
 // Halaman yang selalu bisa diakses semua user yang sudah login,
 // tanpa perlu terdaftar di menu (VUE_USER.menus). Isi dengan path
 // ("/crm") atau route name ("crm.list") — tambah baris baru untuk buka halaman lain.
-export const ALWAYS_ACCESSIBLE: string[] = ["/", "/crm"];
+export const ALWAYS_ACCESSIBLE: string[] = [
+  "/",
+  "/crm",
+  "/crm/wa-template",
+  "/crm/wa-template/create",
+  "/crm/wa-template/:id/edit",
+];
 
 const isAlwaysAccessible = (path: string, routeName?: string) =>
   ALWAYS_ACCESSIBLE.includes(path) ||
