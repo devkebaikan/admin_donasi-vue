@@ -351,6 +351,7 @@
                 size="sm"
                 :variant="null"
                 class="btn-outline-secondary rounded-pill fs-12"
+                @click="showFuModal = true"
               >
                 <i class="bx bx-plus me-1"></i>Tambah FU
               </b-button>
@@ -365,7 +366,7 @@
                 class="d-flex p-3 align-items-start justify-content-between py-2"
                 :style="idx ? 'border-top: 1px solid rgba(0,0,0,0.06)' : ''"
               >
-                <div>
+                <div class="flex-grow-1">
                   <h6 class="mb-0 fs-13 fw-semibold">{{ fu.jenis }}</h6>
                   <p class="mb-0 text-muted fs-11">
                     {{ formatDate(fu.scheduled_date) }} · {{ fu.waktu_slot }} ·
@@ -378,13 +379,50 @@
                     {{ fu.note }}
                   </p>
                 </div>
-                <b-badge
-                  :variant="null"
-                  class="fw-medium fs-10 flex-shrink-0 ms-2"
-                  :class="`badge-soft-${followUpStatusVariant(fu.status)}`"
-                >
-                  {{ fu.status }}
-                </b-badge>
+                <div class="d-flex gap-1 flex-shrink-0 ms-2 align-items-start">
+                  <b-badge
+                    :variant="null"
+                    class="fw-medium fs-10 flex-shrink-0 me-2"
+                    :class="`badge-soft-${followUpStatusVariant(fu.status)}`"
+                  >
+                    {{ fu.status }}
+                  </b-badge>
+                  <b-button
+                    v-if="fu.status === 'pending'"
+                    size="sm"
+                    variant="outline-primary"
+                    class="d-inline-flex align-items-center gap-1 fs-10"
+                    :disabled="isSendingFu"
+                    @click="handleSendFollowUp(fu)"
+                    title="Kirim pesan sesuai template"
+                  >
+                    <i
+                      class="bx bx-send fs-12"
+                      style="transform: rotate(-45deg)"
+                    ></i>
+                    Kirim
+                  </b-button>
+                  <b-button
+                    v-if="fu.status !== 'selesai' && fu.status !== 'batal'"
+                    size="sm"
+                    variant="outline-success"
+                    class="fs-10"
+                    @click="updateFollowUpStatus(fu.id, 'selesai')"
+                    title="Kirim pesan sesuai template"
+                  >
+                    <i class="bx bx-check fs-12"></i>
+                  </b-button>
+                  <b-button
+                    v-if="fu.status !== 'selesai' && fu.status !== 'batal'"
+                    size="sm"
+                    variant="outline-danger"
+                    class="fs-10"
+                    @click="updateFollowUpStatus(fu.id, 'batal')"
+                    title="Kirim pesan sesuai template"
+                  >
+                    <i class="bx bx-undo fs-12"></i>
+                  </b-button>
+                </div>
               </div>
             </div>
             <p v-else class="text-muted fs-13 mb-0">Belum ada follow up</p>
@@ -494,11 +532,100 @@
       />
     </template>
   </b-card>
+
+  <b-modal
+    v-model="showFuModal"
+    title="Tambah Follow Up"
+    size="md"
+    centered
+    @hidden="resetFuForm"
+  >
+    <b-form>
+      <b-form-group
+        label="Jenis Follow Up"
+        label-class="fw-semibold"
+        class="mb-3"
+      >
+        <b-form-input
+          v-model="fuForm.jenis"
+          maxlength="150"
+          placeholder="Contoh: Tindak lanjut donasi"
+          required
+        />
+      </b-form-group>
+
+      <!-- <b-form-group label="Channel" label-class="fw-semibold" class="mb-3">
+        <b-form-select
+          v-model="fuForm.channel"
+          :options="channelOptions"
+          required
+        />
+      </b-form-group> -->
+
+      <b-form-group
+        label="Template WA (Opsional)"
+        label-class="fw-semibold"
+        class="mb-3"
+      >
+        <b-form-select
+          v-model="fuForm.template_id"
+          :options="templateOptions"
+          :disabled="isLoadingTemplates"
+        />
+      </b-form-group>
+
+      <b-form-group
+        label="Jadwal Tindakan"
+        label-class="fw-semibold"
+        class="mb-3"
+      >
+        <b-form-input v-model="fuForm.scheduled_date" type="date" required />
+      </b-form-group>
+
+      <b-form-group label="Waktu Slot" label-class="fw-semibold" class="mb-3">
+        <b-form-select
+          v-model="fuForm.waktu_slot"
+          :options="waktuSlotOptions"
+        />
+      </b-form-group>
+
+      <b-form-group
+        label="Penanggungjawab"
+        label-class="fw-semibold"
+        class="mb-3"
+      >
+        <b-form-select
+          v-model="fuForm.assigned_user_id"
+          :options="assignedUserOptions"
+        />
+      </b-form-group>
+
+      <b-form-group label="Catatan" label-class="fw-semibold" class="mb-0">
+        <b-form-textarea
+          v-model="fuForm.note"
+          rows="2"
+          placeholder="Catatan tambahan"
+        />
+      </b-form-group>
+    </b-form>
+
+    <template #footer>
+      <b-button variant="light" @click="showFuModal = false"> Batal </b-button>
+      <b-button
+        variant="primary"
+        :disabled="isSubmittingFu"
+        @click="handleCreateFollowUp"
+      >
+        <b-spinner v-if="isSubmittingFu" small class="me-2" />
+        Simpan Follow Up
+      </b-button>
+    </template>
+  </b-modal>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { useQuery } from "@tanstack/vue-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/vue-query";
 import { toast, type ToastOptions } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { formatCurrency, formatDate } from "@/helpers/format";
@@ -507,7 +634,10 @@ import {
   getCrmTransactionById,
   getCrmTransactions,
   getCrmKegiatans,
+  getCrmChatTemplates,
   sendCrmChatToDonor,
+  createFollowUp,
+  updateStatusFollowUp,
 } from "@/services/crmService";
 import {
   colorTagVariant,
@@ -533,6 +663,48 @@ const props = defineProps<{
 
 const activeTab = ref<"detail" | "chat">("detail");
 const localMessages = ref<ChatMessageItem[]>([]);
+const showFuModal = ref(false);
+const isSendingFu = ref(false);
+const isSubmittingFu = ref(false);
+const queryClient = useQueryClient();
+
+const fuForm = ref({
+  jenis: "",
+  channel: "crm",
+  template_id: null as number | null,
+  scheduled_date: "",
+  waktu_slot: "Pagi",
+  assigned_user_id: null as number | null,
+  note: "",
+});
+
+const channelOptions = [
+  { value: "WhatsApp", text: "WhatsApp" },
+  { value: "SMS", text: "SMS" },
+  { value: "Phone", text: "Telepon" },
+  { value: "Email", text: "Email" },
+  { value: "In-App", text: "In-App" },
+];
+
+const waktuSlotOptions = [
+  { value: "Pagi", text: "Pagi" },
+  { value: "Siang", text: "Siang" },
+  { value: "Sore", text: "Sore" },
+  { value: "Malam", text: "Malam" },
+  { value: "Segera", text: "Segera" },
+];
+
+const resetFuForm = () => {
+  fuForm.value = {
+    jenis: "",
+    channel: "crm",
+    template_id: null,
+    scheduled_date: "",
+    waktu_slot: "Pagi",
+    assigned_user_id: null,
+    note: "",
+  };
+};
 
 watch(
   () => props.donorId,
@@ -550,10 +722,39 @@ const transactionId = computed(() => props.case?.transaction_id ?? 0);
 const donorProfileId = computed(() => props.case?.donor_profile_id ?? 0);
 
 // Fetch detail
-const { data: detail, isLoading } = useQuery({
+const {
+  data: detail,
+  isLoading,
+  refetch: refetchDetail,
+} = useQuery({
   queryKey: computed(() => ["crm-donor-detail", donorProfileId.value]),
   queryFn: () => getDonorDetail(donorProfileId.value),
   enabled: computed(() => donorProfileId.value > 0),
+});
+
+// Fetch chat templates untuk digunakan di FU
+const { data: templatesRaw, isLoading: isLoadingTemplates } = useQuery({
+  queryKey: computed(() => [
+    "crm-chat-templates",
+    pipelineCase.value?.pipeline_stage?.id,
+  ]),
+  queryFn: () =>
+    getCrmChatTemplates({
+      stage_id: pipelineCase.value?.pipeline_stage?.id,
+    }),
+  enabled: computed(() => !!pipelineCase.value?.pipeline_stage?.id),
+});
+
+const templateOptions = computed(() => {
+  const templates = (templatesRaw.value ?? []) as any[];
+  return [
+    { value: null, text: "- Tidak pakai template -" },
+    ...templates.map((t: any) => ({ value: t.id, text: t.name })),
+  ];
+});
+
+const assignedUserOptions = computed(() => {
+  return [{ value: null, text: "- Belum ditentukan -" }];
 });
 
 // Transaksi yang sedang berjalan di kartu pipeline ini
@@ -594,11 +795,11 @@ const { data: kegiatanListRaw, isLoading: isKegiatanLoading } = useQuery({
 });
 const kegiatanList = computed<CrmKegiatan[]>(() => kegiatanListRaw.value ?? []);
 
-const totalDonasiLifetime = computed(() =>
-  donationHistory.value
-    .filter((tx) => tx.status === "Paid")
-    .reduce((sum, tx) => sum + Number(tx.total ?? 0), 0),
-);
+// const totalDonasiLifetime = computed(() =>
+//   donationHistory.value
+//     .filter((tx) => tx.status === "Paid")
+//     .reduce((sum, tx) => sum + Number(tx.total ?? 0), 0),
+// );
 
 const lastDonationDate = computed(() => {
   const paid = donationHistory.value.filter((tx) => tx.status === "Paid");
@@ -676,6 +877,136 @@ const handleSend = async (text: string, templateId: number | null) => {
       type: "error",
       position: "top-center",
     });
+  }
+};
+
+// Mutation untuk create follow-up
+const createFuMutation = useMutation({
+  mutationFn: (data: any) => createFollowUp(data),
+  onSuccess: async () => {
+    await queryClient.invalidateQueries({
+      queryKey: ["crm-donor-detail", donorProfileId.value],
+    });
+    showFuModal.value = false;
+    resetFuForm();
+    showToast("Follow up berhasil ditambahkan", {
+      type: "success",
+      position: "top-center",
+    });
+  },
+  onError: (err: any) => {
+    showToast(err?.response?.data?.message ?? "Gagal menambahkan follow up", {
+      type: "error",
+      position: "top-center",
+    });
+  },
+});
+
+// Mutation untuk update status follow-up
+const updateStatusFuMutation = useMutation({
+  mutationFn: ({ id, status }: { id: number; status: string }) =>
+    updateStatusFollowUp(id, { status }),
+  onSuccess: async () => {
+    await queryClient.invalidateQueries({
+      queryKey: ["crm-donor-detail", donorProfileId.value],
+    });
+    showToast("Status follow up berhasil diperbarui", {
+      type: "success",
+      position: "top-center",
+    });
+  },
+  onError: (err: any) => {
+    showToast(err?.response?.data?.message ?? "Gagal memperbarui status", {
+      type: "error",
+      position: "top-center",
+    });
+  },
+});
+
+// Handle create follow-up
+const handleCreateFollowUp = async () => {
+  if (!fuForm.value.jenis.trim()) {
+    showToast("Jenis follow up tidak boleh kosong", {
+      type: "warning",
+      position: "top-center",
+    });
+    return;
+  }
+
+  if (!fuForm.value.scheduled_date) {
+    showToast("Jadwal tindakan harus dipilih", {
+      type: "warning",
+      position: "top-center",
+    });
+    return;
+  }
+
+  isSubmittingFu.value = true;
+  try {
+    await createFuMutation.mutateAsync({
+      jenis: fuForm.value.jenis,
+      channel: fuForm.value.channel,
+      template_id: fuForm.value.template_id,
+      scheduled_date: fuForm.value.scheduled_date,
+      waktu_slot: fuForm.value.waktu_slot,
+      // assigned_user_id: fuForm.value.assigned_user_id,
+      note: fuForm.value.note,
+      donor_profile_id: donorProfileId.value,
+      transaction_id: transactionId.value || null,
+      // lead_profile_id: null,
+    });
+  } finally {
+    isSubmittingFu.value = false;
+  }
+};
+
+// Handle update status follow-up
+const updateFollowUpStatus = async (fuId: number, status: string) => {
+  try {
+    await updateStatusFuMutation.mutateAsync({
+      id: fuId,
+      status,
+    });
+  } catch {
+    // Error handled in mutation error callback
+  }
+};
+
+// Handle send follow-up message
+const handleSendFollowUp = async (fu: any) => {
+  if (!fu.template_id) {
+    showToast("Pilih template WA terlebih dahulu", {
+      type: "warning",
+      position: "top-center",
+    });
+    return;
+  }
+
+  isSendingFu.value = true;
+  try {
+    // Send message via template
+    const templateText = fu.jenis; // Fallback ke jenis jika tidak ada template content
+    activeTab.value = "chat";
+
+    await handleSend(templateText, fu.template_id);
+
+    // Update status to selesai after sending
+    await updateStatusFuMutation.mutateAsync({
+      id: fu.id,
+      status: "selesai",
+    });
+
+    showToast("Pesan berhasil dikirim", {
+      type: "success",
+      position: "top-center",
+    });
+  } catch (err: any) {
+    showToast(err?.response?.data?.message ?? "Gagal mengirim pesan", {
+      type: "error",
+      position: "top-center",
+    });
+  } finally {
+    isSendingFu.value = false;
   }
 };
 

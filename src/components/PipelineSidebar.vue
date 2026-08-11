@@ -1,11 +1,16 @@
 <template>
   <b-card no-body class="h-100 d-flex flex-column" style="margin-bottom: 0">
-    <b-card-header class="border-0 py-2 flex-shrink-0">
-      <b-card-title class="mb-0 fs-14">
-        <i class="bx bx-git-branch me-1 text-primary"></i>Ziswaf CRM
-      </b-card-title>
+    <b-card-header class="main-nav">
+      <LogoBox
+        customClass="mx-auto text-center auth-logo"
+        :smLogoHeight="20"
+        :logoHeight="18"
+        smLogoClass="me-1"
+      />
     </b-card-header>
-
+    <!-- <b-card-title class="mb-0 fs-14">
+      <i class="bx bx-git-branch me-1 text-primary"></i>CRM
+    </b-card-title> -->
     <div v-if="isLoading" class="text-center p-3 flex-grow-1">
       <b-spinner small />
     </div>
@@ -45,7 +50,9 @@
         <a
           href="javascript:void(0);"
           class="d-flex align-items-start gap-2 rounded-2 px-2 py-1 mb-1 text-body crm-pipeline-item"
-          :class="{ active: isOnCrmDashboard && currentStageQuery === stage.code }"
+          :class="{
+            active: isOnCrmDashboard && currentStageQuery === stage.code,
+          }"
           @click="navigate"
         >
           <i

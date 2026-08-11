@@ -336,7 +336,6 @@
       title="Verifikasi Transaksi"
       size="lg"
       centered
-      no-close-on-backdrop
       @hidden="resetVerificationModal"
     >
       <div v-if="isLoadingVerificationData" class="text-center py-3">

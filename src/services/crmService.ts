@@ -175,3 +175,27 @@ export const sendCrmChatToDonor = async (
     throw error;
   }
 };
+// jadwalkan Follow Up
+export const createFollowUp = async (data: Record<string, any>) => {
+  try {
+    const res = await HttpClient.post("/crm/follow-ups", data);
+    return res.data.data;
+  } catch (error) {
+    console.error("Error creating follow up:", error);
+    throw error;
+  }
+};
+
+// update status follow up
+export const updateStatusFollowUp = async (
+  id: number,
+  data: Record<string, any>,
+) => {
+  try {
+    const res = await HttpClient.patch(`/crm/follow-ups/${id}/status`, data);
+    return res.data.data;
+  } catch (error) {
+    console.error(`Error updating follow up ${id}:`, error);
+    throw error;
+  }
+};

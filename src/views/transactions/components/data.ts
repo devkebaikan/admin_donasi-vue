@@ -168,6 +168,11 @@ export function useTransactionTable() {
                 <i class="bx bx-show fs-16"></i>
               </button>
               
+              <button class="btn btn-sm btn-soft-warning edit-btn"
+                data-action="edit" data-id="${item.id}" title="Edit">
+                <i class="bx bx-edit fs-16"></i>
+              </button>
+              
               <button class="btn btn-sm btn-soft-danger delete-btn"
                 data-action="delete" data-id="${item.id}" title="Hapus">
                 <i class="bx bx-trash fs-16"></i>
@@ -180,16 +185,10 @@ export function useTransactionTable() {
                 </button>`
                   : ""
               }
-
-
             </div>
           `),
       },
     ],
-    // <button class="btn btn-sm btn-soft-warning edit-btn"
-    //   data-action="edit" data-id="${cell}" title="Edit">
-    //   <i class="bx bx-edit fs-16"></i>
-    // </button>
 
     rowMapper: (item: any, index: number) => [
       index,
