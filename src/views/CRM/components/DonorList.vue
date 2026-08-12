@@ -25,7 +25,8 @@
         class="text-body d-block"
         v-for="card in cards"
         :key="card.id"
-        @click="$emit('select', card.id)"
+        @click.prevent="$emit('select', card.id)"
+        tabindex="0"
       >
         <div
           class="d-flex align-items-start justify-content-between p-2 mb-1 rounded border cursor-pointer"
@@ -36,21 +37,21 @@
           <div class="d-flex align-items-start">
             <div
               class="avatar-title rounded-circle flex-shrink-0 fs-12 fw-semibold"
-              :class="`bg-soft-${card.colorVariant} text-${card.colorVariant}`"
+              :class="getAvatarClass(card)"
               style="width: 30px; height: 30px"
             >
-              {{ card.initials }}
+              {{ getInitials(card) }}
             </div>
             <div class="ms-2">
-              <h6 class="mb-0 fs-13 fw-semibold">{{ card.name }}</h6>
+              <h6 class="mb-0 fs-13 fw-semibold">{{ getName(card) }}</h6>
               <p class="mb-1 text-muted fs-11">{{ subLine(card) }}</p>
-              <div v-if="card.tags?.length" class="d-flex flex-wrap gap-1">
+              <div v-if="getTags(card).length" class="d-flex flex-wrap gap-1">
                 <b-badge
-                  v-for="(tag, idx) in card.tags"
+                  v-for="(tag, idx) in getTags(card)"
                   :key="idx"
                   :variant="null"
                   class="fw-normal fs-10"
-                  :class="`badge-soft-${tag.variant}`"
+                  :class="getTagClass(tag)"
                 >
                   {{ tag.label }}
                 </b-badge>
@@ -85,11 +86,16 @@
 
 <script setup lang="ts">
 import simplebar from "simplebar-vue";
-import type { CrmCaseCard } from "@/types/crm";
+import { formatCurrency } from "@/helpers/format";
+import {
+  cycleStatusVariant,
+  initialsOf,
+  stageColorVariant,
+} from "@/utils/crmAdapters";
 
 withDefaults(
   defineProps<{
-    cards: CrmCaseCard[];
+    cards: any[];
     selectedId: number | null;
     title?: string;
     subtitle?: string;
@@ -108,6 +114,64 @@ defineEmits<{
   select: [id: number];
 }>();
 
-const subLine = (card: CrmCaseCard) =>
-  [card.amount, card.phone].filter(Boolean).join(" · ");
+const sanitizeVariant = (v: any) => {
+  if (!v) return "primary";
+  const s = String(v).trim().toLowerCase();
+  const clean = s.replace(/[^a-z0-9-]/g, "");
+  return clean || "primary";
+};
+
+const getAvatarClass = (card: any) => {
+  const v = sanitizeVariant(
+    card?.colorVariant ??
+      card?.color_tag ??
+      card?.donor?.color_tag ??
+      card?.variant,
+  );
+  return `bg-soft-${v} text-${v}`;
+};
+
+const getInitials = (card: any) =>
+  card.initials ?? initialsOf(card?.donor?.name ?? card?.name ?? "");
+
+const getName = (card: any) => card.name ?? card?.donor?.name ?? "-";
+
+const getPhone = (card: any) => card.phone ?? card?.donor?.phone ?? "";
+
+const getAmount = (card: any) => {
+  if (card.amount) return card.amount;
+  if (card?.transaction?.total != null)
+    return formatCurrency(card.transaction.total);
+  return "";
+};
+
+const getTags = (card: any) => {
+  if (Array.isArray(card.tags) && card.tags.length) return card.tags;
+
+  const tags: any[] = [];
+  if (card?.donor?.level) {
+    tags.push({ label: card.donor.level, variant: "secondary" });
+  }
+  if (card?.donor?.cycle_status) {
+    tags.push({
+      label: card.donor.cycle_status,
+      variant: cycleStatusVariant(card.donor.cycle_status),
+    });
+  }
+  if (card?.pipeline_stage?.label) {
+    tags.push({
+      label: card.pipeline_stage.label,
+      variant: stageColorVariant(card.pipeline_stage.color),
+    });
+  }
+  return tags;
+};
+
+const getTagClass = (tag: any) => {
+  const v = sanitizeVariant(tag?.variant ?? tag);
+  return `badge-soft-${v}`;
+};
+
+const subLine = (card: any) =>
+  [getAmount(card), getPhone(card)].filter(Boolean).join(" · ");
 </script>

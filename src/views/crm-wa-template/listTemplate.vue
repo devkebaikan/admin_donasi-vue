@@ -280,7 +280,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onBeforeUnmount, ref } from "vue";
 import { useQuery } from "@tanstack/vue-query";
-import PipelineSidebar from "@/components/PipelineSidebar.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
 import { formatDateTime } from "@/helpers/format";

@@ -1249,6 +1249,12 @@ const crmRoutes = [
     },
     component: () => import("@/views/crm-wa-template/editTemplate.vue"),
   },
+  {
+    path: "/crm/benefit",
+    name: "crm-benefit",
+    meta: { title: "Benefit", authRequired: true },
+    component: () => import("@/views/crm-benefit/listBenefit.vue"),
+  },
 ];
 
 // ========================================================================== All Routes not use ==========================================================================

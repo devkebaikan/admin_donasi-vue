@@ -2,7 +2,7 @@
   <b-card
     no-body
     class="h-100 d-flex flex-column border-0 shadow-sm"
-    style="margin-bottom: 0; max-height: 86vh; position: relative"
+    style="margin-bottom: 0; max-height: 91vh; position: relative"
   >
     <div
       v-if="!donorId"
@@ -89,7 +89,7 @@
                 :style="`
                 width: 42px;
                 height: 42px;
-                background-color: ${detail.color_tag ?? '#6c757d'};
+                background-color: ${detail.color_tag && detail.color_tag === 'amber' ? '#f59e0b' : detail.color_tag};
                  opacity: 0.5;
               `"
               >
@@ -127,7 +127,7 @@
                     <span
                       class="badge"
                       :style="`
-                        background-color: ${detail.color_tag};
+                        background-color: ${detail.color_tag && detail.color_tag === 'amber' ? '#f59e0b' : detail.color_tag};
                         opacity: 0.5;
                       `"
                     >
@@ -350,7 +350,7 @@
               <b-button
                 size="sm"
                 :variant="null"
-                class="btn-outline-secondary rounded-pill fs-12"
+                class="btn-outline-secondary rounded-pill fs-10"
                 @click="showFuModal = true"
               >
                 <i class="bx bx-plus me-1"></i>Tambah FU
@@ -429,7 +429,7 @@
           </div>
 
           <!-- Riwayat Donasi — soft green -->
-          <div class="rounded-3 mb-3">
+          <div class="rounded-3" style="margin-bottom: 80px">
             <h6
               class="fs-11 fw-semibold text-uppercase mb-2"
               style="color: #5a9c6a"
@@ -482,7 +482,8 @@
         </b-card-body>
 
         <div
-          class="border-top p-2 d-flex flex-wrap align-items-center gap-2 sticky-bottom bg-white"
+          class="border-top py-2 px-4 d-flex flex-wrap align-items-center gap-2 sticky-bottom bg-white"
+          style="position: absolute; bottom: 0; left: 0; right: 0"
         >
           <b-button
             size="sm"
@@ -554,13 +555,13 @@
         />
       </b-form-group>
 
-      <!-- <b-form-group label="Channel" label-class="fw-semibold" class="mb-3">
+      <b-form-group label="Channel" label-class="fw-semibold" class="mb-3">
         <b-form-select
           v-model="fuForm.channel"
           :options="channelOptions"
           required
         />
-      </b-form-group> -->
+      </b-form-group>
 
       <b-form-group
         label="Template WA (Opsional)"
@@ -674,16 +675,14 @@ const fuForm = ref({
   template_id: null as number | null,
   scheduled_date: "",
   waktu_slot: "Pagi",
-  assigned_user_id: null as number | null,
+  // assigned_user_id: null as number | null,
+  assigned_user_id: 459561500707, // siti aminah (default) — sementara belum ada API untuk ambil list user
   note: "",
 });
 
 const channelOptions = [
-  { value: "WhatsApp", text: "WhatsApp" },
-  { value: "SMS", text: "SMS" },
-  { value: "Phone", text: "Telepon" },
-  { value: "Email", text: "Email" },
-  { value: "In-App", text: "In-App" },
+  { value: "crm", text: "CRM" },
+  { value: "Official WA", text: "Official WA" },
 ];
 
 const waktuSlotOptions = [
@@ -701,7 +700,7 @@ const resetFuForm = () => {
     template_id: null,
     scheduled_date: "",
     waktu_slot: "Pagi",
-    assigned_user_id: null,
+    assigned_user_id: 459561500707,
     note: "",
   };
 };
@@ -949,7 +948,7 @@ const handleCreateFollowUp = async () => {
       template_id: fuForm.value.template_id,
       scheduled_date: fuForm.value.scheduled_date,
       waktu_slot: fuForm.value.waktu_slot,
-      // assigned_user_id: fuForm.value.assigned_user_id,
+      assigned_user_id: fuForm.value.assigned_user_id,
       note: fuForm.value.note,
       donor_profile_id: donorProfileId.value,
       transaction_id: transactionId.value || null,

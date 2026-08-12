@@ -1,5 +1,8 @@
 <template>
-  <div class="d-flex flex-column h-100 overflow-hidden">
+  <div
+    class="d-flex flex-column h-100 overflow-hidden"
+    style="max-height: 84vh"
+  >
     <div
       class="p-3 border-bottom d-flex flex-wrap align-items-center justify-content-between gap-2"
     >
@@ -64,32 +67,44 @@
       </div>
 
       <ul class="list-unstyled mb-0" v-else>
-        <li
-          v-for="(msg, idx) in card.chatMessages"
-          :key="idx"
-          class="d-flex mb-3"
-          :class="
-            msg.from_role !== `donor`
-              ? 'justify-content-end'
-              : 'justify-content-start'
-          "
-        >
-          <div
-            class="rounded-3 shadow-sm px-3 py-2"
-            style="max-width: 75%; white-space: pre-line"
-            :style="{
-              backgroundColor:
-                msg.from_role !== `donor` ? '#d9fdd3' : '#ffffff',
-              color: '#111b21',
-            }"
-          >
-            <p class="mb-1" v-html="formatWhatsAppMessage(msg.message)"></p>
+        <template v-for="(msg, idx) in processedMessages" :key="idx">
+          <li v-if="shouldShowDateSeparator(idx)" class="text-center mb-3">
+            <small class="badge bg-light text-muted">{{
+              processedMessages[idx].dateLabel
+            }}</small>
+          </li>
 
-            <div v-if="msg.timeStamp" class="small text-muted text-end">
-              {{ msg.timeStamp }}
+          <li
+            class="d-flex mb-3"
+            :class="
+              msg.from_role !== `donor`
+                ? 'justify-content-end'
+                : 'justify-content-start'
+            "
+          >
+            <div
+              class="rounded-3 shadow-sm px-3 py-2"
+              style="max-width: 75%; white-space: pre-line"
+              :style="{
+                backgroundColor:
+                  msg.from_role !== `donor` ? '#d9fdd3' : '#ffffff',
+                color: '#111b21',
+              }"
+            >
+              <div v-if="msg.templateName" class="mb-1">
+                <small class="text-primary"
+                  >Template: {{ msg.templateName }}</small
+                >
+              </div>
+
+              <p class="mb-1" v-html="formatWhatsAppMessage(msg.message)"></p>
+
+              <div class="small text-muted text-end">
+                {{ msg.timeStamp || "Waktu tidak tersedia" }}
+              </div>
             </div>
-          </div>
-        </li>
+          </li>
+        </template>
       </ul>
     </simplebar>
 
@@ -208,5 +223,63 @@ const handleSend = () => {
   emit("send", message.value.trim(), selectedTemplateId.value);
   message.value = "";
   selectedTemplateId.value = null;
+};
+
+// Prepare messages: ensure timestamp/date exist and resolve template names
+const processedMessages = computed(() => {
+  const raw = props.card.chatMessages ?? [];
+  const tplById = new Map<number, string>(
+    (templates.value ?? []).map((t) => [t.id, t.name]),
+  );
+
+  return raw.map((m: any) => {
+    const timeStamp = m.timeStamp
+      ? m.timeStamp
+      : new Date().toLocaleTimeString("id-ID", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+    // prefer explicit date fields, otherwise assume today's date
+    let dateLabel = "";
+    if (m.date) {
+      try {
+        dateLabel = new Date(m.date).toLocaleDateString("id-ID");
+      } catch (e) {
+        dateLabel = String(m.date);
+      }
+    } else if (m.created_at) {
+      try {
+        dateLabel = new Date(m.created_at).toLocaleDateString("id-ID");
+      } catch (e) {
+        dateLabel = String(m.created_at);
+      }
+    } else {
+      dateLabel = new Date().toLocaleDateString("id-ID");
+    }
+
+    // resolve template name if message carries template id/name
+    const maybeTid = m.template_id ?? m.templateId ?? m.template?.id;
+    let templateName =
+      m.template_name ?? m.templateName ?? m.template?.name ?? null;
+    if (!templateName && maybeTid && tplById.has(Number(maybeTid))) {
+      templateName = tplById.get(Number(maybeTid)) || null;
+    }
+
+    return {
+      ...m,
+      timeStamp,
+      dateLabel,
+      templateName,
+    };
+  });
+});
+
+const shouldShowDateSeparator = (idx: number) => {
+  if (!processedMessages.value.length) return false;
+  if (idx === 0) return true;
+  const prev = processedMessages.value[idx - 1];
+  const cur = processedMessages.value[idx];
+  return prev.dateLabel !== cur.dateLabel;
 };
 </script>

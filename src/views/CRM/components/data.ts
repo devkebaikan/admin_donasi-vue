@@ -24,6 +24,9 @@ export function useDonorsBoard() {
   const selectedLevel = ref("");
   const selectedCycleStatus = ref("");
   const assignedCs = ref<number | null>(null);
+  const dateFilter = ref<"all" | "today" | "yesterday" | "dayBeforeYesterday">(
+    "all",
+  );
   const searchQuery = ref("");
   const currentPage = ref(1);
   const perPageItem = ref(5);
@@ -56,6 +59,40 @@ export function useDonorsBoard() {
     ...(assignedCs.value ? { assigned_cs: assignedCs.value } : {}),
   }));
 
+  const normalizeDate = (dateString?: string) => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return null;
+    date.setHours(0, 0, 0, 0);
+    return date;
+  };
+
+  const today = () => {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    return date;
+  };
+
+  const dateDiffDays = (dateA: Date, dateB: Date) => {
+    const diff = dateA.getTime() - dateB.getTime();
+    return Math.round(diff / (1000 * 60 * 60 * 24));
+  };
+
+  const filteredCasesRaw = computed(() => {
+    if (dateFilter.value === "all") return loadedCases.value;
+
+    const baseDate = today();
+    return loadedCases.value.filter((item) => {
+      const itemDate = normalizeDate(item.created_at);
+      if (!itemDate) return false;
+      const diff = dateDiffDays(baseDate, itemDate);
+      if (dateFilter.value === "today") return diff === 0;
+      if (dateFilter.value === "yesterday") return diff === 1;
+      if (dateFilter.value === "dayBeforeYesterday") return diff === 2;
+      return false;
+    });
+  });
+
   const { data, isLoading, isFetching, isError, error } = useQuery({
     queryKey: computed(() => ["crm-donors", queryParams.value]),
     queryFn: () => getDonorCases(queryParams.value),
@@ -84,7 +121,7 @@ export function useDonorsBoard() {
   });
 
   const cases = computed<CrmCaseCard[]>(() =>
-    loadedCases.value.map(toCaseCard),
+    filteredCasesRaw.value.map(toCaseCard),
   );
 
   const resetPage = () => {
@@ -98,6 +135,7 @@ export function useDonorsBoard() {
       selectedCycleStatus,
       searchQuery,
       assignedCs,
+      dateFilter,
     ],
     resetPage,
   );
@@ -126,6 +164,7 @@ export function useDonorsBoard() {
     selectedLevel,
     selectedCycleStatus,
     assignedCs,
+    dateFilter,
     searchQuery,
     currentPage,
     perPageItem,
