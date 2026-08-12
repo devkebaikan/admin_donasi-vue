@@ -3,7 +3,7 @@ name: Deploy Go Fiber Application
 on:
   push:
     branches:
-      - admin # Memicu pipeline ketika ada push ke branch main
+      - admin # Memicu pipeline ketika ada push ke branch admin
 
 jobs:
   deploy:
@@ -28,6 +28,7 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           VPS_USER: ${{ secrets.VPS_USER }}
           VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
         run: |
           # Buat direktori .ssh jika belum ada
           mkdir -p ~/.ssh
@@ -36,15 +37,15 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           
-          # Tambahkan host ke known_hosts untuk keamanan (bisa juga pakai StrictHostKeyChecking=no jika ingin instan)
-          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts
+          # Tambahkan host & port ke known_hosts untuk keamanan
+          ssh-keyscan -p $VPS_PORT -H "$VPS_HOST" >> ~/.ssh/known_hosts
 
-          # Melakukan koneksi SSH dan eksekusi perintah di VPS
-          ssh -i ~/.ssh/id_rsa $VPS_USER@$VPS_HOST << 'EOF'
+          # Melakukan koneksi SSH dengan port kustom dan eksekusi perintah di VPS
+          ssh -p $VPS_PORT -i ~/.ssh/id_rsa $VPS_USER@$VPS_HOST << 'EOF'
             # Masuk ke direktori projek di VPS
             cd /var/www/akber-new/admin/
             
-            # Tarik kode terbaru dari branch main
+            # Tarik kode terbaru dari branch admin
             git pull
             
             yarn
