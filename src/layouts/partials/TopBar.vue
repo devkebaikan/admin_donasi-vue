@@ -16,6 +16,21 @@
         </div>
 
         <div class="d-flex align-items-center gap-1">
+          <!-- CRM -->
+          <div class="topbar-item">
+            <button
+              type="button"
+              class="topbar-button"
+              title="CRM"
+              @click="$router.push({ name: 'crm.list' })"
+            >
+              <Icon
+                icon="solar:users-group-rounded-broken"
+                class="fs-24 align-middle"
+              />
+            </button>
+          </div>
+
           <!-- Theme Color (Light/Dark) -->
           <div class="topbar-item">
             <button

@@ -13,7 +13,6 @@
           </div>
 
           <b-row v-else class="g-3">
-
             <!-- Nama -->
             <b-col md="6">
               <b-form-group label="Nama Lengkap" label-for="name">
@@ -51,7 +50,12 @@
             <!-- Email -->
             <b-col md="6">
               <b-form-group label="Email" label-for="email">
-                <b-form-input id="email" v-model="formState.email" type="email" placeholder="e.g., user@email.com" />
+                <b-form-input
+                  id="email"
+                  v-model="formState.email"
+                  type="email"
+                  placeholder="e.g., user@email.com"
+                />
                 <small class="text-muted">Opsional</small>
               </b-form-group>
             </b-col>
@@ -89,7 +93,13 @@
             <!-- Status Verified -->
             <b-col md="4">
               <b-form-group label="Status Verified" label-for="verified">
-                <b-form-input id="verified" v-model="formState.verified" type="text" placeholder="e.g., verified" maxlength="50" />
+                <b-form-input
+                  id="verified"
+                  v-model="formState.verified"
+                  type="text"
+                  placeholder="e.g., verified"
+                  maxlength="50"
+                />
                 <small class="text-muted">Opsional</small>
               </b-form-group>
             </b-col>
@@ -97,7 +107,13 @@
             <!-- Referral Code -->
             <b-col md="4">
               <b-form-group label="Kode Referral" label-for="referral-code">
-                <b-form-input id="referral-code" v-model="formState.referral_code" type="text" placeholder="e.g., REF123" maxlength="50" />
+                <b-form-input
+                  id="referral-code"
+                  v-model="formState.referral_code"
+                  type="text"
+                  placeholder="e.g., REF123"
+                  maxlength="50"
+                />
                 <small class="text-muted">Opsional</small>
               </b-form-group>
             </b-col>
@@ -105,7 +121,13 @@
             <!-- Public Code -->
             <b-col md="4">
               <b-form-group label="Kode Publik" label-for="public-code">
-                <b-form-input id="public-code" v-model="formState.public_code" type="text" placeholder="e.g., PUB123" maxlength="50" />
+                <b-form-input
+                  id="public-code"
+                  v-model="formState.public_code"
+                  type="text"
+                  placeholder="e.g., PUB123"
+                  maxlength="50"
+                />
                 <small class="text-muted">Opsional</small>
               </b-form-group>
             </b-col>
@@ -113,65 +135,111 @@
             <!-- Catatan -->
             <b-col md="8">
               <b-form-group label="Catatan" label-for="note">
-                <b-form-textarea id="note" v-model="formState.note" placeholder="Catatan tambahan..." rows="2" />
+                <b-form-textarea
+                  id="note"
+                  v-model="formState.note"
+                  placeholder="Catatan tambahan..."
+                  rows="2"
+                />
                 <small class="text-muted">Opsional</small>
               </b-form-group>
             </b-col>
 
             <!-- Seksi Donatur -->
-            <b-col cols="12">
-              <hr class="my-1" />
-              <h6 class="text-muted fw-semibold mb-3">
+            <b-col cols="12" class="mt-3">
+              <hr class="my-3" />
+              <h4 class="text-muted fw-semibold mb-3">
                 Info Donatur
                 <small class="fw-normal">(Opsional)</small>
-              </h6>
+              </h4>
             </b-col>
 
             <b-col md="4">
               <b-form-group label="Panggilan" label-for="panggilan">
-                <b-form-input id="panggilan" v-model="formState.panggilan" type="text" placeholder="e.g., Bapak" />
+                <b-form-input
+                  id="panggilan"
+                  v-model="formState.panggilan"
+                  type="text"
+                  placeholder="e.g., Bapak"
+                />
               </b-form-group>
             </b-col>
 
             <b-col md="4">
               <b-form-group label="Nama Asli" label-for="real-name">
-                <b-form-input id="real-name" v-model="formState.real_name" type="text" placeholder="e.g., Ahmad Fauzi" />
+                <b-form-input
+                  id="real-name"
+                  v-model="formState.real_name"
+                  type="text"
+                  placeholder="e.g., Ahmad Fauzi"
+                />
               </b-form-group>
             </b-col>
 
             <b-col md="4">
               <b-form-group label="CS ID" label-for="cs-id">
-                <b-form-input id="cs-id" v-model.number="formState.cs_id" type="number" placeholder="ID CS yang handle" min="1" />
+                <b-form-input
+                  id="cs-id"
+                  v-model.number="formState.cs_id"
+                  type="number"
+                  placeholder="ID CS yang handle"
+                  min="1"
+                />
               </b-form-group>
             </b-col>
 
             <b-col md="6">
               <b-form-group label="Soft" label-for="soft">
-                <b-form-input id="soft" v-model="formState.soft" type="text" placeholder="Info soft..." />
+                <b-form-input
+                  id="soft"
+                  v-model="formState.soft"
+                  type="text"
+                  placeholder="Info soft..."
+                />
               </b-form-group>
             </b-col>
 
             <b-col md="6">
               <b-form-group label="Soft Terakhir" label-for="soft-terakhir">
-                <b-form-input id="soft-terakhir" v-model="formState.soft_terakhir" type="text" placeholder="Info soft terakhir..." />
+                <b-form-input
+                  id="soft-terakhir"
+                  v-model="formState.soft_terakhir"
+                  type="text"
+                  placeholder="Info soft terakhir..."
+                />
               </b-form-group>
             </b-col>
 
             <b-col md="6">
               <b-form-group label="Hard" label-for="hard">
-                <b-form-input id="hard" v-model="formState.hard" type="text" placeholder="Info hard..." />
+                <b-form-input
+                  id="hard"
+                  v-model="formState.hard"
+                  type="text"
+                  placeholder="Info hard..."
+                />
               </b-form-group>
             </b-col>
 
             <b-col md="6">
               <b-form-group label="Hard Terakhir" label-for="hard-terakhir">
-                <b-form-input id="hard-terakhir" v-model="formState.hard_terakhir" type="text" placeholder="Info hard terakhir..." />
+                <b-form-input
+                  id="hard-terakhir"
+                  v-model="formState.hard_terakhir"
+                  type="text"
+                  placeholder="Info hard terakhir..."
+                />
               </b-form-group>
             </b-col>
 
             <b-col md="12">
               <b-form-group label="Exis" label-for="exis">
-                <b-form-input id="exis" v-model="formState.exis" type="text" placeholder="Info exis..." />
+                <b-form-input
+                  id="exis"
+                  v-model="formState.exis"
+                  type="text"
+                  placeholder="Info exis..."
+                />
               </b-form-group>
             </b-col>
 
@@ -184,16 +252,23 @@
             <!-- Tombol -->
             <b-col cols="12">
               <div class="d-flex gap-2 justify-content-end">
-                <b-button variant="outline-secondary" @click="router.push('/users')" :disabled="isPending">
+                <b-button
+                  variant="outline-secondary"
+                  @click="router.push('/users')"
+                  :disabled="isPending"
+                >
                   Batal
                 </b-button>
-                <b-button variant="primary" @click="handleSubmit" :disabled="isPending">
+                <b-button
+                  variant="primary"
+                  @click="handleSubmit"
+                  :disabled="isPending"
+                >
                   <b-spinner v-if="isPending" small class="me-1" />
                   Simpan Perubahan
                 </b-button>
               </div>
             </b-col>
-
           </b-row>
         </UIComponentCard>
       </b-col>
@@ -295,13 +370,24 @@ const { mutate, isPending } = useMutation({
     if (formState.email) payload.email = formState.email;
     if (formState.password) payload.password = formState.password;
     if (formState.verified) payload.verified = formState.verified;
-    if (formState.referral_code) payload.referral_code = formState.referral_code;
+    if (formState.referral_code)
+      payload.referral_code = formState.referral_code;
     if (formState.public_code) payload.public_code = formState.public_code;
     if (formState.note) payload.note = formState.note;
 
-    const donaturFields = ["panggilan", "real_name", "soft", "soft_terakhir", "hard", "hard_terakhir", "exis"] as const;
+    const donaturFields = [
+      "panggilan",
+      "real_name",
+      "soft",
+      "soft_terakhir",
+      "hard",
+      "hard_terakhir",
+      "exis",
+    ] as const;
     const donatur: Record<string, any> = {};
-    donaturFields.forEach((k) => { if (formState[k]) donatur[k] = formState[k]; });
+    donaturFields.forEach((k) => {
+      if (formState[k]) donatur[k] = formState[k];
+    });
     if (formState.cs_id) donatur.cs_id = formState.cs_id;
     if (Object.keys(donatur).length) payload.donatur = donatur;
 
@@ -309,7 +395,10 @@ const { mutate, isPending } = useMutation({
   },
   onSuccess: () => {
     queryClient.invalidateQueries({ queryKey: ["users"] });
-    showToast("User berhasil diperbarui", { type: "success", position: "top-center" });
+    showToast("User berhasil diperbarui", {
+      type: "success",
+      position: "top-center",
+    });
     setTimeout(() => router.push("/users"), 1500);
   },
   onError: (err: any) => {
@@ -322,7 +411,10 @@ const handleSubmit = async () => {
   if (isPending.value) return;
   const isValid = await v$.value.$validate();
   if (!isValid) {
-    showToast("Lengkapi semua field yang wajib diisi", { type: "warning", position: "top-center" });
+    showToast("Lengkapi semua field yang wajib diisi", {
+      type: "warning",
+      position: "top-center",
+    });
     return;
   }
   mutate();

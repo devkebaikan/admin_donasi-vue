@@ -83,3 +83,16 @@ export const verifTransaction = async (
     throw error;
   }
 };
+
+export const updateTransactionDetailProject = async (
+  id: number,
+  data: { project_id: number },
+) => {
+  try {
+    const res = await HttpClient.put(`/admin/transactions/details/${id}`, data);
+    return res.data.data;
+  } catch (error) {
+    console.error(`Error updating transaction detail ${id}:`, error);
+    throw error;
+  }
+};

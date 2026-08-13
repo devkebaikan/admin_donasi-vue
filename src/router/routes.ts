@@ -1224,6 +1224,15 @@ const crmRoutes = [
     component: () => import("@/views/CRM/donors.vue"),
   },
   {
+    path: "/crm/profiling/:id",
+    name: "crm.profiling",
+    meta: {
+      title: setTitle("Profiling User"),
+      authRequired: true,
+    },
+    component: () => import("@/views/crm-profiling/profiling.vue"),
+  },
+  {
     path: "/crm/wa-template",
     name: "crm-wa-template",
     meta: { title: "WA Template", authRequired: true },
@@ -1254,6 +1263,18 @@ const crmRoutes = [
     name: "crm-benefit",
     meta: { title: "Benefit", authRequired: true },
     component: () => import("@/views/crm-benefit/listBenefit.vue"),
+  },
+  {
+    path: "/crm/benefit/create",
+    name: "crm-benefit.create",
+    meta: { title: "Buat Benefit", authRequired: true },
+    component: () => import("@/views/crm-benefit/createBenefit.vue"),
+  },
+  {
+    path: "/crm/benefit/:id/edit",
+    name: "crm-benefit.edit",
+    meta: { title: "Edit Benefit", authRequired: true },
+    component: () => import("@/views/crm-benefit/editBenefit.vue"),
   },
 ];
 

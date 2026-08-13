@@ -93,7 +93,7 @@ export function useDonorsBoard() {
     });
   });
 
-  const { data, isLoading, isFetching, isError, error } = useQuery({
+  const { data, isLoading, isFetching, isError, error, refetch } = useQuery({
     queryKey: computed(() => ["crm-donors", queryParams.value]),
     queryFn: () => getDonorCases(queryParams.value),
     // Tetap tampilkan halaman yang sudah termuat selagi halaman berikutnya
@@ -107,18 +107,22 @@ export function useDonorsBoard() {
 
   // Halaman 1 mengganti akumulasi (filter/search baru), halaman > 1 menambah
   // di bawahnya — inilah yang membuat list "bertambah ke bawah", bukan berganti.
-  watch(data, (page) => {
-    const pageItems = (page?.data ?? []) as CrmPipelineCase[];
-    if (currentPage.value <= 1) {
-      loadedCases.value = pageItems;
-      return;
-    }
-    const existingIds = new Set(loadedCases.value.map((item) => item.id));
-    loadedCases.value = [
-      ...loadedCases.value,
-      ...pageItems.filter((item) => !existingIds.has(item.id)),
-    ];
-  });
+  watch(
+    data,
+    (page) => {
+      const pageItems = (page?.data ?? []) as CrmPipelineCase[];
+      if (currentPage.value <= 1) {
+        loadedCases.value = pageItems;
+        return;
+      }
+      const existingIds = new Set(loadedCases.value.map((item) => item.id));
+      loadedCases.value = [
+        ...loadedCases.value,
+        ...pageItems.filter((item) => !existingIds.has(item.id)),
+      ];
+    },
+    { immediate: true },
+  );
 
   const cases = computed<CrmCaseCard[]>(() =>
     filteredCasesRaw.value.map(toCaseCard),
@@ -180,6 +184,7 @@ export function useDonorsBoard() {
     isFetching,
     isError,
     error,
+    refetch,
     selectedId,
     selectCase,
     selectedCase,

@@ -80,6 +80,7 @@ declare module 'vue' {
     MenuItem: typeof import('./src/components/AppMenu/MenuItem.vue')['default']
     MenuItemLink: typeof import('./src/components/AppMenu/MenuItemLink.vue')['default']
     MenuItemWithChildren: typeof import('./src/components/AppMenu/MenuItemWithChildren.vue')['default']
+    PipelineLayout: typeof import('./src/components/PipelineLayout.vue')['default']
     PipelineSidebar: typeof import('./src/components/PipelineSidebar.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

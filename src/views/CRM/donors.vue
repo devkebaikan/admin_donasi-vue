@@ -1,22 +1,6 @@
 <template>
-  <div class="crm-donors-shell d-flex flex-column">
-    <b-row class="g-2 flex-grow-1" style="min-height: 0">
-      <!-- Pipeline stage menu -->
-      <b-col xxl="2" lg="3" class="d-flex flex-column" style="min-height: 0">
-        <PipelineSidebar :active-code="selectedStage" @select="setStage" />
-      </b-col>
-
-      <b-col xxl="10" lg="9" class="d-flex flex-column" style="min-height: 0">
-        <!-- <b-card class="mb-2 flex-shrink-0" body-class="py-2">
-          <b-row class="align-items-center">
-            <b-col>
-              <h6 class="mb-0 fs-15 fw-semibold">{{ boardTitle }}</h6>
-              <p class="text-muted mb-0 fs-11">{{ boardDescription }}</p>
-            </b-col>
-          </b-row>
-        </b-card> -->
-
-        <b-card class="mb-2 flex-shrink-0 shadow-sm border-0" body-class="p-3">
+  <PipelineLayout :active-code="selectedStage">
+    <b-card class="mb-2 flex-shrink-0 shadow-sm border-0" body-class="p-3">
           <b-row class="g-3 align-items-center">
             <!-- Search -->
             <b-col cols="12" lg="4">
@@ -39,7 +23,7 @@
               <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
                 <b-button
                   size="sm"
-                  class="rounded-pill px-2 fs-10 d-flex align-items-center"
+                  class="rounded-pill px-2 fs-11 d-flex align-items-center"
                   :variant="
                     dateFilter === 'today' ? 'secondary' : 'outline-secondary'
                   "
@@ -51,7 +35,7 @@
 
                 <b-button
                   size="sm"
-                  class="rounded-pill px-2 fs-10 d-flex align-items-center"
+                  class="rounded-pill px-2 fs-11 d-flex align-items-center"
                   :variant="
                     dateFilter === 'yesterday'
                       ? 'secondary'
@@ -65,7 +49,7 @@
 
                 <b-button
                   size="sm"
-                  class="rounded-pill px-2 fs-10 d-flex align-items-center"
+                  class="rounded-pill px-2 fs-11 d-flex align-items-center"
                   :variant="
                     dateFilter === 'dayBeforeYesterday'
                       ? 'secondary'
@@ -79,7 +63,7 @@
 
                 <b-button
                   size="sm"
-                  class="rounded-pill px-2 fs-10 d-flex align-items-center"
+                  class="rounded-pill px-2 fs-11 d-flex align-items-center"
                   :variant="
                     dateFilter === 'all' ? 'secondary' : 'outline-secondary'
                   "
@@ -147,17 +131,17 @@
           >
             <DonorDetail :donor-id="selectedId" :case="selectedPipelineCase" />
           </b-col>
-        </b-row>
-      </b-col>
-    </b-row>
-  </div>
+                </b-row>
+
+  </PipelineLayout>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onActivated } from "vue";
 import { useQuery } from "@tanstack/vue-query";
 import { getPipeline } from "@/services/crmService";
 
+import PipelineLayout from "@/components/PipelineLayout.vue";
 import DonorList from "./components/DonorList.vue";
 import DonorDetail from "./components/DonorDetail.vue";
 
@@ -181,10 +165,15 @@ const {
   isFetching,
   isError,
   error,
+  refetch,
   selectedId,
   selectCase,
   selectedPipelineCase,
 } = useDonorsBoard();
+
+onActivated(() => {
+  refetch();
+});
 
 const { data: pipelineData } = useQuery({
   queryKey: ["crm-pipeline-stages"],
@@ -203,7 +192,5 @@ const boardDescription = computed(
 </script>
 
 <style scoped>
-.crm-donors-shell {
-  min-height: 100vh;
-}
+/* PipelineLayout now provides the CRM shell layout */
 </style>

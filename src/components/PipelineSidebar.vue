@@ -71,7 +71,7 @@
           href="javascript:void(0);"
           class="d-flex align-items-start gap-2 rounded-2 px-2 py-1 mb-1 text-body crm-pipeline-item"
           :class="{
-            active: isOnCrmDashboard && currentStageQuery === stage.code,
+            active: isOnCrmDashboard && activeStageCode === stage.code,
           }"
           @click="navigate"
         >
@@ -146,7 +146,7 @@ import simplebar from "simplebar-vue";
 import { getPipeline } from "@/services/crmService";
 import type { PipelineStage } from "@/types/crm";
 
-defineProps<{
+const props = defineProps<{
   activeCode?: string;
 }>();
 
@@ -183,6 +183,10 @@ const isOnCrmDashboard = computed(() => route.path === "/crm");
 
 const currentStageQuery = computed(
   () => (route.query.stage as string | undefined) ?? undefined,
+);
+
+const activeStageCode = computed(
+  () => props.activeCode ?? currentStageQuery.value,
 );
 
 const isRouteActive = (path: string) => route.path === path;
