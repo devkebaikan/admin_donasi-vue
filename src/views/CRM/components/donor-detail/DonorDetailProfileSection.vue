@@ -6,7 +6,7 @@
         :style="`
           width: 42px;
           height: 42px;
-          background-color: ${detail.color_tag && detail.color_tag === 'amber' ? '#f59e0b' : detail.color_tag};
+          background-color: ${!detail.color_tag ? '#6c757d' : detail.color_tag === 'amber' ? '#f59e0b' : detail.color_tag};
           opacity: 0.5;
         `"
       >
@@ -92,8 +92,18 @@
 <script setup lang="ts">
 import { cycleStatusVariant, initialsOf } from "@/utils/crmAdapters";
 import type { CrmDonorDetail } from "@/types/crm";
+import { useQuery } from "@tanstack/vue-query";
+import { getUserById } from "@/services/userService";
 
-defineProps<{
+const props = defineProps<{
   detail: CrmDonorDetail;
+  userId: number;
 }>();
+
+const { data: userDetail, isLoading } = useQuery({
+  queryKey: ["user-detail", props.userId],
+  queryFn: () => getUserById(props.userId),
+});
+
+console.log(userDetail);
 </script>

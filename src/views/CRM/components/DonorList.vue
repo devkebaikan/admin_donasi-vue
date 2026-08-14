@@ -37,8 +37,12 @@
           <div class="d-flex align-items-start">
             <div
               class="avatar-title rounded-circle flex-shrink-0 fs-12 fw-semibold"
-              :class="getAvatarClass(card)"
-              style="width: 30px; height: 30px"
+              :style="`
+              width: 30px;
+              height: 30px;
+              background-color: ${!card.color_tag ? '#6c757d' : card.color_tag === 'amber' ? '#f59e0b' : card.color_tag};
+              opacity: 0.5;
+            `"
             >
               {{ getInitials(card) }}
             </div>

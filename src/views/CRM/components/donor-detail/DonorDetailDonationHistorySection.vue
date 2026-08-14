@@ -11,30 +11,60 @@
       <div
         v-for="(don, idx) in donationHistory"
         :key="don.id"
-        style="background-color: #ecf8ee"
-        class="d-flex p-3 align-items-center justify-content-between py-1"
-        :style="idx ? 'border-top: 1px solid rgba(0,0,0,0.06)' : ''"
+        class="d-flex align-items-center justify-content-between px-3 py-2"
+        :class="{ 'border-top': idx > 0 }"
+        style="background-color: #edf6ef; border-radius: 0.375rem"
       >
-        <div>
-          <p class="mb-0 fs-12 fw-semibold">
-            {{ formatCurrency(don.total) }}
+        <!-- Left Content -->
+        <div class="flex-grow-1 pr-2">
+          <!-- Nominal -->
+          <div class="d-flex align-items-center mb-1">
+            <span class="fw-bold text-success fs-12">
+              {{ formatCurrency(don.total) }}
+            </span>
+
             <b-badge
               v-if="don.id === transaction?.id"
-              :variant="null"
-              class="badge-soft-primary fs-10 ms-1"
+              variant="primary"
+              class="ms-2 fs-10"
             >
               Transaksi Ini
             </b-badge>
-          </p>
-          <p class="mb-0 text-muted fs-11">
-            {{ don.transaction_details?.[0].program?.name }}
-          </p>
+          </div>
+
+          <!-- Nama Program -->
+          <div class="text-dark font-weight-medium fs-11 mb-1">
+            {{
+              don.transaction_details?.[0]?.program?.name ||
+              "Belum masuk program"
+            }}
+          </div>
+
+          <!-- Tipe Transaksi & Metode Pembayaran -->
+          <div class="d-flex align-items-center flex-wrap text-muted fs-10">
+            <span>
+              {{ don.transaction_type?.name || "-" }}
+            </span>
+
+            <span class="mx-1">•</span>
+
+            <span>
+              {{ don.payment_method?.bank_name || "-" }}
+            </span>
+          </div>
         </div>
-        <div class="text-end flex-shrink-0 ms-2">
-          <p class="mb-1 text-muted fs-11">{{ formatDate(don.date) }}</p>
+
+        <!-- Right Content -->
+        <div class="text-right flex-shrink-0">
+          <!-- Jam -->
+          <div v-if="don.time" class="text-muted fs-10 mb-1">
+            {{ formatDateTime(don.date) }}
+          </div>
+
+          <!-- Status -->
           <b-badge
             :variant="null"
-            class="fw-medium fs-10"
+            class="font-weight-medium fs-10"
             :class="`badge-soft-${transactionStatusVariant(don.status)}`"
           >
             {{ don.status }}
@@ -47,6 +77,7 @@
 </template>
 
 <script setup lang="ts">
+import { formatDateTime } from "@/helpers/format";
 import type {
   CrmTransactionDetail,
   CrmTransactionHistoryItem,

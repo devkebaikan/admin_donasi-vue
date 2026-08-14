@@ -128,6 +128,8 @@ export function useDonorsBoard() {
     filteredCasesRaw.value.map(toCaseCard),
   );
 
+  console.log(cases.value);
+
   const resetPage = () => {
     currentPage.value = 1;
   };

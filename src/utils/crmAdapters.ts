@@ -51,6 +51,7 @@ export const toCaseCard = (item: CrmPipelineCase): CrmCaseCard => ({
   id: item.id,
   initials: initialsOf(item.donor.name),
   colorVariant: colorTagVariant(item.donor.color_tag),
+  color_tag: item.donor.color_tag,
   name: item.donor.name,
   nickname: item.donor.nick,
   phone: item.donor.phone,

@@ -30,8 +30,12 @@
         <div class="d-flex align-items-center">
           <div
             class="avatar-title rounded-circle flex-shrink-0 fs-12 fw-semibold"
-            :class="`bg-soft-${colorTagVariant(detail.color_tag)} text-${colorTagVariant(detail.color_tag)}`"
-            style="width: 32px; height: 32px"
+            :style="`
+              width: 32px;
+              height: 32px;
+              background-color: ${!detail.color_tag ? '#6c757d' : detail.color_tag === 'amber' ? '#f59e0b' : detail.color_tag};
+              opacity: 0.5;
+            `"
           >
             {{ initialsOf(detail.name) }}
           </div>
@@ -80,7 +84,10 @@
         style="min-height: 0; overflow-y: auto; background-color: #f8f9fb"
       >
         <b-card-body class="pb-2">
-          <DonorDetailProfileSection :detail="detail" />
+          <DonorDetailProfileSection
+            :detail="detail"
+            :userId="transaction?.user_id"
+          />
 
           <DonorDetailTransactionSection
             :pipeline-case="pipelineCase"
