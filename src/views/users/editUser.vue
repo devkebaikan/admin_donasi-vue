@@ -73,16 +73,25 @@
               </b-form-group>
             </b-col>
 
-            <!-- Role ID -->
+            <!-- Role -->
             <b-col md="4">
-              <b-form-group label="Role ID" label-for="role-id">
-                <b-form-input
+              <b-form-group label="Role" label-for="role-id">
+                <SearchSelect
                   id="role-id"
-                  v-model.number="v$.role_id.$model"
-                  type="number"
-                  placeholder="e.g., 7"
-                  min="1"
-                  :state="v$.role_id.$error ? false : null"
+                  :modelValue="String(formState.role_id || 0)"
+                  @update:modelValue="
+                    (val) => {
+                      formState.role_id = val === '0' ? null : Number(val);
+                      v$.role_id.$touch();
+                    }
+                  "
+                  @search="
+                    (query: string) => {
+                      roleSearchQuery = query;
+                    }
+                  "
+                  :options="roleOptionsWithSelected"
+                  :isLoading="isRoleLoading"
                 />
                 <b-form-invalid-feedback v-if="v$.role_id.$error">
                   {{ v$.role_id.$errors[0].$message }}
@@ -277,7 +286,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watch } from "vue";
+import { reactive, watch, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/vue-query";
 import { useVuelidate } from "@vuelidate/core";
@@ -285,7 +294,10 @@ import { required, minLength, maxLength, helpers } from "@vuelidate/validators";
 import { toast as showToast } from "vue3-toastify";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
+import SearchSelect from "@/components/SearchSelect.vue";
+import { useSearchSelect } from "@/composables/useSearchSelect";
 import { getUserById, updateUser } from "@/services/userService";
+import { getAllRoles } from "@/services/roleService";
 
 const route = useRoute();
 const router = useRouter();
@@ -357,6 +369,34 @@ const rules = {
     required: helpers.withMessage("Role ID wajib diisi", required),
   },
 };
+
+const {
+  searchQuery: roleSearchQuery,
+  options: roleOptions,
+  isLoading: isRoleLoading,
+} = useSearchSelect({
+  queryKey: "roles-search",
+  fetchFn: getAllRoles,
+  optionsMapper: (role: any) => ({
+    value: role.id,
+    text: role.name,
+  }),
+  placeholder: "Cari role...",
+  limit: 10,
+});
+
+const roleOptionsWithSelected = computed(() => {
+  const options = roleOptions.value ?? [];
+  if (!formState.role_id) return options;
+
+  const selectedId = Number(formState.role_id);
+  const alreadyExists = options.some(
+    (opt: any) => Number(opt.value) === selectedId,
+  );
+  if (alreadyExists) return options;
+
+  return [...options, { value: selectedId, text: `Role #${selectedId}` }];
+});
 
 const v$ = useVuelidate(rules, formState);
 

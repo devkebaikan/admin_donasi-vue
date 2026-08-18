@@ -67,16 +67,25 @@
               </b-form-group>
             </b-col>
 
-            <!-- Role ID -->
+            <!-- Role -->
             <b-col md="4">
-              <b-form-group label="Role ID" label-for="role-id">
-                <b-form-input
+              <b-form-group label="Role" label-for="role-id">
+                <SearchSelect
                   id="role-id"
-                  v-model.number="v$.role_id.$model"
-                  type="number"
-                  placeholder="e.g., 7"
-                  min="1"
-                  :state="v$.role_id.$error ? false : null"
+                  :modelValue="String(formState.role_id || 0)"
+                  @update:modelValue="
+                    (val) => {
+                      formState.role_id = val === '0' ? null : Number(val);
+                      v$.role_id.$touch();
+                    }
+                  "
+                  @search="
+                    (query: string) => {
+                      roleSearchQuery = query;
+                    }
+                  "
+                  :options="roleOptions"
+                  :isLoading="isRoleLoading"
                 />
                 <b-form-invalid-feedback v-if="v$.role_id.$error">
                   {{ v$.role_id.$errors[0].$message }}
@@ -274,18 +283,15 @@
 import { reactive } from "vue";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { useVuelidate } from "@vuelidate/core";
-import {
-  required,
-  minLength,
-  maxLength,
-  email,
-  helpers,
-} from "@vuelidate/validators";
+import { required, minLength, maxLength, helpers } from "@vuelidate/validators";
 import { useRouter } from "vue-router";
 import { toast as showToast } from "vue3-toastify";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
+import SearchSelect from "@/components/SearchSelect.vue";
+import { useSearchSelect } from "@/composables/useSearchSelect";
 import { createUser } from "@/services/userService";
+import { getAllRoles } from "@/services/roleService";
 
 const router = useRouter();
 const queryClient = useQueryClient();
@@ -330,6 +336,21 @@ const rules = {
     required: helpers.withMessage("Role ID wajib diisi", required),
   },
 };
+
+const {
+  searchQuery: roleSearchQuery,
+  options: roleOptions,
+  isLoading: isRoleLoading,
+} = useSearchSelect({
+  queryKey: "roles-search",
+  fetchFn: getAllRoles,
+  optionsMapper: (role: any) => ({
+    value: role.id,
+    text: role.name,
+  }),
+  placeholder: "Cari role...",
+  limit: 10,
+});
 
 const v$ = useVuelidate(rules, formState);
 
