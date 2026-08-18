@@ -51,7 +51,7 @@
     <b-row>
       <b-col>
         <UIComponentCard id="basic" title="Daftar Role">
-          <div class="d-flex justify-content-end mb-3">
+          <div v-if="isCanCreate" class="d-flex justify-content-end mb-3">
             <b-button variant="primary" @click="router.push('/roles/create')">
               <i class="bx bx-plus fs-16 me-1"></i>Tambah Role
             </b-button>
@@ -136,6 +136,9 @@ import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
 import { useRoleTable } from "./components/data";
 import router from "@/router";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanCreate = hasPermission("role:create");
 
 const {
   tableOptions,

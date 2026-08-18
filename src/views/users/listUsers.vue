@@ -219,16 +219,16 @@
             <div class="bg-light rounded p-2">
               <small class="text-muted d-block">Status Verified</small>
               <span v-if="userDetail.verified" class="badge bg-success">{{
-                userDetail.verified
+                userDetail.verified == "1" ? "Verified" : "Belum Verified"
               }}</span>
               <span v-else class="badge bg-secondary">Belum Verified</span>
             </div>
           </b-col>
           <b-col cols="6">
             <div class="bg-light rounded p-2">
-              <small class="text-muted d-block">User ID</small>
+              <small class="text-muted d-block">Role ID</small>
               <span class="fw-semibold small font-monospace"
-                >#{{ userDetail.id }}</span
+                >#{{ userDetail.role_id }}</span
               >
             </div>
           </b-col>

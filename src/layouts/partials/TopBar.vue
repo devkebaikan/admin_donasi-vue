@@ -17,7 +17,7 @@
 
         <div class="d-flex align-items-center gap-1">
           <!-- CRM -->
-          <div class="topbar-item">
+          <div v-if="isAccessCRM" class="topbar-item">
             <button
               type="button"
               class="topbar-button"
@@ -146,6 +146,9 @@ import { profileMenuItems } from "@/layouts/partials/data";
 import DropDown from "@/components/DropDown.vue";
 import avatar1 from "@/assets/images/users/avatar-1.jpg";
 import Notification from "./Notification.vue";
+import { hasPermission } from "@/helpers/permission";
+
+const isAccessCRM = hasPermission("crm:task");
 
 const toggleFullScreen = () => {
   if (!document.fullscreenElement) {
