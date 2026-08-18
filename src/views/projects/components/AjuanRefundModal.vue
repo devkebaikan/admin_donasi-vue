@@ -128,6 +128,7 @@ import { createAjuan } from "@/services/ajuanService";
 import { getAllBankReferences } from "@/services/bankReferenceService";
 import { getProjectById } from "@/services/projectService";
 import { getMitraById } from "@/services/mitraService";
+import { getAllPaymentMethods } from "@/services/paymentMethodService";
 
 type Mode = "ajuan" | "refund";
 
@@ -274,7 +275,7 @@ watch(
 
 const { data: bankData, isLoading: isBankLoading } = useQuery({
   queryKey: ["bank-references-list"],
-  queryFn: () => getAllBankReferences({ mode: "list" }),
+  queryFn: () => getAllPaymentMethods({ usage: "penampung", is_active: true }),
 });
 
 const bankOptions = computed(() => {
@@ -284,7 +285,7 @@ const bankOptions = computed(() => {
     { value: 0, text: "-- Pilih Bank Reference --" },
     ...list.map((b: any) => ({
       value: b.id,
-      text: `${b.name}${b.code && b.code !== "-" ? ` (${b.code})` : ""}`,
+      text: `${b.fin_akun_detail.name}`,
     })),
   ];
 });
@@ -293,7 +294,7 @@ const { mutate: mutateForm, isPending: isActionPending } = useMutation({
   mutationFn: () =>
     createAjuan({
       project_id: props.projectId,
-      mitra_id: form.mitra_id,
+      mitra_id: Number(form.mitra_id),
       bank_reference_id: form.bank_reference_id,
       account_behalf: form.account_behalf,
       account_number: form.account_number,
@@ -346,6 +347,17 @@ const handleSubmit = () => {
       type: "warning",
       position: "top-center",
     });
+    return;
+  }
+
+  if (form.nominal_ajuan > maxNominal.value) {
+    toast(
+      `Nominal ${config.value.label.toLowerCase()} tidak boleh lebih dari ${formatRupiah(maxNominal.value)}`,
+      {
+        type: "warning",
+        position: "top-center",
+      },
+    );
     return;
   }
 

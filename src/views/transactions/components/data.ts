@@ -121,7 +121,7 @@ export function useTransactionTable() {
 
             <div class="mt-1">
               <span class="badge bg-primary-subtle text-primary border">
-                Donasi #${item.donation_number}
+                Donasi ke #${item.donation_number}
               </span>
             </div>
 

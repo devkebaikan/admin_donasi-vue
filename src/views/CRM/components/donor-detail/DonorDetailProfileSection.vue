@@ -75,94 +75,227 @@
           </b-badge>
         </div>
 
-        <div class="row g-2 mt-2">
-          <div class="col-12 col-lg-6">
-            <div class="profile-panel h-100">
-              <h6 class="panel-title mb-2">
-                <i class="bx bx-user-pin"></i>
-                Profil Donatur
-              </h6>
+        <div class="d-flex justify-content-end mt-1">
+          <button
+            type="button"
+            class="btn btn-link p-0 text-decoration-none fw-semibold fs-12 d-inline-flex align-items-center"
+            :aria-expanded="detailProfileShow"
+            @click="detailProfileShow = !detailProfileShow"
+          >
+            <span>{{
+              detailProfileShow ? "Sembunyikan Detail" : "Tampilkan Detail"
+            }}</span>
+            <i
+              class="bx bx-chevron-down ms-1"
+              :style="{
+                transition: 'transform 0.28s ease',
+                transform: detailProfileShow
+                  ? 'rotate(180deg)'
+                  : 'rotate(0deg)',
+              }"
+            />
+          </button>
+        </div>
+      </div>
+    </div>
 
-              <div class="profile-grid">
-                <div class="profile-grid-item">
-                  <small class="profile-label">Level</small>
-                  <span class="profile-value">{{ detail.level }}</span>
+    <transition name="profile-expand">
+      <div v-show="detailProfileShow" class="row g-2 mt-2">
+        <div class="col-12 col-lg-6">
+          <div class="bg-white border rounded-3 p-3 h-100">
+            <h6
+              class="mb-2 text-uppercase fw-bold d-flex align-items-center gap-1 text-muted"
+              style="font-size: 0.72rem; letter-spacing: 0.03em"
+            >
+              <i class="bx bx-user-pin"></i>
+              Profil Donatur
+            </h6>
+
+            <div class="row g-2">
+              <div class="col-12 col-sm-6">
+                <div
+                  class="bg-light rounded-2 p-2 d-flex flex-column"
+                  style="gap: 0.15rem"
+                >
+                  <small
+                    class="text-muted"
+                    style="font-size: 0.66rem; line-height: 1.2"
+                    >Level</small
+                  >
+                  <span
+                    class="fw-semibold text-dark"
+                    style="font-size: 0.74rem; line-height: 1.25"
+                    >{{ detail.level }}</span
+                  >
                 </div>
-                <div class="profile-grid-item">
-                  <small class="profile-label">Tgl Gabung</small>
-                  <span class="profile-value">{{
-                    formatShortDate(donorProfileDummy.joinedDate)
-                  }}</span>
+              </div>
+              <div class="col-12 col-sm-6">
+                <div
+                  class="bg-light rounded-2 p-2 d-flex flex-column"
+                  style="gap: 0.15rem"
+                >
+                  <small
+                    class="text-muted"
+                    style="font-size: 0.66rem; line-height: 1.2"
+                    >Tgl Gabung</small
+                  >
+                  <span
+                    class="fw-semibold text-dark"
+                    style="font-size: 0.74rem; line-height: 1.25"
+                    >{{ formatShortDate(donorProfileDummy.joinedDate) }}</span
+                  >
                 </div>
-                <div class="profile-grid-item">
-                  <small class="profile-label">Terakhir Donasi</small>
-                  <span class="profile-value"
+              </div>
+              <div class="col-12 col-sm-6">
+                <div
+                  class="bg-light rounded-2 p-2 d-flex flex-column"
+                  style="gap: 0.15rem"
+                >
+                  <small
+                    class="text-muted"
+                    style="font-size: 0.66rem; line-height: 1.2"
+                    >Terakhir Donasi</small
+                  >
+                  <span
+                    class="fw-semibold text-dark"
+                    style="font-size: 0.74rem; line-height: 1.25"
                     >{{ donorProfileDummy.lastDonationDays }} hari lalu</span
                   >
                 </div>
-                <div class="profile-grid-item">
-                  <small class="profile-label">Aktivitas</small>
-                  <span class="profile-value">{{
-                    donorProfileDummy.activity
-                  }}</span>
+              </div>
+              <div class="col-12 col-sm-6">
+                <div
+                  class="bg-light rounded-2 p-2 d-flex flex-column"
+                  style="gap: 0.15rem"
+                >
+                  <small
+                    class="text-muted"
+                    style="font-size: 0.66rem; line-height: 1.2"
+                    >Aktivitas</small
+                  >
+                  <span
+                    class="fw-semibold text-dark"
+                    style="font-size: 0.74rem; line-height: 1.25"
+                    >{{ donorProfileDummy.activity }}</span
+                  >
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          <div class="col-12 col-lg-6">
-            <div class="profile-panel h-100">
-              <h6 class="panel-title mb-2">
-                <i class="bx bx-target-lock"></i>
-                Preferensi & Catatan
-              </h6>
+        <div class="col-12 col-lg-6">
+          <div class="bg-white border rounded-3 p-3 h-100">
+            <h6
+              class="mb-2 text-uppercase fw-bold d-flex align-items-center gap-1 text-muted"
+              style="font-size: 0.72rem; letter-spacing: 0.03em"
+            >
+              <i class="bx bx-target-lock"></i>
+              Preferensi & Catatan
+            </h6>
 
-              <div class="d-flex flex-wrap gap-1 mb-2">
-                <b-badge
-                  v-for="tag in donorProfileDummy.tags"
-                  :key="tag"
-                  :variant="null"
-                  class="badge-soft-info"
+            <div class="d-flex flex-wrap gap-1 mb-2">
+              <b-badge
+                v-for="tag in donorProfileDummy.tags"
+                :key="tag"
+                :variant="null"
+                class="badge-soft-info"
+              >
+                #{{ tag }}
+              </b-badge>
+            </div>
+
+            <div class="row g-2">
+              <div class="col-12 col-sm-6">
+                <div
+                  class="bg-light rounded-2 p-2 d-flex flex-column"
+                  style="gap: 0.15rem"
                 >
-                  #{{ tag }}
-                </b-badge>
-              </div>
-
-              <div class="profile-grid">
-                <div class="profile-grid-item">
-                  <small class="profile-label">Kota</small>
-                  <span class="profile-value">{{
-                    donorProfileDummy.city
-                  }}</span>
+                  <small
+                    class="text-muted"
+                    style="font-size: 0.66rem; line-height: 1.2"
+                    >Kota</small
+                  >
+                  <span
+                    class="fw-semibold text-dark"
+                    style="font-size: 0.74rem; line-height: 1.25"
+                    >{{ donorProfileDummy.city }}</span
+                  >
                 </div>
-                <div class="profile-grid-item">
-                  <small class="profile-label">Usia</small>
-                  <span class="profile-value"
+              </div>
+              <div class="col-12 col-sm-6">
+                <div
+                  class="bg-light rounded-2 p-2 d-flex flex-column"
+                  style="gap: 0.15rem"
+                >
+                  <small
+                    class="text-muted"
+                    style="font-size: 0.66rem; line-height: 1.2"
+                    >Usia</small
+                  >
+                  <span
+                    class="fw-semibold text-dark"
+                    style="font-size: 0.74rem; line-height: 1.25"
                     >{{ donorProfileDummy.age }} tahun</span
                   >
                 </div>
-                <div class="profile-grid-item">
-                  <small class="profile-label">Pekerjaan</small>
-                  <span class="profile-value">{{ donorProfileDummy.job }}</span>
+              </div>
+              <div class="col-12 col-sm-6">
+                <div
+                  class="bg-light rounded-2 p-2 d-flex flex-column"
+                  style="gap: 0.15rem"
+                >
+                  <small
+                    class="text-muted"
+                    style="font-size: 0.66rem; line-height: 1.2"
+                    >Pekerjaan</small
+                  >
+                  <span
+                    class="fw-semibold text-dark"
+                    style="font-size: 0.74rem; line-height: 1.25"
+                    >{{ donorProfileDummy.job }}</span
+                  >
                 </div>
-                <div class="profile-grid-item">
-                  <small class="profile-label">Komunitas</small>
-                  <span class="profile-value">{{
-                    donorProfileDummy.community
-                  }}</span>
+              </div>
+              <div class="col-12 col-sm-6">
+                <div
+                  class="bg-light rounded-2 p-2 d-flex flex-column"
+                  style="gap: 0.15rem"
+                >
+                  <small
+                    class="text-muted"
+                    style="font-size: 0.66rem; line-height: 1.2"
+                    >Komunitas</small
+                  >
+                  <span
+                    class="fw-semibold text-dark"
+                    style="font-size: 0.74rem; line-height: 1.25"
+                    >{{ donorProfileDummy.community }}</span
+                  >
                 </div>
-                <div class="profile-grid-item profile-grid-item--full">
-                  <small class="profile-label">Note</small>
-                  <span class="profile-value text-muted">{{
-                    donorProfileDummy.note
-                  }}</span>
+              </div>
+              <div class="col-12">
+                <div
+                  class="bg-light rounded-2 p-2 d-flex flex-column"
+                  style="gap: 0.15rem"
+                >
+                  <small
+                    class="text-muted"
+                    style="font-size: 0.66rem; line-height: 1.2"
+                    >Note</small
+                  >
+                  <span
+                    class="fw-semibold text-muted"
+                    style="font-size: 0.74rem; line-height: 1.25"
+                    >{{ donorProfileDummy.note }}</span
+                  >
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </transition>
 
     <div
       v-if="detail.assigned_cs"
@@ -178,7 +311,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { cycleStatusVariant, initialsOf } from "@/utils/crmAdapters";
 import type { CrmDonorDetail } from "@/types/crm";
 
@@ -200,6 +333,8 @@ type DonorProfileDummy = {
   note: string;
   statusUser: "Aktif" | "Perlu Follow Up" | "Tidak Aktif";
 };
+
+const detailProfileShow = ref(false);
 
 const DUMMY_DONOR_PROFILES: DonorProfileDummy[] = [
   {
@@ -268,106 +403,34 @@ const formatShortDate = (value: string) => {
   });
 };
 
-const statusUserVariant = (status: DonorProfileDummy["statusUser"]) => {
-  if (status === "Aktif") return "success";
-  if (status === "Perlu Follow Up") return "warning";
-  return "secondary";
-};
+// const statusUserVariant = (status: DonorProfileDummy["statusUser"]) => {
+//   if (status === "Aktif") return "success";
+//   if (status === "Perlu Follow Up") return "warning";
+//   return "secondary";
+// };
 </script>
 
 <style scoped>
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.5rem;
+.profile-expand-enter-active,
+.profile-expand-leave-active {
+  transition:
+    max-height 0.28s ease,
+    opacity 0.22s ease,
+    transform 0.22s ease;
+  overflow: hidden;
 }
 
-.kpi-chip {
-  background: #ffffff;
-  border: 1px solid #e9edf6;
-  border-radius: 0.65rem;
-  padding: 0.55rem 0.65rem;
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
+.profile-expand-enter-from,
+.profile-expand-leave-to {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-6px);
 }
 
-.kpi-icon {
-  width: 1.95rem;
-  height: 1.95rem;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.95rem;
-}
-
-.kpi-label {
-  color: #7b8190;
-  font-size: 0.68rem;
-  line-height: 1.2;
-}
-
-.kpi-value {
-  color: #344054;
-  font-size: 0.76rem;
-  line-height: 1.2;
-}
-
-.profile-panel {
-  background: #ffffff;
-  border: 1px solid #e9edf6;
-  border-radius: 0.75rem;
-  padding: 0.75rem;
-}
-
-.panel-title {
-  color: #475467;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.profile-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.45rem;
-}
-
-.profile-grid-item {
-  background: #f8f9fc;
-  border-radius: 0.55rem;
-  padding: 0.45rem 0.55rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.profile-grid-item--full {
-  grid-column: 1 / -1;
-}
-
-.profile-label {
-  color: #7b8190;
-  font-size: 0.66rem;
-  line-height: 1.2;
-}
-
-.profile-value {
-  font-size: 0.74rem;
-  font-weight: 600;
-  line-height: 1.25;
-  color: #344054;
-}
-
-@media (max-width: 575.98px) {
-  .kpi-grid,
-  .profile-grid {
-    grid-template-columns: 1fr;
-  }
+.profile-expand-enter-to,
+.profile-expand-leave-from {
+  max-height: 650px;
+  opacity: 1;
+  transform: translateY(0);
 }
 </style>

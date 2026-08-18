@@ -27,7 +27,7 @@
     >
       <!-- Section: Antrian (dinamis dari API) -->
       <div class="px-2 pt-2 pb-1 fs-10 fw-bold text-muted text-uppercase">
-        Antrian
+        Kartu
       </div>
       <router-link
         :to="{ path: '/crm', query: {} }"

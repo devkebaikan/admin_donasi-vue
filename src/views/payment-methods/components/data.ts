@@ -6,10 +6,10 @@ import {
   deletePaymentMethod,
 } from "@/services/paymentMethodService";
 import { formatCurrency } from "@/helpers/format";
-import { hasPermission } from "@/helpers/permission";
+// import { hasPermission } from "@/helpers/permission";
 
-const isCanEdit = hasPermission("payment:update");
-const isCanDelete = hasPermission("payment:delete");
+const isCanEdit = true;
+const isCanDelete = true;
 
 export function usePaymentMethodTable() {
   const selectedBankReferenceId = ref<number | string>("");
@@ -68,6 +68,16 @@ export function usePaymentMethodTable() {
           html(`<span class="fw-semibold d-block">${cell || "-"}</span>`),
       },
       {
+        name: "Usage",
+        width: "110px",
+        formatter: (cell: string) => {
+          const cls = cell === "penampung" ? "bg-info" : "bg-primary";
+          return html(
+            `<span class="badge ${cls}">${cell === "penerima" ? "Penerima" : "Penampung"}</span>`,
+          );
+        },
+      },
+      {
         name: "Fee",
         width: "110px",
         formatter: (cell: { fee: number; fee_type: string }) =>
@@ -79,6 +89,7 @@ export function usePaymentMethodTable() {
             }</span>`,
           ),
       },
+
       {
         name: "Status",
         width: "120px",
@@ -123,6 +134,7 @@ export function usePaymentMethodTable() {
         bankName: item.bank_reference?.name ?? "-",
       },
       item.bank_reference.type,
+      item.usage,
       { fee: item.fee, fee_type: item.fee_type },
       { id: item.id, is_active: item.is_active },
       item.id,

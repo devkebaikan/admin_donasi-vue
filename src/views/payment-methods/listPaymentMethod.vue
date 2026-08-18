@@ -223,6 +223,21 @@
             <b-form-select-option value="false">Nonaktif</b-form-select-option>
           </b-form-select>
         </b-col>
+
+        <b-col cols="12" md="2">
+          <label class="form-label fw-semibold">Usage</label>
+          <b-form-select v-model="selectedUsage" @change="resetPage">
+            <template #first>
+              <b-form-select-option value="">Semua Usage</b-form-select-option>
+            </template>
+            <b-form-select-option value="penampung"
+              >Penampung</b-form-select-option
+            >
+            <b-form-select-option value="penerima"
+              >Penerima</b-form-select-option
+            >
+          </b-form-select>
+        </b-col>
       </b-row>
 
       <!-- Active Filters -->

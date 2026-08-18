@@ -25,7 +25,7 @@
               @click="$router.push({ name: 'crm.list' })"
             >
               <Icon
-                icon="solar:users-group-rounded-broken"
+                icon="hugeicons:customer-support"
                 class="fs-24 align-middle"
               />
             </button>

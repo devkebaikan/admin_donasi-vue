@@ -333,7 +333,10 @@ const { mutate, isPending } = useMutation({
       type: "success",
       position: "top-center",
     });
-    setTimeout(() => router.push("/kegiatan"), 1500);
+    setTimeout(
+      () => router.push(`/kegiatan?project_id=${formState.project_id}`),
+      1500,
+    );
   },
   onError: (err: any) => {
     const msg = err?.response?.data?.message ?? "Gagal memperbarui kegiatan";
