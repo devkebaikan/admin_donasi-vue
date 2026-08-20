@@ -125,7 +125,7 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
 import { createAjuan } from "@/services/ajuanService";
-import { getAllBankReferences } from "@/services/bankReferenceService";
+// import { getAllBankReferences } from "@/services/bankReferenceService";
 import { getProjectById } from "@/services/projectService";
 import { getMitraById } from "@/services/mitraService";
 import { getAllPaymentMethods } from "@/services/paymentMethodService";
@@ -222,7 +222,10 @@ const { data: projectData } = useQuery({
 
 const maxNominal = computed(() => {
   const field = config.value.maxField;
-  return Number(projectData.value?.[field] ?? 0);
+  return Number(
+    projectData.value?.claimed_donasi - projectData.value?.total_tf_ke_mitra ??
+      0,
+  );
 });
 
 const formatRupiah = (val: number) => val.toLocaleString("id-ID");
@@ -232,21 +235,35 @@ watch(
   ([isOpen, project]) => {
     if (!isOpen || !project) return;
 
-    form.mitra_id = String(project.mitra_utama?.id ?? "");
+    const mitraId = String(project.mitra_utama?.id ?? "");
+
+    if (form.mitra_id !== mitraId) {
+      form.mitra_id = mitraId;
+    }
   },
   { immediate: true },
 );
 
 const { data: detailMitra } = useQuery({
-  queryKey: ["detail-mitra", form.mitra_id],
-  queryFn: () => getMitraById(Number(form.mitra_id)),
-  enabled: computed(() => form.mitra_id !== ""),
+  queryKey: computed(() => ["detail-mitra", form.mitra_id]),
+  queryFn: ({ queryKey }) => {
+    const [, mitraId] = queryKey;
+    return getMitraById(Number(mitraId));
+  },
+  enabled: computed(() => !!form.mitra_id),
 });
 
 watch(
   [() => showModal.value, () => detailMitra.value],
   ([isOpen, mitra]) => {
-    if (!isOpen || !mitra) return;
+    if (!isOpen) return;
+
+    if (!mitra) {
+      form.account_behalf = "";
+      form.account_number = "";
+      form.bank_reference_id = 0;
+      return;
+    }
 
     const data = mitra.data ?? mitra;
 
@@ -256,7 +273,6 @@ watch(
   },
   { immediate: true },
 );
-
 watch(
   () => showModal.value,
   (isOpen) => {

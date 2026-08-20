@@ -35,7 +35,7 @@ export const updateUserProfiling = async (
   data: Record<string, any>,
 ) => {
   try {
-    const res = await HttpClient.put(`/rbac/users/${id}/profiling`, data);
+    const res = await HttpClient.put(`/rbac/users/${id}/donatur`, data);
     return res.data.data;
   } catch (error) {
     console.error(`Error updating profiling user with id ${id}:`, error);

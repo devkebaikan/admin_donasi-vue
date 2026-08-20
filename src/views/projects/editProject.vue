@@ -25,9 +25,24 @@
             </b-button>
           </div>
 
+          <!-- Fallback: id tidak valid / data tidak ditemukan / form belum siap -->
+          <div v-else-if="!formReady" class="text-center py-5">
+            <i class="bx bx-search-alt fs-1 text-muted d-block mb-2"></i>
+            <p class="text-muted">
+              Data project tidak ditemukan atau tidak valid.
+            </p>
+            <b-button
+              variant="outline-primary"
+              size="sm"
+              @click="router.push('/projects')"
+            >
+              <i class="bx bx-arrow-back me-1"></i>Kembali ke Daftar Project
+            </b-button>
+          </div>
+
           <!-- Form -->
           <form-wizard
-            v-else-if="formReady"
+            v-else
             shape="tab"
             color="#1e84c4"
             back-button-text="Sebelumnya"
@@ -60,7 +75,7 @@
                       Judul wajib diisi.
                     </b-form-invalid-feedback>
 
-                    <small> Mitra: {{ formState.mitra_name }} </small>
+                    <small> Mitra: {{ formState.mitra_name ?? "-" }} </small>
                   </b-form-group>
                 </b-col>
 
@@ -503,7 +518,12 @@ import { toast, type ToastOptions } from "vue3-toastify";
 
 const route = useRoute();
 const router = useRouter();
+
+// ── Project ID & validasi ────────────────────────────────────────────────────
 const projectId = computed(() => Number(route.params.id));
+const isValidProjectId = computed(
+  () => !Number.isNaN(projectId.value) && projectId.value > 0,
+);
 
 const showToast = (message: string, options: ToastOptions) =>
   toast(message, options);
@@ -519,6 +539,7 @@ const existingImagesUrl = ref<string | null>(null);
 
 // ── Form state ────────────────────────────────────────────────────────────────
 const formReady = ref(false);
+const programSelectKey = ref(0);
 
 const formState = reactive({
   judul: "",
@@ -572,6 +593,15 @@ const validateStep2 = () =>
   touchAndCheck(["nominal_ajuan", "waktu_pelaksanaan"]);
 const validateStep3 = () => true;
 
+// ── Reset state saat pindah project (SPA nav antar id, komponen di-reuse) ────
+watch(projectId, () => {
+  formReady.value = false;
+  imageFile.value = null;
+  imagesFile.value = null;
+  imagePreview.value = null;
+  imagesPreview.value = null;
+});
+
 // ── Fetch project by ID ───────────────────────────────────────────────────────
 const {
   data: projectData,
@@ -581,7 +611,7 @@ const {
 } = useQuery({
   queryKey: ["project", projectId],
   queryFn: () => getProjectById(projectId.value),
-  enabled: computed(() => !!projectId.value),
+  enabled: isValidProjectId,
 });
 
 // ── Pre-fill form ─────────────────────────────────────────────────────────────
@@ -590,37 +620,46 @@ watch(
   (data) => {
     if (!data) return;
 
-    formState.judul = data.judul ?? "";
-    formState.status = data.status ?? "draft";
-    formState.activity = data.activity ?? "";
-    formState.request = data.request ?? "nothing";
-    formState.mitra_id = data.mitra_utama.id ?? null;
-    formState.mitra_name = data.mitra_utama.nama ?? null;
-    formState.nominal_ajuan = data.nominal_ajuan ?? undefined;
-    formState.nominal_acc = data.nominal_acc ?? undefined;
-    formState.waktu_pelaksanaan = data.waktu_pelaksanaan ?? "";
-    formState.jumlah_pm = data.jumlah_pm ?? "";
-    formState.reason = data.reason ?? "";
-    formState.kesiapan = data.kesiapan ?? "";
-    formState.notes = data.notes ?? "";
-    formState.deskripsi = data.deskripsi ?? "";
-    formState.lat = data.lat ? Number(data.lat) : undefined;
-    formState.lng = data.lng ? Number(data.lng) : undefined;
-    formState.kode_wilayah = data.kode_wilayah ?? "";
-    formState.pengaju = data.pengaju ?? "";
-    formState.email = data.email ?? "";
-    formState.wa = data.wa ?? "";
-    formState.marketing = data.marketing ?? "";
+    try {
+      formState.judul = data.judul ?? "";
+      formState.status = data.status ?? "draft";
+      formState.activity = data.activity ?? "";
+      formState.request = data.request ?? "nothing";
+      formState.mitra_id = data.mitra_utama?.id ?? null;
+      formState.mitra_name = data.mitra_utama?.nama ?? null;
+      formState.nominal_ajuan = data.nominal_ajuan ?? undefined;
+      formState.nominal_acc = data.nominal_acc ?? undefined;
+      formState.waktu_pelaksanaan = data.waktu_pelaksanaan ?? "";
+      formState.jumlah_pm = data.jumlah_pm ?? "";
+      formState.reason = data.reason ?? "";
+      formState.kesiapan = data.kesiapan ?? "";
+      formState.notes = data.notes ?? "";
+      formState.deskripsi = data.deskripsi ?? "";
+      formState.lat = data.lat ? Number(data.lat) : undefined;
+      formState.lng = data.lng ? Number(data.lng) : undefined;
+      formState.kode_wilayah = data.kode_wilayah ?? "";
+      formState.pengaju = data.pengaju ?? "";
+      formState.email = data.email ?? "";
+      formState.wa = data.wa ?? "";
+      formState.marketing = data.marketing ?? "";
 
-    if (Array.isArray(data.programs)) {
-      formState.program_ids = data.programs.map((p: any) => p.id);
+      formState.program_ids = Array.isArray(data.programs)
+        ? data.programs.map((p: any) => p?.id).filter((id: any) => id != null)
+        : [];
+
+      existingImageUrl.value = data.image_url ?? null;
+      existingImagesUrl.value = data.images_url ?? null;
+
+      formReady.value = true;
+      programSelectKey.value++;
+    } catch (e) {
+      console.error("Gagal mengisi form dari data project:", e);
+      showToast("Terjadi kesalahan saat memuat data project", {
+        type: "error",
+        position: "top-center",
+      });
+      // formReady sengaja dibiarkan false → template menampilkan fallback "tidak ditemukan"
     }
-
-    existingImageUrl.value = data.image_url ?? null;
-    existingImagesUrl.value = data.images_url ?? null;
-
-    formReady.value = true;
-    programSelectKey.value++;
   },
   { immediate: true },
 );
@@ -637,11 +676,11 @@ const allPrograms = computed(() => programData.value ?? []);
 const programOptions = computed(() =>
   allPrograms.value.map((p: any) => ({
     value: String(p.id),
-    text: p.title,
+    text: p.title ?? p.name ?? `Program #${p.id}`,
   })),
 );
 
-const programSelectKey = ref(0);
+// const programSelectKey = ref(0);
 
 // ── Image handlers ────────────────────────────────────────────────────────────
 const handleImageChange = (event: Event) => {
@@ -692,7 +731,10 @@ const { mutate: submitUpdate, isPending } = useMutation({
       type: "success",
       position: "top-center",
     });
-    setTimeout(() => router.push("/projects"), 1500);
+    setTimeout(
+      () => router.push(`/projects?program_id=${formState?.program_ids[0]}`),
+      1500,
+    );
   },
   onError: (err: any) => {
     const msg = err?.response?.data?.message ?? "Gagal memperbarui project";

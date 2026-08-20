@@ -95,15 +95,20 @@
 
             <!-- Status Verified -->
             <b-col md="4">
-              <b-form-group label="Status Verified" label-for="verified">
-                <b-form-input
+              <b-form-group label="Status Verifikasi" label-for="verified">
+                <b-form-checkbox
                   id="verified"
                   v-model="formState.verified"
-                  type="text"
-                  placeholder="e.g., verified"
-                  maxlength="50"
-                />
-                <small class="text-muted">Opsional</small>
+                  :value="'1'"
+                  :unchecked-value="''"
+                  switch
+                >
+                  Verified
+                </b-form-checkbox>
+
+                <small class="text-muted">
+                  Aktifkan jika user sudah terverifikasi
+                </small>
               </b-form-group>
             </b-col>
 
