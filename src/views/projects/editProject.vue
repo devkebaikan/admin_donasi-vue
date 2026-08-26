@@ -654,10 +654,10 @@ watch(
       programSelectKey.value++;
     } catch (e) {
       console.error("Gagal mengisi form dari data project:", e);
-      showToast("Terjadi kesalahan saat memuat data project", {
-        type: "error",
-        position: "top-center",
-      });
+      // showToast("Terjadi kesalahan saat memuat data project", {
+      //   type: "error",
+      //   position: "top-center",
+      // });
       // formReady sengaja dibiarkan false → template menampilkan fallback "tidak ditemukan"
     }
   },

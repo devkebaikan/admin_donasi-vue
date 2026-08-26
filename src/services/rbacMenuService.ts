@@ -39,7 +39,7 @@ export const getAll = async (params: { format?: "list" | "tree" } = {}) => {
     };
   } catch (error) {
     console.error("Error fetching menus:", error);
-    return { data: [], format: "list", meta: { total: 0, last_page: 1 } };
+    throw error;
   }
 };
 

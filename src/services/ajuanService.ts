@@ -52,7 +52,7 @@ export const deleteAjuan = async (id: number) => {
 
 export const acceptAjuan = async (id: number, data: Record<string, any>) => {
   try {
-    const res = await HttpClient.post(
+    const res = await HttpClient.put(
       `/program/project-ajuans/${id}/accept`,
       data,
     );
@@ -64,7 +64,7 @@ export const acceptAjuan = async (id: number, data: Record<string, any>) => {
 };
 export const rejectAjuan = async (id: number) => {
   try {
-    await HttpClient.post(`/program/project-ajuans/${id}/reject`);
+    await HttpClient.put(`/program/project-ajuans/${id}/reject`);
     return true;
   } catch (error) {
     console.error(`Error rejecting ajuan with id ${id}:`, error);
@@ -73,7 +73,7 @@ export const rejectAjuan = async (id: number) => {
 };
 export const acceptRefund = async (id: number) => {
   try {
-    await HttpClient.post(`/program/project-refunds/${id}/reject`);
+    await HttpClient.put(`/program/project-refunds/${id}/accept`);
     return true;
   } catch (error) {
     console.error(`Error accepting refund with id ${id}:`, error);
@@ -82,7 +82,7 @@ export const acceptRefund = async (id: number) => {
 };
 export const rejectRefund = async (id: number) => {
   try {
-    await HttpClient.post(`/program/project-refunds/${id}/reject`);
+    await HttpClient.put(`/program/project-refunds/${id}/reject`);
     return true;
   } catch (error) {
     console.error(`Error rejecting refund with id ${id}:`, error);

@@ -343,10 +343,7 @@
                 <b-spinner v-if="isPending" small class="me-1" />
                 {{ isPending ? "Menyimpan..." : "Simpan Transaksi" }}
               </b-button>
-              <b-button
-                variant="outline-secondary"
-                @click="router.push('/transactions')"
-              >
+              <b-button variant="outline-secondary" @click="router.back()">
                 Batal
               </b-button>
             </div>

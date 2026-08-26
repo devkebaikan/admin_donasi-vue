@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/vue-query";
 import { getAll } from "@/services/rbacMenuService";
 import { setDynamicMenuItems } from "@/helpers/menu";
 import { hasRouteAccess } from "@/helpers/permission";
+import { useAuthStore } from "@/stores/auth";
 import type { MenuItemType } from "@/types/menu";
 import type { MenuItem } from "@/services/rbacMenuService";
 
@@ -16,7 +17,9 @@ const filterAccessibleMenus = (items: MenuItem[]): MenuItem[] => {
   const processed = items.map((item): MenuItem | null => {
     if (item.children && item.children.length > 0) {
       const filteredChildren = filterAccessibleMenus(item.children);
-      return filteredChildren.length > 0 ? { ...item, children: filteredChildren } : null;
+      return filteredChildren.length > 0
+        ? { ...item, children: filteredChildren }
+        : null;
     }
     if (item.route) {
       return hasRouteAccess(item.route) ? item : null;
@@ -28,7 +31,9 @@ const filterAccessibleMenus = (items: MenuItem[]): MenuItem[] => {
   processed.forEach((item, idx) => {
     if (!item) return;
     if (isTitlePlaceholder(item)) {
-      const next = processed.slice(idx + 1).find((n) => n !== null) as MenuItem | undefined;
+      const next = processed.slice(idx + 1).find((n) => n !== null) as
+        | MenuItem
+        | undefined;
       if (!next || isTitlePlaceholder(next)) return;
     }
     result.push(item);
@@ -44,17 +49,37 @@ const transformMenuItems = (items: MenuItem[]): MenuItemType[] => {
     isTitle: !item.route && (!item.children || item.children.length === 0),
     route: item.route ? { name: item.route } : undefined,
     parentKey: item.parent_id ? item.parent_id.toString() : undefined,
-    children: item.children && item.children.length > 0
-      ? transformMenuItems(item.children)
-      : undefined,
+    children:
+      item.children && item.children.length > 0
+        ? transformMenuItems(item.children)
+        : undefined,
   }));
 };
 
 export const useDynamicMenu = () => {
-  const { data: menuResponse, isLoading, error, refetch } = useQuery({
+  const authStore = useAuthStore();
+
+  const sessionReady = computed(() => {
+    if (!authStore.user || typeof authStore.user !== "string") return false;
+
+    try {
+      const parsed = JSON.parse(authStore.user);
+      return Boolean(parsed?.token || parsed?.data?.access_token);
+    } catch (e) {
+      return false;
+    }
+  });
+
+  const {
+    data: menuResponse,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ["dynamic-menu"],
     queryFn: () => getAll({ format: "tree" }),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    enabled: sessionReady,
+    staleTime: 1000 * 60 * 5,
   });
 
   const menuItems = computed((): MenuItemType[] => {

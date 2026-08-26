@@ -178,6 +178,23 @@
           </span>
         </div>
 
+        <div
+          v-if="
+            isCanPublish &&
+            String(programDetail.status || '').toUpperCase() === 'DRAFT'
+          "
+          class="mb-3"
+        >
+          <b-button
+            variant="success"
+            size="sm"
+            class="w-100"
+            @click="handlePublish(programDetail.id)"
+          >
+            <i class="bx bx-upload me-1"></i>Publish Program
+          </b-button>
+        </div>
+
         <!-- Description -->
         <p v-if="programDetail.description" class="text-muted small mb-3">
           {{ programDetail.description }}
@@ -564,16 +581,23 @@ import { useProgramsTable } from "./components/data";
 import { useListStatePreserve } from "@/composables/useListStatePreserve";
 import { useOffcanvasStatePreserve } from "@/composables/useOffcanvasStatePreserve";
 import router from "@/router";
-import { useQuery } from "@tanstack/vue-query";
+import { useQuery, useQueryClient } from "@tanstack/vue-query";
+import Swal from "sweetalert2/dist/sweetalert2.js";
+import "sweetalert2/dist/sweetalert2.css";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 import {
   getProgramCategories,
   getProgramBylink,
   getProgramTypes,
+  publishProgram,
 } from "@/services/programService";
 import { formatCurrency, formatDate, formatDateTime } from "@/helpers/format";
 import { hasPermission } from "@/helpers/permission";
 
 const isCanCreate = hasPermission("program:create");
+const isCanPublish = hasPermission("program:publish");
+const queryClient = useQueryClient();
 
 // const sortOrderOptions = [
 //   { value: "id", text: "ID" },
@@ -585,6 +609,7 @@ const isCanCreate = hasPermission("program:create");
 const {
   tableOptions,
   tableKeyString,
+  tableKey,
   isLoading,
   isError,
   error,
@@ -678,6 +703,43 @@ const openDetail = (link: string) => {
   showDetailOffcanvas.value = true;
 };
 
+const handlePublish = async (id: number) => {
+  const result = await Swal.fire({
+    title: "Publish Program?",
+    text: "Status program ini akan diubah menjadi PUBLISH.",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Ya, Publish",
+    cancelButtonText: "Batal",
+    confirmButtonColor: "#198754",
+    cancelButtonColor: "#ef5f5f",
+  });
+
+  if (!result.isConfirmed) return;
+
+  try {
+    await publishProgram(id, { status: "PUBLISH" });
+    await queryClient.invalidateQueries({
+      queryKey: ["programs"],
+      exact: false,
+    });
+    tableKey.value++;
+    if (selectedProgramLink.value) {
+      await queryClient.invalidateQueries({
+        queryKey: ["program-detail", selectedProgramLink.value],
+        exact: false,
+      });
+    }
+    toast("Program berhasil dipublish", {
+      type: "success",
+      position: "top-center",
+    });
+  } catch (err: any) {
+    const msg = err?.response?.data?.message ?? "Gagal mempublish program";
+    toast(msg, { type: "error", position: "top-center" });
+  }
+};
+
 const PROJECT_STATUS_BADGE: Record<string, string> = {
   draft: "bg-secondary",
   diajukan: "bg-warning text-dark",
@@ -700,6 +762,10 @@ const projectActivityBadge = (activity: string) =>
 const handleGlobalClick = (event: Event) => {
   const target = event.target as HTMLElement;
 
+  const publishBtn = target.closest<HTMLElement>(
+    '#table-gridjs .publish-btn[data-action="publish"]',
+  );
+
   const detailBtn = target.closest<HTMLElement>(
     '#table-gridjs .detail-btn[data-action="detail"]',
   );
@@ -719,6 +785,13 @@ const handleGlobalClick = (event: Event) => {
   const deleteBtn = target.closest<HTMLElement>(
     '#table-gridjs .delete-btn[data-action="delete"]',
   );
+
+  if (publishBtn) {
+    event.preventDefault();
+    const id = publishBtn.getAttribute("data-id");
+    if (id) handlePublish(Number(id));
+    return;
+  }
 
   if (detailBtn) {
     event.preventDefault();

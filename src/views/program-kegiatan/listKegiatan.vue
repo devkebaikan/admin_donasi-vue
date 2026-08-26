@@ -165,26 +165,8 @@
 
         <hr class="my-3" />
 
-        <!-- Timestamps -->
-        <div class="d-flex gap-3 mb-3">
-          <div>
-            <small class="text-muted d-block">Dibuat</small>
-            <small class="fw-semibold">{{
-              formatDateTime(kegiatanDetail.created_at)
-            }}</small>
-          </div>
-          <div>
-            <small class="text-muted d-block">Diperbarui</small>
-            <small class="fw-semibold">{{
-              formatDateTime(kegiatanDetail.updated_at)
-            }}</small>
-          </div>
-        </div>
-
-        <hr class="my-3" />
-
         <!-- Deskripsi -->
-        <!-- <h6
+        <h6
           class="fw-semibold text-muted mb-2 text-uppercase"
           style="font-size: 11px; letter-spacing: 0.5px"
         >
@@ -195,7 +177,7 @@
           class="small"
           v-html="kegiatanDetail.deskripsi"
         ></div>
-        <p v-else class="text-muted small fst-italic">Tidak ada deskripsi.</p> -->
+        <p v-else class="text-muted small fst-italic">Tidak ada deskripsi.</p>
       </div>
     </b-offcanvas>
 

@@ -54,10 +54,9 @@ const renderActionButtons = (item: {
 
   // Ajuan Section
   if (
-    isCanApprove
-    // &&
-    // item.claimed > 0 &&
-    // (item.activity === "active open" || item.activity === "active close")
+    isCanApprove &&
+    item.claimed > 0 &&
+    (item.activity === "active open" || item.activity === "active close")
   ) {
     html += `
       <div class="d-flex align-items-center gap-2 p-2 bg-light rounded">

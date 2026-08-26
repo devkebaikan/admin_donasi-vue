@@ -120,6 +120,16 @@ export const deleteProgramType = async (id: number) => {
   }
 };
 
+export const publishProgram = async (id: number, data: Record<string, any>) => {
+  try {
+    const res = await HttpClient.patch(`/programs/${id}/status`, data);
+    return res.data.data;
+  } catch (error) {
+    console.error(`Error publish program with id ${id}: `, error);
+    throw error;
+  }
+};
+
 // fetch all program percentages
 export const getProgramPercentages = async (params = {}) => {
   try {
