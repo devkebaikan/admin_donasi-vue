@@ -29,7 +29,7 @@
             </b-col>
 
             <!-- Type -->
-            <b-col md="4">
+            <!-- <b-col md="4">
               <b-form-group label="Tipe" label-for="type">
                 <b-form-select
                   id="type"
@@ -52,7 +52,7 @@
                   {{ v$.type.$errors[0].$message }}
                 </b-form-invalid-feedback>
               </b-form-group>
-            </b-col>
+            </b-col> -->
 
             <!-- Mitra IDs -->
             <!-- <b-col md="8">
@@ -181,7 +181,7 @@
                 <b-button
                   variant="outline-secondary"
                   :disabled="isPending"
-                  @click="router.push('/project-report')"
+                  @click="router.back()"
                 >
                   Batal
                 </b-button>
@@ -232,7 +232,7 @@ const waImagePreview = ref<string | null>(null);
 const formState = reactive({
   project_id: 0,
   kegiatan_id: 0,
-  type: "",
+  type: "Final",
   mitra_ids: "",
   link_ig: "",
   embed_ig: "",
@@ -254,7 +254,7 @@ watch(
       const project = await getProjectById(projectId);
       if (project) {
         if (project.mitra_utama !== null) {
-          formState.mitra_ids = project.mitra_utama.id;
+          formState.mitra_ids = String(project.mitra_utama.id);
         } else {
           formState.mitra_ids = "";
         }
@@ -329,7 +329,7 @@ const { mutate, isPending } = useMutation({
     formData.append("kegiatan_id", String(formState.kegiatan_id));
     formData.append("type", formState.type);
     if (formState.mitra_ids.trim())
-      formData.append("mitra_ids", formState.mitra_ids.trim());
+      formData.append("mitra_ids", formState.mitra_ids);
     if (thumbnailFile.value) formData.append("thumbnail", thumbnailFile.value);
     if (waImageFile.value) formData.append("wa_image", waImageFile.value);
     if (formState.link_ig.trim())
@@ -346,7 +346,10 @@ const { mutate, isPending } = useMutation({
       type: "success",
       position: "top-center",
     });
-    setTimeout(() => router.push("/project-report"), 1500);
+    setTimeout(
+      () => router.push(`/project-report?project_id=${formState.project_id}`),
+      1500,
+    );
   },
   onError: (err: any) => {
     showToast(err?.response ?? "Gagal menambahkan laporan", {

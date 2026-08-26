@@ -13,7 +13,7 @@
 
           <b-row v-else class="g-3">
             <!-- Project -->
-            <b-col md="6">
+            <!-- <b-col md="6">
               <b-form-group label="Project" label-for="project-id">
                 <ChoicesSelect
                   id="project-id"
@@ -36,7 +36,7 @@
                   {{ v$.project_id.$errors[0].$message }}
                 </div>
               </b-form-group>
-            </b-col>
+            </b-col> -->
 
             <!-- Kegiatan -->
             <b-col md="6">
@@ -68,7 +68,7 @@
             </b-col>
 
             <!-- Type -->
-            <b-col md="4">
+            <!-- <b-col md="4">
               <b-form-group label="Tipe" label-for="type">
                 <b-form-select
                   id="type"
@@ -91,7 +91,7 @@
                   {{ v$.type.$errors[0].$message }}
                 </b-form-invalid-feedback>
               </b-form-group>
-            </b-col>
+            </b-col> -->
 
             <!-- Mitra IDs -->
             <!-- <b-col md="8">
@@ -219,7 +219,7 @@
                 <b-button
                   variant="outline-secondary"
                   :disabled="isPending"
-                  @click="router.push('/project-report')"
+                  @click="router.back()"
                 >
                   Batal
                 </b-button>
@@ -259,7 +259,7 @@ import router from "@/router";
 const showToast = (message: string, options: ToastOptions) =>
   toast(message, options);
 const route = useRoute();
-const id = Number(route.params.id);
+const id = computed(() => Number(route.params.id));
 const queryClient = useQueryClient();
 
 const thumbnailFile = ref<File | null>(null);
@@ -270,7 +270,7 @@ const waImagePreview = ref<string | null>(null);
 const formState = reactive({
   project_id: 0,
   kegiatan_id: 0,
-  type: "",
+  type: "Final",
   mitra_ids: "",
   link_ig: "",
   embed_ig: "",
@@ -298,42 +298,41 @@ const {
   isLoading: isDetailLoading,
   isError: isDetailError,
 } = useQuery({
-  queryKey: ["reports", id],
-  queryFn: () => getReportById(id),
-  enabled: !!id,
+  queryKey: computed(() => ["reports", id.value]),
+  queryFn: () => getReportById(id.value),
+  enabled: computed(() => !!id.value),
 });
 
-watch(reportData, (val) => {
-  if (!val) return;
-  formState.project_id = val.project_id ?? 0;
-  formState.kegiatan_id = val.kegiatan_id ?? 0;
-  formState.type = val.type ?? "";
-  formState.mitra_ids = val.mitra_ids ?? "";
-  formState.link_ig = val.link_ig ?? "";
-  formState.embed_ig = val.embed_ig ?? "";
-  formState.wa_caption = val.wa_caption ?? "";
-  if (val.thumbnail_url) thumbnailPreview.value = val.thumbnail_url;
-  if (val.wa_image) waImagePreview.value = val.wa_image;
-});
+watch(
+  () => reportData.value,
+  (val) => {
+    if (!val) return;
+
+    formState.project_id = val.project_id ?? 0;
+    formState.kegiatan_id = val.kegiatan_id ?? 0;
+    formState.type = val.type ?? "";
+    formState.mitra_ids = String(val.mitra_ids ?? "");
+    formState.link_ig = val.link_ig ?? "";
+    formState.embed_ig = val.embed_ig ?? "";
+    formState.wa_caption = val.wa_caption ?? "";
+
+    thumbnailPreview.value = val.thumbnail_url ?? null;
+    waImagePreview.value = val.wa_image ?? null;
+  },
+  { immediate: true },
+);
 
 // ── Dropdown options ──────────────────────────────────────────────────────
-
-const { data: projectData, isLoading: isProjectLoading } = useQuery({
-  queryKey: ["projects-list"],
-  queryFn: () => getProjects({ mode: "list" }),
-});
-const projectOptions = computed(() => {
-  const list = Array.isArray(projectData.value) ? projectData.value : [];
-  return [
-    { value: 0, text: "-- Pilih Project --" },
-    ...list.map((p: any) => ({ value: p.id, text: p.judul })),
-  ];
-});
-
 const { data: kegiatanData, isLoading: isKegiatanLoading } = useQuery({
-  queryKey: ["kegiatans-list"],
-  queryFn: () => getAllKegiatan({ mode: "list" }),
+  queryKey: ["kegiatans-list", formState.project_id],
+  queryFn: () =>
+    getAllKegiatan({
+      mode: "list",
+      project_id: formState.project_id,
+    }),
+  enabled: computed(() => formState.project_id > 0),
 });
+
 const kegiatanOptions = computed(() => {
   const list = Array.isArray(kegiatanData.value) ? kegiatanData.value : [];
   return [
@@ -386,16 +385,19 @@ const { mutate, isPending } = useMutation({
       formData.append("embed_ig", formState.embed_ig.trim());
     if (formState.wa_caption.trim())
       formData.append("wa_caption", formState.wa_caption.trim());
-    return updateReport(id, formData);
+    return updateReport(id.value, formData);
   },
   onSuccess: () => {
     queryClient.invalidateQueries({ queryKey: ["reports"] });
-    queryClient.invalidateQueries({ queryKey: ["reports", id] });
+    queryClient.invalidateQueries({ queryKey: ["reports", id.value] });
     showToast("Laporan berhasil diperbarui", {
       type: "success",
       position: "top-center",
     });
-    setTimeout(() => router.push("/project-report"), 1500);
+    setTimeout(
+      () => router.push(`/project-report?project_id=${formState.project_id}`),
+      1500,
+    );
   },
   onError: (err: any) => {
     showToast(err?.response?.data?.message ?? "Gagal memperbarui laporan", {
@@ -415,5 +417,6 @@ const handleSubmit = async () => {
     return;
   }
   mutate();
+  console.log(formState);
 };
 </script>

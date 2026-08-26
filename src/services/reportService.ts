@@ -34,7 +34,7 @@ export const createReport = async (data: FormData) => {
 
 export const updateReport = async (id: number, data: FormData) => {
   try {
-    const res = await HttpClient.post(`/program/project-laporan/${id}`, data, {
+    const res = await HttpClient.put(`/program/project-laporan/${id}`, data, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return res.data.data;

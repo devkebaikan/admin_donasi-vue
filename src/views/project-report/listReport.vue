@@ -184,7 +184,7 @@
           </b-input-group>
         </b-col>
 
-        <b-col cols="12" md="4">
+        <!-- <b-col cols="12" md="4">
           <label class="form-label fw-semibold">Project</label>
           <ChoicesSelect
             id="filter-project"
@@ -199,9 +199,9 @@
             :isLoading="isProjectLoading"
             :key="projectOptions.length"
           />
-        </b-col>
+        </b-col> -->
 
-        <b-col cols="12" md="4">
+        <!-- <b-col cols="12" md="4">
           <label class="form-label fw-semibold">Kegiatan</label>
           <ChoicesSelect
             id="filter-kegiatan"
@@ -216,7 +216,7 @@
             :isLoading="isKegiatanLoading"
             :key="kegiatanOptions.length"
           />
-        </b-col>
+        </b-col> -->
 
         <b-col cols="12" md="2">
           <label class="form-label fw-semibold">Tipe</label>
