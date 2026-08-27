@@ -69,13 +69,13 @@ export function useTransactionTable() {
       {
         name: "Invoice",
         width: "200px",
-        formatter: (item: { program: string; inv: string }) =>
+        formatter: (item: { program: string; inv: string; type: string }) =>
           html(`
           <small class="d-flex flex-column">
              ${
                item.program?.trim()
                  ? `<span class="fw-semibold text-dark">${item.program}</span>`
-                 : `<span class="fw-semibold text-secondary">Belum ada program</span>`
+                 : `<span class="fw-semibold text-warning">${item.type === "Donasi" ? "Belum ada program" : item.type}</span>`
              }
 
             <span class="text-primary font-monospace">
@@ -195,6 +195,7 @@ export function useTransactionTable() {
       {
         program: item?.transaction_details?.[0]?.program?.name,
         inv: item.invoice,
+        type: item.transaction_type.name,
       },
       item.date,
       item.total,

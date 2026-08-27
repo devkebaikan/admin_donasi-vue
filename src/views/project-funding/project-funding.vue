@@ -130,7 +130,10 @@
           </b-button>
           <b-button
             variant="primary"
-            :disabled="(!checkedIds.size && !saldoPakai) || isAllocating"
+            :disabled="
+              (!checkedIds.size && !saldoPakai && !pendingRefunds.length) ||
+              isAllocating
+            "
             @click="handleAlokasikan"
           >
             <b-spinner v-if="isAllocating" small class="me-1" />
@@ -217,6 +220,77 @@
           </div>
         </div>
       </template>
+
+      <!-- Pending Refund -->
+      <b-card v-if="pendingRefunds.length" class="mb-3">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div>
+            <h6 class="mb-1 fw-semibold">Pending Refund</h6>
+            <small class="text-muted">
+              Refund berikut wajib dialokasikan dan tidak dapat dibatalkan.
+            </small>
+          </div>
+
+          <span class="badge bg-warning text-dark">
+            {{ pendingRefunds.length }} refund
+          </span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th style="width: 44px" class="text-center">#</th>
+                <th class="text-muted small">Mitra</th>
+                <th class="text-muted small text-end">Nominal</th>
+                <th class="text-muted small">Tanggal</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr
+                v-for="refund in pendingRefunds"
+                :key="refund.id"
+                class="table-warning"
+              >
+                <td class="text-center">
+                  <b-form-checkbox :model-value="true" disabled />
+                </td>
+
+                <td>
+                  <div class="fw-medium small">
+                    {{ refund.mitra_name }}
+                  </div>
+                </td>
+
+                <td class="text-end">
+                  <span class="fw-semibold small">
+                    {{ formatCurrency(Number(refund.nominal_ajuan ?? 0)) }}
+                  </span>
+                </td>
+
+                <td class="small text-muted">
+                  {{ formatDate(refund.created_at) }}
+                </td>
+              </tr>
+            </tbody>
+
+            <tfoot class="table-light">
+              <tr>
+                <td colspan="2" class="text-end fw-semibold small text-muted">
+                  Total Pending Refund
+                </td>
+
+                <td class="text-end fw-bold small">
+                  {{ formatCurrency(totalPendingRefund) }}
+                </td>
+
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </b-card>
 
       <div v-if="isLoading" class="text-center py-5">
         <b-spinner variant="primary" style="width: 2rem; height: 2rem" />
@@ -333,6 +407,17 @@ const { data: fundCheck, isLoading: isFundCheckLoading } = useQuery({
   queryFn: () => checkFundingProject(projectId),
 });
 
+const pendingRefunds = computed<any[]>(() => {
+  return fundCheck.value?.pending_refunds ?? [];
+});
+
+const totalPendingRefund = computed(() => {
+  return pendingRefunds.value.reduce(
+    (sum, refund) => sum + Number(refund.nominal_ajuan ?? 0),
+    0,
+  );
+});
+
 const programs = computed<any[]>(() => fundCheck.value?.breakdown ?? []);
 
 watch(programs, (list) => {
@@ -431,9 +516,11 @@ const nominalTercentang = computed(() =>
     .reduce((sum, t) => sum + t.nominal, 0),
 );
 
-const totalAlokasi = computed(
-  () => nominalTercentang.value + (saldoPakai.value || 0),
-);
+const totalAlokasi = computed(() => {
+  return (
+    totalPendingRefund.value + nominalTercentang.value + (saldoPakai.value || 0)
+  );
+});
 
 const coveragePercent = computed(() => {
   if (!kekuranganDana.value) return 100;
@@ -501,7 +588,7 @@ const doAutoCheck = () => {
 const onProgramChange = () => {
   checkedIds.value = new Set();
   saldoPakai.value = 0;
-  nominalClaim.value = 0;
+  // nominalClaim.value = 0;
 };
 
 const { mutate: mutateClaim, isPending: isAllocating } = useMutation({
@@ -513,6 +600,10 @@ const { mutate: mutateClaim, isPending: isAllocating } = useMutation({
           donation_ids: Array.from(checkedIds.value),
         },
       ],
+
+      refund_ids: pendingRefunds.value.map((refund) => refund.id),
+
+      saldo_pakai: saldoPakai.value || 0,
     }),
   onSuccess: () => {
     queryClient.invalidateQueries({ queryKey: ["fund-check", projectId] });
@@ -533,13 +624,33 @@ const { mutate: mutateClaim, isPending: isAllocating } = useMutation({
 });
 
 const handleAlokasikan = () => {
-  if (!checkedIds.value.size) {
-    showToast("Pilih minimal satu donasi untuk dialokasikan.", {
+  if (
+    !checkedIds.value.size &&
+    !saldoPakai.value &&
+    !pendingRefunds.value.length
+  ) {
+    showToast("Tidak ada dana yang dapat dialokasikan.", {
       type: "warning",
       position: "top-center",
     });
+
     return;
   }
+
+  if (totalAlokasi.value > kekuranganDana.value) {
+    showToast(
+      `Total alokasi melebihi kekurangan dana sebesar ${formatCurrency(
+        totalAlokasi.value - kekuranganDana.value,
+      )}.`,
+      {
+        type: "warning",
+        position: "top-center",
+      },
+    );
+
+    return;
+  }
+
   mutateClaim();
 };
 </script>

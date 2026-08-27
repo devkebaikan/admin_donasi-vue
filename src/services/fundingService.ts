@@ -11,6 +11,13 @@ export interface FundCheckResult {
   breakdown: any;
   status: string;
   message: string;
+  pending_refunds?: PendingRefund[];
+}
+interface PendingRefund {
+  id: number;
+  mitra_name: string;
+  nominal_ajuan: number | string;
+  created_at: string;
 }
 
 export interface ClaimableProgramRequest {
@@ -57,7 +64,11 @@ export const disburseFunding = async (id: number, data = {}) => {
 
 export const claimFunding = async (
   id: number,
-  data: { programs: ClaimProgramRequest[] },
+  data: {
+    programs: ClaimProgramRequest[];
+    refund_ids?: number[];
+    saldo_pakai?: number;
+  },
 ) => {
   try {
     const res = await HttpClient.post(

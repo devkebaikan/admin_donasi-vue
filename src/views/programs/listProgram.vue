@@ -178,7 +178,7 @@
           </span>
         </div>
 
-        <div
+        <!-- <div
           v-if="
             isCanPublish &&
             String(programDetail.status || '').toUpperCase() === 'DRAFT'
@@ -193,7 +193,7 @@
           >
             <i class="bx bx-upload me-1"></i>Publish Program
           </b-button>
-        </div>
+        </div> -->
 
         <!-- Description -->
         <p v-if="programDetail.description" class="text-muted small mb-3">
