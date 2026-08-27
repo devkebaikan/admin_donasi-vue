@@ -115,25 +115,11 @@ export function useProgramsTable() {
       },
       {
         name: "Actions",
-        width: "150px",
+        width: "120px",
         sort: false,
-        formatter: (program: { id: number; link: string; status?: string }) => {
-          const isDraft =
-            String(program.status || "").toUpperCase() === "DRAFT";
-          return html(`
+        formatter: (program: { id: number; link: string }) =>
+          html(`
             <div class="d-flex gap-1 justify-content-center">
-              ${
-                isDraft
-                  ? `<button
-                class="btn btn-sm btn-soft-success publish-btn"
-                data-action="publish"
-                data-id="${program.id}"
-                title="Publish Program">
-                <i class="bx bx-upload fs-16"></i>
-              </button>`
-                  : ""
-              }
-
               <button
                 class="btn btn-sm btn-soft-primary detail-btn"
                 data-action="detail"
@@ -162,8 +148,7 @@ export function useProgramsTable() {
                 <i class="bx bx-folder-open fs-16"></i>
               </button>
             </div>
-          `);
-        },
+          `),
       },
     ],
 
@@ -184,7 +169,7 @@ export function useProgramsTable() {
         achieved: program.nominal_achieved,
       },
       program.remaining_days,
-      { id: program.id, link: program.link, status: program.status },
+      { id: program.id, link: program.link },
     ],
   });
 

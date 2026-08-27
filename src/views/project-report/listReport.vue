@@ -442,18 +442,12 @@ const selectedKegiatanLabel = computed(
 // ── Filter helpers ────────────────────────────────────────────────────────
 
 const hasActiveFilters = computed(
-  () =>
-    !!(
-      searchQuery.value ||
-      selectedProjectId.value ||
-      selectedKegiatanId.value ||
-      selectedType.value
-    ),
+  () => !!(searchQuery.value || selectedKegiatanId.value || selectedType.value),
 );
 
 const clearFilters = () => {
   searchQuery.value = "";
-  selectedProjectId.value = "";
+  // selectedProjectId.value = "";
   selectedKegiatanId.value = "";
   selectedType.value = "";
   resetPage();

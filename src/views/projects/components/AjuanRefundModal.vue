@@ -28,9 +28,20 @@
               :state="nominalError ? false : null"
             />
           </b-input-group>
-          <small class="text-muted">
-            Maksimal: Rp {{ formatRupiah(maxNominal) }}
-          </small>
+          <div class="d-flex align-items-center gap-2 mt-2 flex-wrap">
+            <small class="text-muted">
+              Maksimal: Rp {{ formatRupiah(maxNominal) }}
+            </small>
+            <b-button
+              size="sm"
+              variant="outline-primary"
+              class="ms-1"
+              :disabled="maxNominal <= 0"
+              @click="applyMaxNominal"
+            >
+              Pakai Maksimal
+            </b-button>
+          </div>
           <div v-if="nominalError" class="invalid-feedback d-block">
             {{ nominalError }}
           </div>
@@ -222,10 +233,22 @@ const { data: projectData } = useQuery({
 
 const maxNominal = computed(() => {
   const field = config.value.maxField;
-  return Number(
-    projectData.value?.claimed_donasi - projectData.value?.total_tf_ke_mitra ??
-      0,
-  );
+  // const value = Number(projectData.value?.[field] ?? 0);
+  // return Number.isFinite(value) ? value : 0;
+
+  // Number(
+  //   projectData.value?.claimed_donasi - projectData.value?.total_tf_ke_mitra ??
+  //     0,
+  // );
+
+  if (field === "total_alokasi") {
+    return Number(
+      projectData.value?.claimed_donasi -
+        projectData.value?.total_tf_ke_mitra ?? 0,
+    );
+  } else {
+    return Number(projectData.value?.sisa_dana_mitra);
+  }
 });
 
 const formatRupiah = (val: number) => val.toLocaleString("id-ID");
@@ -385,5 +408,12 @@ const handleSubmit = () => {
   }
 
   mutateForm();
+};
+
+const applyMaxNominal = () => {
+  if (maxNominal.value > 0) {
+    form.nominal_ajuan = maxNominal.value;
+    nominalError.value = "";
+  }
 };
 </script>

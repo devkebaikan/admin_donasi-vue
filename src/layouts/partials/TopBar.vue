@@ -104,9 +104,9 @@
               </span>
             </a>
             <div class="dropdown-menu dropdown-menu-end">
-              <h6 class="dropdown-header">Welcome Gaston!</h6>
+              <h6 class="dropdown-header">{{ role }}</h6>
 
-              <router-link
+              <!-- <router-link
                 class="dropdown-item"
                 :to="{ name: item.route?.name }"
                 v-for="(item, idx) in profileMenuItems"
@@ -116,7 +116,7 @@
                   :class="`bx ${item.icon} text-muted fs-18 align-middle me-1`"
                 ></i
                 ><span class="align-middle">{{ item.label }}</span>
-              </router-link>
+              </router-link> -->
 
               <div class="dropdown-divider my-1"></div>
 
@@ -147,6 +147,9 @@ import DropDown from "@/components/DropDown.vue";
 import avatar1 from "@/assets/images/users/avatar-1.jpg";
 import Notification from "./Notification.vue";
 import { hasPermission } from "@/helpers/permission";
+
+const dataUser = JSON.parse(localStorage.getItem("VUE_USER") || "{}");
+const role = dataUser?.role.toUpperCase();
 
 const isAccessCRM = hasPermission("crm:task");
 
