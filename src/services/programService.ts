@@ -12,6 +12,17 @@ export const getAllPrograms = async (params = {}) => {
 };
 
 // Fetch program by ID
+export const getProgramById = async (id: number) => {
+  try {
+    const res = await HttpClient.get(`/programs/${id}`);
+    return res.data.data;
+  } catch (error) {
+    console.error(`Error fetching program with id ${id}:`, error);
+    return null;
+  }
+};
+
+// by link
 export const getProgramBylink = async (link: string) => {
   try {
     const res = await HttpClient.get(`/programs/link/${link}`);

@@ -202,7 +202,7 @@ export function useProgramsTable() {
                   ? `<button
                 class="btn btn-sm btn-soft-warning edit-btn"
                 data-action="edit"
-                data-link="${program.link}"
+                data-link="${program.id}"
                 title="Edit Program">
                 <i class="bx bx-edit fs-16"></i>
               </button>`
