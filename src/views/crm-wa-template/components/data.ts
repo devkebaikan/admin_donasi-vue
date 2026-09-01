@@ -2,6 +2,7 @@ import { computed, ref } from "vue";
 import { html } from "gridjs";
 import { useDataTable } from "@/composables/useDataTable";
 import { getCrmChatTemplates, deleteCrmChatTemplate } from "@/services/crmService";
+import { hasPermission } from "@/helpers/permission";
 
 /**
  * Daftar variable yang bisa dipakai pada isi template WA type "crm".
@@ -34,6 +35,9 @@ export const typeBadgeClass = (type: string) => TYPE_BADGE[type] ?? "bg-secondar
 
 export const typeLabel = (type: string) =>
   type === "crm" ? "CRM" : type === "system" ? "System" : type;
+
+const isCanEdit = hasPermission("crm:whatsapp_template");
+const isCanDelete = hasPermission("crm:whatsapp_template");
 
 const truncate = (text: string, length = 60) =>
   text && text.length > length ? `${text.slice(0, length)}...` : text ?? "-";
@@ -92,8 +96,16 @@ export function useCrmTemplateTable() {
         formatter: (id: number) => html(`
           <div class="d-flex gap-1 justify-content-center">
             <button class="btn btn-sm btn-soft-primary detail-btn" data-action="detail" data-id="${id}" title="Detail"><i class="bx bx-show fs-16"></i></button>
-            <button class="btn btn-sm btn-soft-warning edit-btn" data-action="edit" data-id="${id}" title="Edit"><i class="bx bx-edit fs-16"></i></button>
-            <button class="btn btn-sm btn-soft-danger delete-btn" data-action="delete" data-id="${id}" title="Hapus"><i class="bx bx-trash fs-16"></i></button>
+            ${
+              isCanEdit
+                ? `<button class="btn btn-sm btn-soft-warning edit-btn" data-action="edit" data-id="${id}" title="Edit"><i class="bx bx-edit fs-16"></i></button>`
+                : ""
+            }
+            ${
+              isCanDelete
+                ? `<button class="btn btn-sm btn-soft-danger delete-btn" data-action="delete" data-id="${id}" title="Hapus"><i class="bx bx-trash fs-16"></i></button>`
+                : ""
+            }
           </div>`),
       },
     ],

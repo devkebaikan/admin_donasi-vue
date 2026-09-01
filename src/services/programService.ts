@@ -12,6 +12,17 @@ export const getAllPrograms = async (params = {}) => {
 };
 
 // Fetch program by ID
+export const getProgramById = async (id: number) => {
+  try {
+    const res = await HttpClient.get(`/programs/${id}`);
+    return res.data.data;
+  } catch (error) {
+    console.error(`Error fetching program with id ${id}:`, error);
+    return null;
+  }
+};
+
+// by link
 export const getProgramBylink = async (link: string) => {
   try {
     const res = await HttpClient.get(`/programs/link/${link}`);
@@ -116,6 +127,16 @@ export const deleteProgramType = async (id: number) => {
     return true;
   } catch (error) {
     console.error(`Error deleting program type with id ${id}:`, error);
+    throw error;
+  }
+};
+
+export const publishProgram = async (id: number, data: Record<string, any>) => {
+  try {
+    const res = await HttpClient.patch(`/programs/${id}/status`, data);
+    return res.data.data;
+  } catch (error) {
+    console.error(`Error publish program with id ${id}: `, error);
     throw error;
   }
 };

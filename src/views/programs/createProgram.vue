@@ -713,7 +713,7 @@ const { mutate: createProgramPayload, isPending } = useMutation({
       type: "success",
       position: "top-center",
     });
-    setTimeout(() => router.push("/programs"), 1500);
+    setTimeout(() => (window.location.href = "/programs"), 1500);
   },
   onError: (err: any) => {
     const msg = err?.response?.data?.message ?? "Gagal membuat program";

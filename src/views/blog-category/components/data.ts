@@ -4,6 +4,10 @@ import {
   getAllBlogCategory,
   deleteBlogCategory,
 } from "@/services/blogCategoryService";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanEdit = hasPermission("blog:update");
+const isCanDelete = hasPermission("blog:delete");
 
 export function useBlogCategoryTable() {
   const table = useDataTable({
@@ -37,8 +41,8 @@ export function useBlogCategoryTable() {
         formatter: (id: number) =>
           html(`
             <div class="d-flex gap-1 justify-content-center">
-              <button class="btn btn-sm btn-soft-warning edit-btn" data-action="edit" data-id="${id}" title="Edit"><i class="bx bx-edit fs-16"></i></button>
-              <button class="btn btn-sm btn-soft-danger delete-btn" data-action="delete" data-id="${id}" title="Hapus"><i class="bx bx-trash fs-16"></i></button>
+            ${isCanEdit ? `<button class="btn btn-sm btn-soft-warning edit-btn" data-action="edit" data-id="${id}" title="Edit"><i class="bx bx-edit fs-16"></i></button> ` : ""}
+            ${isCanDelete ? `<button class="btn btn-sm btn-soft-danger delete-btn" data-action="delete" data-id="${id}" title="Hapus"><i class="bx bx-trash fs-16"></i></button>` : ""}
             </div>`),
       },
     ],

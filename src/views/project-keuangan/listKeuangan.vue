@@ -274,7 +274,7 @@
     <b-row>
       <b-col>
         <UIComponentCard id="basic" title="Daftar Project Keuangan">
-          <div class="d-flex justify-content-end mb-3">
+          <div v-if="isCanCreate" class="d-flex justify-content-end mb-3">
             <b-button
               v-if="selectedProjectId"
               variant="primary"
@@ -342,6 +342,9 @@ import { getAllMitra } from "@/services/mitraService";
 import { formatCurrency, formatDateTime } from "@/helpers/format";
 import router from "@/router";
 import { useRoute } from "vue-router";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanCreate = hasPermission("project:keuangan");
 
 const {
   tableOptions,

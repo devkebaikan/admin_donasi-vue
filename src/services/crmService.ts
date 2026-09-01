@@ -111,11 +111,9 @@ export const createCrmChatTemplate = async (data: any) => {
 };
 
 // update template chat
-export const updateCrmChatTemplate = async (id: number, data: FormData) => {
+export const updateCrmChatTemplate = async (id: number, data: any) => {
   try {
-    const res = await HttpClient.post(`/crm/whatsapp-templates/${id}`, data, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    const res = await HttpClient.put(`/crm/whatsapp-templates/${id}`, data);
     return res.data.data;
   } catch (error) {
     console.error(`Error updating chat template ${id}:`, error);
@@ -174,6 +172,30 @@ export const sendCrmChatToDonor = async (
     return res.data.data;
   } catch (error) {
     console.error("Error sending chat to donor:", error);
+    throw error;
+  }
+};
+// jadwalkan Follow Up
+export const createFollowUp = async (data: Record<string, any>) => {
+  try {
+    const res = await HttpClient.post("/crm/follow-ups", data);
+    return res.data.data;
+  } catch (error) {
+    console.error("Error creating follow up:", error);
+    throw error;
+  }
+};
+
+// update status follow up
+export const updateStatusFollowUp = async (
+  id: number,
+  data: Record<string, any>,
+) => {
+  try {
+    const res = await HttpClient.patch(`/crm/follow-ups/${id}/status`, data);
+    return res.data.data;
+  } catch (error) {
+    console.error(`Error updating follow up ${id}:`, error);
     throw error;
   }
 };

@@ -94,7 +94,7 @@
     <b-row>
       <b-col>
         <UIComponentCard id="basic" title="Daftar Akun Keuangan">
-          <div class="d-flex justify-content-end mb-3">
+          <div v-if="isCanCreate" class="d-flex justify-content-end mb-3">
             <b-button
               variant="primary"
               @click="router.push('/finance-account/create')"
@@ -152,7 +152,10 @@ import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
 import { useFinanceAccountsTable } from "./components/data";
+import { hasPermission } from "@/helpers/permission";
 import router from "@/router";
+
+const isCanCreate = hasPermission("finance_akun:create");
 
 const {
   tableOptions,

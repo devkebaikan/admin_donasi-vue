@@ -5,6 +5,10 @@ import {
   getAllKeuangan,
   deleteKeuangan,
 } from "@/services/projectKeuanganService";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanEdit = hasPermission("project:keuangan");
+const isCanDelete = hasPermission("project:keuangan");
 
 const formatRupiah = (val: number) =>
   new Intl.NumberFormat("id-ID", {
@@ -87,12 +91,20 @@ export function useKeuanganTable() {
               <button class="btn btn-sm btn-soft-primary detail-btn" data-action="detail" data-id="${id}" title="Lihat Detail">
                 <i class="bx bx-show fs-16"></i>
               </button>
-              <button class="btn btn-sm btn-soft-warning edit-btn" data-action="edit" data-id="${id}" title="Edit">
+              ${
+                isCanEdit
+                  ? `<button class="btn btn-sm btn-soft-warning edit-btn" data-action="edit" data-id="${id}" title="Edit">
                 <i class="bx bx-edit fs-16"></i>
-              </button>
-              <button class="btn btn-sm btn-soft-danger delete-btn" data-action="delete" data-id="${id}" title="Hapus">
+              </button>`
+                  : ""
+              }
+              ${
+                isCanDelete
+                  ? `<button class="btn btn-sm btn-soft-danger delete-btn" data-action="delete" data-id="${id}" title="Hapus">
                 <i class="bx bx-trash fs-16"></i>
-              </button>
+              </button>`
+                  : ""
+              }
             </div>
           `),
       },

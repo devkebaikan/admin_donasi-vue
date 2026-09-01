@@ -597,14 +597,14 @@ import {
   getProgramPercentages,
   getProgramTypes,
   getProgramCategories,
+  getProgramById,
 } from "@/services/programService";
 import { getAllMitra } from "@/services/mitraService";
 import { toast, type ToastOptions } from "vue3-toastify";
 
 // ── Route params ───────────────────────────────────────────────────────────
 const route = useRoute();
-const router = useRouter();
-const programLink = computed(() => String(route.params.id));
+const programId = computed(() => Number(route.params.id));
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 const showToast = (message: string, options: ToastOptions) =>
@@ -706,9 +706,9 @@ const {
   isError: fetchError,
   refetch: refetchProgram,
 } = useQuery({
-  queryKey: ["program", programLink],
-  queryFn: () => getProgramBylink(programLink.value),
-  enabled: computed(() => !!programLink.value),
+  queryKey: ["program", programId],
+  queryFn: () => getProgramById(programId.value),
+  enabled: computed(() => !!programId.value),
 });
 
 // ── Pre-fill form saat data program tersedia ───────────────────────────────
@@ -787,13 +787,24 @@ const { data: tipeData, isLoading: isTipeLoading } = useQuery({
   queryFn: getProgramTypes,
 });
 
-const tipeList = [
-  { value: 0, text: "Choose Tipe..." },
-  { value: 1, text: "Zakat" },
-  { value: 2, text: "Infaq" },
-  { value: 3, text: "Sadaqah" },
-  { value: 4, text: "Wakaf" },
-];
+const tipeList = computed(() => {
+  if (!tipeData.value) return [{ value: 0, text: "Choose Tipe..." }];
+  return [
+    { value: 0, text: "Choose Tipe..." },
+    ...tipeData.value.map((item: any) => ({
+      value: item.id,
+      text: item.nama,
+    })),
+  ];
+});
+
+// const tipeList = [
+//   { value: 0, text: "Choose Tipe..." },
+//   { value: 1, text: "Zakat" },
+//   { value: 2, text: "Infaq" },
+//   { value: 3, text: "Sadaqah" },
+//   { value: 4, text: "Wakaf" },
+// ];
 
 const { data: categoryData, isLoading: isCategoryLoading } = useQuery({
   queryKey: ["program-categories"],
@@ -878,12 +889,12 @@ const { mutate: updateProgramPayload, isPending } = useMutation({
     updateProgram(Number(formState.id), payload),
   onSuccess: () => {
     queryClient.invalidateQueries({ queryKey: ["programs"] });
-    queryClient.invalidateQueries({ queryKey: ["program", programLink] });
+    queryClient.invalidateQueries({ queryKey: ["program", programId] });
     showToast("Program berhasil diperbarui", {
       type: "success",
       position: "top-center",
     });
-    setTimeout(() => router.push("/programs"), 1500);
+    setTimeout(() => (window.location.href = "/programs"), 1500);
   },
   onError: (err: any) => {
     const msg = err?.response?.data?.message ?? "Gagal memperbarui program";

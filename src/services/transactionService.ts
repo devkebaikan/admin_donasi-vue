@@ -53,12 +53,46 @@ export const deleteTransaction = async (id: number) => {
   }
 };
 
-export const getUserTransactionHistory = async (userId: number, params = {}) => {
+export const getUserTransactionHistory = async (
+  userId: number,
+  params = {},
+) => {
   try {
-    const res = await HttpClient.get(`/admin/users/${userId}/transactions`, { params });
+    const res = await HttpClient.get(`/admin/users/${userId}/transactions`, {
+      params,
+    });
     return res.data.data;
   } catch (error) {
-    console.error(`Error fetching transaction history for user ${userId}:`, error);
+    console.error(
+      `Error fetching transaction history for user ${userId}:`,
+      error,
+    );
     return { data: [], meta: { total: 0, last_page: 1 } };
+  }
+};
+
+export const verifTransaction = async (
+  id: number,
+  data: Record<string, any>,
+) => {
+  try {
+    const res = await HttpClient.put(`/admin/transactions/${id}/verify`, data);
+    return res.data.data;
+  } catch (error) {
+    console.error(`Error verifikasi transaction ${id}:`, error);
+    throw error;
+  }
+};
+
+export const updateTransactionDetailProject = async (
+  id: number,
+  data: { project_id: number },
+) => {
+  try {
+    const res = await HttpClient.put(`/admin/transactions/details/${id}`, data);
+    return res.data.data;
+  } catch (error) {
+    console.error(`Error updating transaction detail ${id}:`, error);
+    throw error;
   }
 };

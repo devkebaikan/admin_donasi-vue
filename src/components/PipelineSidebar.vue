@@ -1,11 +1,20 @@
 <template>
-  <b-card no-body class="h-100 d-flex flex-column" style="margin-bottom: 0">
-    <b-card-header class="border-0 py-2 flex-shrink-0">
-      <b-card-title class="mb-0 fs-14">
-        <i class="bx bx-git-branch me-1 text-primary"></i>Ziswaf CRM
-      </b-card-title>
+  <b-card
+    no-body
+    class="h-100 d-flex flex-column overflow-hidden"
+    style="margin-bottom: 0; max-height: 100vh"
+  >
+    <b-card-header class="main-nav">
+      <LogoBox
+        customClass="mx-auto text-center auth-logo"
+        :smLogoHeight="20"
+        :logoHeight="18"
+        smLogoClass="me-1"
+      />
     </b-card-header>
-
+    <!-- <b-card-title class="mb-0 fs-14">
+      <i class="bx bx-git-branch me-1 text-primary"></i>CRM
+    </b-card-title> -->
     <div v-if="isLoading" class="text-center p-3 flex-grow-1">
       <b-spinner small />
     </div>
@@ -18,7 +27,7 @@
     >
       <!-- Section: Antrian (dinamis dari API) -->
       <div class="px-2 pt-2 pb-1 fs-10 fw-bold text-muted text-uppercase">
-        Antrian
+        Kartu
       </div>
       <router-link
         :to="{ path: '/crm', query: {} }"
@@ -35,6 +44,22 @@
           <span class="fs-11 fw-semibold">Semua Stage</span>
         </a>
       </router-link>
+
+      <!-- Kartu Plan -->
+      <router-link
+        :to="'/crm'"
+        class="d-flex align-items-start gap-2 rounded-2 px-2 py-1 mb-1 text-body crm-pipeline-item"
+        :class="{ active: isRouteActive('/crm/plan') }"
+      >
+        <i :class="`bx bx-book fs-14 flex-shrink-0 mt-1 text-info`"></i>
+        <span class="lh-sm">
+          <span class="d-block fs-11 fw-semibold">Plan - Belum Transfer</span>
+          <span class="d-block fs-10 text-muted"
+            >khusus untuk case tertentu</span
+          >
+        </span>
+      </router-link>
+
       <router-link
         v-for="stage in pipelineStages"
         :key="stage.id"
@@ -45,11 +70,13 @@
         <a
           href="javascript:void(0);"
           class="d-flex align-items-start gap-2 rounded-2 px-2 py-1 mb-1 text-body crm-pipeline-item"
-          :class="{ active: isOnCrmDashboard && currentStageQuery === stage.code }"
+          :class="{
+            active: isOnCrmDashboard && activeStageCode === stage.code,
+          }"
           @click="navigate"
         >
           <i
-            :class="`bx ${stageIcon(stage.code)} fs-14 flex-shrink-0 mt-1 text-${stageColorVariant(stage.color)}`"
+            :class="`bx ${stageIcon(stage.code)} fs-14 flex-shrink-0 mt-1 text-info`"
           ></i>
           <span class="lh-sm">
             <span class="d-block fs-11 fw-semibold">{{ stage.label }}</span>
@@ -67,6 +94,21 @@
         </a>
       </router-link>
 
+      <!-- Kartu 0 - khusus -->
+      <router-link
+        :to="'/crm'"
+        class="d-flex align-items-start gap-2 rounded-2 px-2 py-1 mb-1 text-body crm-pipeline-item"
+        :class="{ active: isRouteActive('/crm/kartu0') }"
+      >
+        <i :class="`bx bx-book fs-14 flex-shrink-0 mt-1 text-info`"></i>
+        <span class="lh-sm">
+          <span class="d-block fs-11 fw-semibold">Kartu 0 - Khusus</span>
+          <span class="d-block fs-10 text-muted"
+            >khusus untuk case tertentu</span
+          >
+        </span>
+      </router-link>
+
       <!-- Section: Modul (halaman terpisah) -->
       <div class="px-2 pt-2 pb-1 fs-10 fw-bold text-muted text-uppercase">
         Modul
@@ -78,7 +120,7 @@
         class="d-flex align-items-start gap-2 rounded-2 px-2 py-1 mb-1 text-body crm-pipeline-item"
         active-class="active"
       >
-        <i :class="`bx ${mod.icon} fs-14 flex-shrink-0 mt-1`"></i>
+        <i :class="`bx ${mod.icon} fs-14 flex-shrink-0 mt-1 text-warning`"></i>
         <span class="lh-sm">
           <span class="d-block fs-11 fw-semibold">{{ mod.label }}</span>
           <span class="d-block fs-10 text-muted">{{ mod.description }}</span>
@@ -102,10 +144,9 @@ import { useQuery } from "@tanstack/vue-query";
 import { useRoute } from "vue-router";
 import simplebar from "simplebar-vue";
 import { getPipeline } from "@/services/crmService";
-import { stageColorVariant } from "@/utils/crmAdapters";
 import type { PipelineStage } from "@/types/crm";
 
-defineProps<{
+const props = defineProps<{
   activeCode?: string;
 }>();
 
@@ -117,7 +158,12 @@ const modules = [
     description: "Kelola template pesan WhatsApp",
     icon: "bxl-whatsapp",
   },
-  // tambahkan modul lain di sini
+  {
+    to: "/crm/benefit",
+    label: "Marketing - Benefit",
+    description: "Kelola benefit donatur",
+    icon: "bx-book",
+  },
 ];
 
 const { data, isLoading } = useQuery({
@@ -138,6 +184,12 @@ const isOnCrmDashboard = computed(() => route.path === "/crm");
 const currentStageQuery = computed(
   () => (route.query.stage as string | undefined) ?? undefined,
 );
+
+const activeStageCode = computed(
+  () => props.activeCode ?? currentStageQuery.value,
+);
+
+const isRouteActive = (path: string) => route.path === path;
 
 const STAGE_ICON: Record<string, string> = {
   kartu1: "bx-time-five",

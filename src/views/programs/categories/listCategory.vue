@@ -116,7 +116,7 @@
     <b-row>
       <b-col>
         <UIComponentCard id="basic" title="Daftar Kategori Program">
-          <div class="d-flex justify-content-end mb-3">
+          <div v-if="isCanCreate" class="d-flex justify-content-end mb-3">
             <b-button
               variant="primary"
               @click="router.push('/category/create')"
@@ -175,6 +175,9 @@ import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
 import { useCategoryTable } from "./data";
 import router from "@/router";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanCreate = hasPermission("program:create");
 
 const sortDirOptions = [
   { value: "asc", text: "Ascending" },

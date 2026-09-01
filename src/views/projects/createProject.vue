@@ -60,13 +60,20 @@
                 <!-- Activity -->
                 <b-col md="6">
                   <b-form-group label="Activity" label-for="activity">
-                    <b-form-select id="activity" v-model="formState.activity">
-                      <option value="">Pilih activity...</option>
+                    <b-form-select
+                      id="activity"
+                      v-model="v$.activity.$model"
+                      :state="v$.activity.$error ? false : null"
+                    >
+                      <option value="" disabled>Pilih activity...</option>
                       <option value="inactive">Inactive</option>
                       <option value="active open">Active Open</option>
                       <option value="active close">Active Close</option>
                       <option value="selesai">Selesai</option>
                     </b-form-select>
+                    <b-form-invalid-feedback v-if="v$.activity.$error">
+                      Activity wajib dipilih.
+                    </b-form-invalid-feedback>
                   </b-form-group>
                 </b-col>
 
@@ -130,13 +137,23 @@
                         :modelValue="formState.program_ids.map(String)"
                         @update:modelValue="
                           (val) => {
-                            formState.program_ids = val.map(Number);
+                            formState.program_ids = val
+                              .map(Number)
+                              .filter((id: number) => Number.isFinite(id));
+                            v$.program_ids.$touch();
                           }
                         "
                         :options="programOptions"
                         :choice-options="{ removeItemButton: true }"
+                        :class="v$.program_ids.$error ? 'is-invalid' : ''"
                         multiple
                       />
+                      <b-form-invalid-feedback
+                        v-if="v$.program_ids.$error"
+                        class="d-block"
+                      >
+                        Program wajib dipilih minimal 1.
+                      </b-form-invalid-feedback>
                       <!-- <b-form-checkbox
                         v-for="p in allPrograms"
                         :key="p.id"
@@ -503,6 +520,8 @@ const formState = reactive({
 const rules = computed(() => ({
   judul: { required },
   status: { required },
+  activity: { required },
+  program_ids: { required },
   nominal_ajuan: { required },
   waktu_pelaksanaan: { required },
 }));
@@ -521,7 +540,8 @@ const touchAndCheck = (fields: string[]): boolean => {
   return !hasError;
 };
 
-const validateStep1 = () => touchAndCheck(["judul", "status"]);
+const validateStep1 = () =>
+  touchAndCheck(["judul", "status", "activity", "program_ids"]);
 const validateStep2 = () =>
   touchAndCheck(["nominal_ajuan", "waktu_pelaksanaan"]);
 const validateStep3 = () => true;

@@ -122,12 +122,14 @@
             <!-- Usage -->
             <b-col md="4">
               <b-form-group label="Usage" label-for="usage">
-                <b-form-input
-                  id="usage"
-                  v-model="formState.usage"
-                  type="text"
-                  maxlength="50"
-                />
+                <b-form-select id="usage" v-model="formState.usage">
+                  <b-form-select-option value="penerima"
+                    >Penerima</b-form-select-option
+                  >
+                  <b-form-select-option value="penampung"
+                    >Penampung</b-form-select-option
+                  >
+                </b-form-select>
                 <small class="text-muted">Opsional</small>
               </b-form-group>
             </b-col>

@@ -160,7 +160,6 @@
                       id="nominal-ajuan"
                       placeholder="0"
                       v-model="v$.nominal_ajuan.$model"
-                      :key="`nominal-ajuan-${formState.nominal_ajuan}`"
                       :state="null"
                     />
                     <b-form-invalid-feedback
@@ -179,7 +178,6 @@
                       id="nominal-acc"
                       placeholder="0"
                       v-model="formState.nominal_acc"
-                      :key="`nominal-acc-${formState.nominal_acc}`"
                       :state="null"
                     />
                     <small class="text-muted">Opsional</small>
@@ -594,8 +592,11 @@ watch(
     formState.status = data.status ?? "draft";
     formState.activity = data.activity ?? "";
     formState.request = data.request ?? "nothing";
-    formState.mitra_id = data.mitra_utama.id ?? null;
-    formState.mitra_name = data.mitra_utama.nama ?? null;
+
+    // ✅ Guard terhadap mitra_utama yang null/undefined
+    formState.mitra_id = data.mitra_utama?.id ?? null;
+    formState.mitra_name = data.mitra_utama?.nama ?? null;
+
     formState.nominal_ajuan = data.nominal_ajuan ?? undefined;
     formState.nominal_acc = data.nominal_acc ?? undefined;
     formState.waktu_pelaksanaan = data.waktu_pelaksanaan ?? "";
@@ -692,7 +693,10 @@ const { mutate: submitUpdate, isPending } = useMutation({
       type: "success",
       position: "top-center",
     });
-    setTimeout(() => router.push("/projects"), 1500);
+    setTimeout(
+      () => router.push(`/projects?program_id=${formState?.program_ids[0]}`),
+      1500,
+    );
   },
   onError: (err: any) => {
     const msg = err?.response?.data?.message ?? "Gagal memperbarui project";

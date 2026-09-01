@@ -2,6 +2,10 @@ import { computed, ref } from "vue";
 import { html } from "gridjs";
 import { useDataTable } from "@/composables/useDataTable";
 import { getAllLeads, deleteLead } from "@/services/leadService";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanEdit = hasPermission("setting:leads");
+const isCanDelete = hasPermission("setting:leads");
 
 export function useLeadTable() {
   const selectedType = ref<string>("");
@@ -57,20 +61,28 @@ export function useLeadTable() {
         formatter: (lead: { id: number }) =>
           html(`
             <div class="d-flex gap-2 justify-content-center">
-              <button
+              ${
+                isCanEdit
+                  ? `<button
                 class="btn btn-sm btn-soft-warning edit-btn"
                 data-action="edit"
                 data-id="${lead.id}"
                 title="Edit Lead">
                 <i class="bx bx-edit fs-16"></i>
-              </button>
-              <button
+              </button>`
+                  : ""
+              }
+              ${
+                isCanDelete
+                  ? `<button
                 class="btn btn-sm btn-soft-danger delete-btn"
                 data-action="delete"
                 data-id="${lead.id}"
                 title="Hapus Lead">
                 <i class="bx bx-trash fs-16"></i>
-              </button>
+              </button>`
+                  : ""
+              }
             </div>
           `),
       },

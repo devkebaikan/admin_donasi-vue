@@ -3,6 +3,10 @@ import { html } from "gridjs";
 import { useDataTable } from "@/composables/useDataTable";
 import { getAllPrograms, deleteProgram } from "@/services/programService";
 import { formatCurrency } from "@/helpers/format";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanEdit = hasPermission("program:update");
+const isCanPublish = hasPermission("program:publish");
 
 export function useProgramsTable() {
   const selectedCategory = ref<string | number>("");
@@ -35,18 +39,73 @@ export function useProgramsTable() {
       {
         name: "Title",
         width: "300px",
-        formatter: (item: { title: string; link: string; mitra: string }) =>
-          html(`
-            <div style="max-width: 280px">
-              <div class="fw-semibold text-dark text-truncate" title="${item.title}">${item.title}</div>
-              <div class="text-muted text-truncate" style="font-size: 11px">
-                ${item.mitra}
-              </div>
-              <div class="text-truncate" style="font-size: 11px">
-                <i class="bx bx-link me-1"></i><a href="https://don.aksiberbagi.com/donasi/${item.link}" target="_blank" rel="noopener noreferrer">${item.link}</a>
-              </div>
+        formatter: (item: {
+          title: string;
+          link: string;
+          mitra: string;
+          id: number;
+          status: string;
+        }) => {
+          const isDraft = String(item.status || "").toUpperCase() === "DRAFT";
+
+          return html(`
+          <div style="max-width: 280px">
+
+            <!-- Title -->
+            <div
+              class="fw-semibold text-dark text-truncate"
+              title="${item.title}"
+            >
+              ${item.title}
             </div>
-          `),
+
+            <!-- Mitra -->
+            <div
+              class="text-muted text-truncate mt-1"
+              style="font-size: 11px"
+            >
+              ${item.mitra}
+            </div>
+
+            <!-- Link -->
+            <div
+              class="text-truncate mt-1"
+              style="font-size: 11px"
+            >
+              <i class="bx bx-link me-1"></i>
+              <a
+                href="https://don.aksiberbagi.com/donasi/${item.link}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-primary"
+              >
+                ${item.link}
+              </a>
+            </div>
+
+            ${
+              isDraft && isCanPublish
+                ? `
+                  <!-- Publish -->
+                  <div class="mt-2">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-soft-success publish-btn"
+                      data-action="publish"
+                      data-id="${item.id}"
+                      title="Publish Program"
+                    >
+                      <i class="bx bx-upload me-1"></i>
+                      Publish
+                    </button>
+                  </div>
+                `
+                : ""
+            }
+
+          </div>
+        `);
+        },
       },
       {
         name: "Type & Category",
@@ -100,14 +159,27 @@ export function useProgramsTable() {
           `);
         },
       },
+
       {
-        name: "Sisa hari",
-        width: "100px",
-        formatter: (cell: number | null) => {
-          if (cell === null) return html(`<span class="text-muted">∞</span>`);
-          const color =
-            cell <= 7 ? "bg-danger" : cell <= 30 ? "bg-warning" : "bg-success";
-          return html(`<span class="badge ${color}">${cell} hari</span>`);
+        name: "Status",
+        width: "110px",
+        sort: false,
+        formatter: (status: string | null) => {
+          const normalizedStatus = String(status || "").toUpperCase();
+
+          // Menggunakan class badge Bootstrap 4
+          const badgeClass =
+            normalizedStatus === "PUBLISH"
+              ? "bg-success"
+              : normalizedStatus === "DRAFT"
+                ? "bg-warning"
+                : "bg-light text-dark";
+
+          return html(`
+          <span class="badge ${badgeClass}">
+            ${normalizedStatus || "-"}
+          </span>
+        `);
         },
       },
       {
@@ -125,13 +197,17 @@ export function useProgramsTable() {
                 <i class="bx bx-show fs-16"></i>
               </button>
 
-              <button
+              ${
+                isCanEdit
+                  ? `<button
                 class="btn btn-sm btn-soft-warning edit-btn"
                 data-action="edit"
-                data-link="${program.link}"
+                data-link="${program.id}"
                 title="Edit Program">
                 <i class="bx bx-edit fs-16"></i>
-              </button>
+              </button>`
+                  : ""
+              }
 
               <button
                 class="btn btn-sm btn-soft-success projects-btn"
@@ -151,6 +227,8 @@ export function useProgramsTable() {
         title: program.title,
         link: program.link,
         mitra: program.mitra?.name ?? "-",
+        status: program.status,
+        id: program.id,
       },
       {
         category: program.category?.name ?? "-",
@@ -161,7 +239,7 @@ export function useProgramsTable() {
         target: program.nominal_target,
         achieved: program.nominal_achieved,
       },
-      program.remaining_days,
+      program.status,
       { id: program.id, link: program.link },
     ],
   });

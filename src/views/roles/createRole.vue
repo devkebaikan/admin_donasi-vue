@@ -40,15 +40,18 @@
 
             <hr class="my-4" />
 
-            <!-- Menus Section -->
+            <!-- Menus Section (Tree) -->
             <div class="mb-4">
-              <div class="d-flex justify-content-between align-items-center mb-3">
+              <div
+                class="d-flex justify-content-between align-items-center mb-3"
+              >
                 <h6 class="fw-semibold mb-0">
                   <i class="bx bx-menu me-2"></i>Menus
                 </h6>
                 <div class="d-flex gap-2">
                   <b-button
                     v-if="selectedMenus.length > 0"
+                    type="button"
                     size="sm"
                     variant="outline-secondary"
                     @click="clearAllMenus"
@@ -56,6 +59,7 @@
                     <i class="bx bx-x me-1"></i>Hapus Semua
                   </b-button>
                   <b-button
+                    type="button"
                     size="sm"
                     variant="outline-primary"
                     @click="selectAllMenus"
@@ -70,32 +74,21 @@
                 <span class="text-muted">Memuat menus...</span>
               </div>
 
-              <div v-else-if="availableMenus.length === 0" class="alert alert-warning">
+              <div
+                v-else-if="menuTree.length === 0"
+                class="alert alert-warning"
+              >
                 Tidak ada menus yang tersedia.
               </div>
 
-              <div v-else class="menus-list">
-                <div class="d-flex flex-wrap gap-3">
-                  <div
-                    v-for="menu in availableMenus"
-                    :key="`menu-${menu.id}`"
-                    class="form-check"
-                  >
-                    <input
-                      :id="`menu-${menu.id}`"
-                      type="checkbox"
-                      class="form-check-input"
-                      :checked="selectedMenus.includes(menu.id)"
-                      @change="toggleMenu(menu.id)"
-                    />
-                    <label
-                      :for="`menu-${menu.id}`"
-                      class="form-check-label text-muted small"
-                    >
-                      {{ menu.name }}
-                    </label>
-                  </div>
-                </div>
+              <div v-else class="menus-tree border rounded p-3">
+                <MenuTreeNode
+                  v-for="node in menuTree"
+                  :key="node.id"
+                  :node="node"
+                  :selected="selectedMenus"
+                  @toggle="toggleMenu"
+                />
               </div>
 
               <div v-if="selectedMenus.length > 0" class="mt-3 pt-3 border-top">
@@ -105,15 +98,18 @@
               </div>
             </div>
 
-            <!-- Permissions Section -->
+            <!-- Permissions Section (Grouped Cards) -->
             <div class="mb-4">
-              <div class="d-flex justify-content-between align-items-center mb-3">
+              <div
+                class="d-flex justify-content-between align-items-center mb-3"
+              >
                 <h6 class="fw-semibold mb-0">
                   <i class="bx bx-lock-open me-2"></i>Permissions
                 </h6>
                 <div class="d-flex gap-2">
                   <b-button
                     v-if="selectedPermissions.length > 0"
+                    type="button"
                     size="sm"
                     variant="outline-secondary"
                     @click="clearAllPermissions"
@@ -121,6 +117,7 @@
                     <i class="bx bx-x me-1"></i>Hapus Semua
                   </b-button>
                   <b-button
+                    type="button"
                     size="sm"
                     variant="outline-primary"
                     @click="selectAllPermissions"
@@ -135,35 +132,78 @@
                 <span class="text-muted">Memuat permissions...</span>
               </div>
 
-              <div v-else-if="standalonePermissions.length === 0" class="alert alert-info">
+              <div
+                v-else-if="standalonePermissions.length === 0"
+                class="alert alert-info"
+              >
                 Tidak ada standalone permissions.
               </div>
 
-              <div v-else class="permissions-list">
-                <div class="d-flex flex-wrap gap-3">
-                  <div
-                    v-for="perm in standalonePermissions"
-                    :key="`perm-${perm.id}`"
-                    class="form-check"
-                  >
-                    <input
-                      :id="`perm-${perm.id}`"
-                      type="checkbox"
-                      class="form-check-input"
-                      :checked="selectedPermissions.includes(perm.id)"
-                      @change="togglePermission(perm.id)"
-                    />
-                    <label
-                      :for="`perm-${perm.id}`"
-                      class="form-check-label text-muted small"
-                    >
-                      {{ perm.name }}
-                    </label>
-                  </div>
-                </div>
-              </div>
+              <b-row v-else>
+                <b-col
+                  v-for="groupItem in groupedPermissions"
+                  :key="groupItem.group"
+                  cols="12"
+                  md="6"
+                  lg="4"
+                  class="mb-3"
+                >
+                  <b-card no-body class="h-100">
+                    <template #header>
+                      <div
+                        class="d-flex justify-content-between align-items-center"
+                      >
+                        <span class="fw-semibold text-capitalize small">{{
+                          groupItem.group
+                        }}</span>
+                        <b-button
+                          type="button"
+                          size="sm"
+                          variant="link"
+                          class="p-0"
+                          @click="
+                            isGroupFullySelected(groupItem.permissions)
+                              ? clearAllInGroup(groupItem.permissions)
+                              : selectAllInGroup(groupItem.permissions)
+                          "
+                        >
+                          {{
+                            isGroupFullySelected(groupItem.permissions)
+                              ? "Hapus Semua"
+                              : "Pilih Semua"
+                          }}
+                        </b-button>
+                      </div>
+                    </template>
+                    <b-card-body class="d-flex flex-column gap-2 py-2">
+                      <div
+                        v-for="perm in groupItem.permissions"
+                        :key="`perm-${perm.id}`"
+                        class="form-check mb-0"
+                      >
+                        <input
+                          :id="`perm-${perm.id}`"
+                          type="checkbox"
+                          class="form-check-input"
+                          :checked="selectedPermissions.includes(perm.id)"
+                          @change="togglePermission(perm.id)"
+                        />
+                        <label
+                          :for="`perm-${perm.id}`"
+                          class="form-check-label text-muted small"
+                        >
+                          {{ perm.name }}
+                        </label>
+                      </div>
+                    </b-card-body>
+                  </b-card>
+                </b-col>
+              </b-row>
 
-              <div v-if="selectedPermissions.length > 0" class="mt-3 pt-3 border-top">
+              <div
+                v-if="selectedPermissions.length > 0"
+                class="mt-3 pt-3 border-top"
+              >
                 <small class="text-muted">
                   {{ selectedPermissions.length }} permission dipilih
                 </small>
@@ -172,11 +212,7 @@
 
             <!-- Actions -->
             <div class="d-flex gap-2">
-              <b-button
-                type="submit"
-                variant="primary"
-                :disabled="isPending"
-              >
+              <b-button type="submit" variant="primary" :disabled="isPending">
                 <b-spinner v-if="isPending" small class="me-1" />
                 {{ isPending ? "Menyimpan..." : "Simpan" }}
               </b-button>
@@ -202,17 +238,21 @@ import { required, helpers } from "@vuelidate/validators";
 import { toast } from "vue3-toastify";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
+import MenuTreeNode, { type MenuNode } from "./components/MenuTreeNode.vue";
 import { createRole, getPermissionsReference } from "@/services/roleService";
 import router from "@/router";
 
 interface Permission {
   id: number;
   name: string;
+  group?: string;
 }
 
-interface Menu {
+interface RawMenu {
   id: number;
   name: string;
+  parent_id?: number | null;
+  children?: RawMenu[];
 }
 
 const formState = reactive({
@@ -228,16 +268,93 @@ const { data: permissionsRef, isLoading: isLoadingPermissions } = useQuery({
   queryFn: getPermissionsReference,
 });
 
-const availableMenus = computed((): Menu[] => {
-  return (permissionsRef.value?.menus ?? []);
+const normalizeMenuTree = (items: RawMenu[]): MenuNode[] => {
+  if (!items || items.length === 0) return [];
+
+  const alreadyNested = items.some((item) => Array.isArray(item.children));
+  if (alreadyNested) {
+    return items.map((item) => ({
+      id: item.id,
+      name: item.name,
+      children: item.children ? normalizeMenuTree(item.children) : [],
+    }));
+  }
+
+  const byId = new Map<number, MenuNode>();
+  items.forEach((item) => {
+    byId.set(item.id, { id: item.id, name: item.name, children: [] });
+  });
+
+  const roots: MenuNode[] = [];
+  items.forEach((item) => {
+    const node = byId.get(item.id)!;
+    if (item.parent_id && byId.has(item.parent_id)) {
+      byId.get(item.parent_id)!.children!.push(node);
+    } else {
+      roots.push(node);
+    }
+  });
+
+  return roots;
+};
+
+const menuTree = computed<MenuNode[]>(() => {
+  const nested = permissionsRef.value?.menu_tree;
+  const flat = permissionsRef.value?.menus;
+  return normalizeMenuTree((nested ?? flat ?? []) as RawMenu[]);
 });
 
+const flattenMenus = (nodes: MenuNode[]): MenuNode[] =>
+  nodes.flatMap((n) => [n, ...(n.children ? flattenMenus(n.children) : [])]);
+
+const findMenuNode = (nodes: MenuNode[], id: number): MenuNode | undefined => {
+  for (const n of nodes) {
+    if (n.id === id) return n;
+    if (n.children) {
+      const found = findMenuNode(n.children, id);
+      if (found) return found;
+    }
+  }
+  return undefined;
+};
+
+const descendantIds = (node: MenuNode): number[] =>
+  (node.children ?? []).flatMap((c) => [c.id, ...descendantIds(c)]);
+
 const standalonePermissions = computed((): Permission[] => {
-  return (permissionsRef.value?.permissions ?? []);
+  return (
+    permissionsRef.value?.standalone_permissions ??
+    permissionsRef.value?.permissions ??
+    []
+  );
+});
+
+const groupedPermissions = computed(() => {
+  const groups = new Map<string, Permission[]>();
+
+  standalonePermissions.value.forEach((perm) => {
+    const key =
+      perm.group ??
+      (perm.name.includes(":")
+        ? perm.name.split(":")[0]
+        : perm.name.includes(".")
+          ? perm.name.split(".")[0]
+          : perm.name.includes("-")
+            ? perm.name.split("-")[0]
+            : "Lainnya");
+
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(perm);
+  });
+
+  return Array.from(groups.entries()).map(([group, permissions]) => ({
+    group,
+    permissions,
+  }));
 });
 
 const allMenuIds = computed(() => {
-  return availableMenus.value.map((m) => m.id);
+  return flattenMenus(menuTree.value).map((m) => m.id);
 });
 
 const allPermissionIds = computed(() => {
@@ -245,7 +362,9 @@ const allPermissionIds = computed(() => {
 });
 
 const rules = {
-  role_name: { required: helpers.withMessage("Nama role wajib diisi.", required) },
+  role_name: {
+    required: helpers.withMessage("Nama role wajib diisi.", required),
+  },
   guard_name: {
     required: helpers.withMessage("Guard name wajib dipilih.", required),
   },
@@ -254,11 +373,14 @@ const rules = {
 const v$ = useVuelidate(rules, formState);
 
 const toggleMenu = (menuId: number) => {
-  const index = selectedMenus.value.indexOf(menuId);
-  if (index > -1) {
-    selectedMenus.value.splice(index, 1);
+  const node = findMenuNode(menuTree.value, menuId);
+  const ids = node ? [menuId, ...descendantIds(node)] : [menuId];
+  const isCurrentlySelected = selectedMenus.value.includes(menuId);
+
+  if (isCurrentlySelected) {
+    selectedMenus.value = selectedMenus.value.filter((id) => !ids.includes(id));
   } else {
-    selectedMenus.value.push(menuId);
+    selectedMenus.value = [...new Set([...selectedMenus.value, ...ids])];
   }
 };
 
@@ -287,6 +409,23 @@ const clearAllPermissions = () => {
   selectedPermissions.value = [];
 };
 
+const isGroupFullySelected = (permissions: Permission[]) =>
+  permissions.every((p) => selectedPermissions.value.includes(p.id));
+
+const selectAllInGroup = (permissions: Permission[]) => {
+  const ids = permissions.map((p) => p.id);
+  selectedPermissions.value = [
+    ...new Set([...selectedPermissions.value, ...ids]),
+  ];
+};
+
+const clearAllInGroup = (permissions: Permission[]) => {
+  const ids = permissions.map((p) => p.id);
+  selectedPermissions.value = selectedPermissions.value.filter(
+    (id) => !ids.includes(id),
+  );
+};
+
 const { mutate, isPending } = useMutation({
   mutationFn: (payload: {
     guard_name: string;
@@ -299,7 +438,9 @@ const { mutate, isPending } = useMutation({
     router.push("/roles");
   },
   onError: (err: any) => {
-    toast.error(err?.response?.data?.message ?? "Gagal menambahkan role. Coba lagi.");
+    toast.error(
+      err?.response?.data?.message ?? "Gagal menambahkan role. Coba lagi.",
+    );
   },
 });
 

@@ -6,7 +6,7 @@ export const getProjects = async (params = {}) => {
     return res.data.data;
   } catch (error) {
     console.error("Error fetching projects:", error);
-    return { data: [], meta: { total: 0, last_page: 1 } };
+    return [];
   }
 };
 

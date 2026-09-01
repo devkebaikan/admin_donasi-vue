@@ -155,7 +155,7 @@
     <b-row>
       <b-col>
         <UIComponentCard id="basic" title="Projects List">
-          <div class="d-flex justify-content-end mb-3">
+          <div v-if="isCanCreate" class="d-flex justify-content-end mb-3">
             <b-button
               variant="primary"
               @click="router.push('/projects/create')"
@@ -213,16 +213,16 @@ import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
 import ProjectDetailOffcanvas from "./components/ProjectDetailOffcanvas.vue";
-// import AjuanModal from "./components/AjuanModal.vue";
-// import RefundModal from "./components/RefundModal.vue";
 import { useProjectsTable } from "./components/data";
 import { useListStatePreserve } from "@/composables/useListStatePreserve";
 import { useOffcanvasStatePreserve } from "@/composables/useOffcanvasStatePreserve";
 import router from "@/router";
-import { useQuery, useQueryClient } from "@tanstack/vue-query";
-import { getAllPrograms } from "@/services/programService";
+import { useQueryClient } from "@tanstack/vue-query";
 import { useRoute } from "vue-router";
 import AjuanRefundModal from "./components/AjuanRefundModal.vue";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanCreate = hasPermission("project:create");
 
 const {
   tableOptions,

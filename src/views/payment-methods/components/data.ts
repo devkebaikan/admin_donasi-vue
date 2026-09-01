@@ -6,6 +6,10 @@ import {
   deletePaymentMethod,
 } from "@/services/paymentMethodService";
 import { formatCurrency } from "@/helpers/format";
+// import { hasPermission } from "@/helpers/permission";
+
+const isCanEdit = true;
+const isCanDelete = true;
 
 export function usePaymentMethodTable() {
   const selectedBankReferenceId = ref<number | string>("");
@@ -64,6 +68,16 @@ export function usePaymentMethodTable() {
           html(`<span class="fw-semibold d-block">${cell || "-"}</span>`),
       },
       {
+        name: "Usage",
+        width: "110px",
+        formatter: (cell: string) => {
+          const cls = cell === "penampung" ? "bg-info" : "bg-primary";
+          return html(
+            `<span class="badge ${cls}">${cell === "penerima" ? "Penerima" : "Penampung"}</span>`,
+          );
+        },
+      },
+      {
         name: "Fee",
         width: "110px",
         formatter: (cell: { fee: number; fee_type: string }) =>
@@ -75,6 +89,7 @@ export function usePaymentMethodTable() {
             }</span>`,
           ),
       },
+
       {
         name: "Status",
         width: "120px",
@@ -103,8 +118,8 @@ export function usePaymentMethodTable() {
         formatter: (id: number) =>
           html(`
             <div class="d-flex gap-1 justify-content-center">
-              <button class="btn btn-sm btn-soft-warning edit-btn" data-action="edit" data-id="${id}" title="Edit"><i class="bx bx-edit fs-16"></i></button>
-              <button class="btn btn-sm btn-soft-danger delete-btn" data-action="delete" data-id="${id}" title="Hapus"><i class="bx bx-trash fs-16"></i></button>
+              ${isCanEdit ? `<button class="btn btn-sm btn-soft-warning edit-btn" data-action="edit" data-id="${id}" title="Edit"><i class="bx bx-edit fs-16"></i></button>` : ""}
+              ${isCanDelete ? `<button class="btn btn-sm btn-soft-danger delete-btn" data-action="delete" data-id="${id}" title="Hapus"><i class="bx bx-trash fs-16"></i></button>` : ""}
             </div>
           `),
       },
@@ -119,6 +134,7 @@ export function usePaymentMethodTable() {
         bankName: item.bank_reference?.name ?? "-",
       },
       item.bank_reference.type,
+      item.usage,
       { fee: item.fee, fee_type: item.fee_type },
       { id: item.id, is_active: item.is_active },
       item.id,

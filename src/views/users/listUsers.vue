@@ -219,16 +219,16 @@
             <div class="bg-light rounded p-2">
               <small class="text-muted d-block">Status Verified</small>
               <span v-if="userDetail.verified" class="badge bg-success">{{
-                userDetail.verified
+                userDetail.verified == "1" ? "Verified" : "Belum Verified"
               }}</span>
               <span v-else class="badge bg-secondary">Belum Verified</span>
             </div>
           </b-col>
           <b-col cols="6">
             <div class="bg-light rounded p-2">
-              <small class="text-muted d-block">User ID</small>
+              <small class="text-muted d-block">Role ID</small>
               <span class="fw-semibold small font-monospace"
-                >#{{ userDetail.id }}</span
+                >#{{ userDetail.role_id }}</span
               >
             </div>
           </b-col>
@@ -258,7 +258,7 @@
     <b-row>
       <b-col>
         <UIComponentCard id="basic" title="Daftar User">
-          <div class="d-flex justify-content-end mb-3">
+          <div v-if="isCanCreate" class="d-flex justify-content-end mb-3">
             <b-button variant="primary" :to="{ name: 'user.create' }">
               <i class="bx bx-plus fs-16 me-1"></i>Tambah User
             </b-button>
@@ -319,6 +319,9 @@ import { getAllRoles } from "@/services/roleService";
 import { getUserById } from "@/services/userService";
 import { formatDateTime } from "@/helpers/format";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanCreate = hasPermission("user:create");
 
 const {
   tableOptions,

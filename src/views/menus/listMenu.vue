@@ -26,7 +26,11 @@
                 </b-button>
               </b-button-group>
             </div>
-            <b-button variant="primary" @click="router.push('/menus/create')">
+            <b-button
+              v-if="isCanCreate"
+              variant="primary"
+              @click="router.push('/menus/create')"
+            >
               <i class="bx bx-plus fs-16 me-1"></i>Buat Menu
             </b-button>
           </div>
@@ -94,9 +98,12 @@ import Swal from "sweetalert2/dist/sweetalert2.js";
 import "sweetalert2/dist/sweetalert2.css";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { hasPermission } from "@/helpers/permission";
 
 const router = useRouter();
 const viewFormat = ref<"list" | "tree">("tree");
+
+const isCanCreate = hasPermission("menu:create");
 
 const {
   tableOptions,

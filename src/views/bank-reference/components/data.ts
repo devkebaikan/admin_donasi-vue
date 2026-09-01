@@ -5,12 +5,16 @@ import {
   getAllBankReferences,
   deleteBankReference,
 } from "@/services/bankReferenceService";
+import { hasPermission } from "@/helpers/permission";
 
 const STORAGE_BASE =
   (import.meta.env.VITE_API_BASE_URL as string).replace("/api/v1", "") +
   "/storage/";
 
 const buildImageUrl = (path: string) => (path ? `${STORAGE_BASE}${path}` : "");
+
+const isCanEdit = hasPermission("bank:update");
+const isCanDelete = hasPermission("bank:delete");
 
 export function useBankReferenceTable() {
   const selectedType = ref<string>("");
@@ -115,20 +119,28 @@ export function useBankReferenceTable() {
         formatter: (item: { id: number }) =>
           html(`
             <div class="d-flex gap-2 justify-content-center">
-              <button
+            ${
+              isCanEdit
+                ? `<button
                 class="btn btn-sm btn-soft-warning edit-btn"
                 data-action="edit"
                 data-id="${item.id}"
                 title="Edit Bank Reference">
                 <i class="bx bx-edit fs-16"></i>
-              </button>
-              <button
+              </button> `
+                : ""
+            }
+            ${
+              isCanDelete
+                ? `<button
                 class="btn btn-sm btn-soft-danger delete-btn"
                 data-action="delete"
                 data-id="${item.id}"
                 title="Hapus">
                 <i class="bx bx-trash fs-16"></i>
-              </button>
+              </button>`
+                : ""
+            }
             </div>
           `),
       },

@@ -24,6 +24,7 @@ export type CrmCaseCard = {
   name: string;
   nickname?: string;
   phone: string;
+  color_tag?: string;
   amount?: string;
   days?: number;
   isUrgent?: boolean;
@@ -115,6 +116,7 @@ export type CrmPipelineCase = {
   id: number;
   donor_profile_id: number;
   transaction_id: number;
+  color_tag?: string;
   is_active: boolean;
   keterangan?: string;
   pipeline_stage: PipelineStage;

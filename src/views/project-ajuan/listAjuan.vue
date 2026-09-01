@@ -18,7 +18,7 @@
 
       <!-- Search -->
       <b-row class="g-3">
-        <b-col cols="12">
+        <b-col cols="4">
           <label class="form-label fw-semibold">Pencarian</label>
           <b-input-group>
             <span class="input-group-text"><i class="bx bx-search"></i></span>
@@ -64,7 +64,7 @@
           </b-form-select>
         </b-col>
 
-        <b-col cols="12" md="4">
+        <!-- <b-col cols="12" md="4">
           <label class="form-label fw-semibold">Mitra</label>
           <ChoicesSelect
             id="filter-mitra"
@@ -79,7 +79,7 @@
             :isLoading="isMitraLoading"
             :key="mitraOptions.length"
           />
-        </b-col>
+        </b-col> -->
 
         <b-col cols="12" md="2" class="d-flex align-items-end">
           <b-button
@@ -280,9 +280,9 @@
         </div>
 
         <!-- Tombol Aksi -->
-        <div
+        <!-- <div
           v-if="ajuanDetail.activity === 'proposed'"
-          class="d-flex gap-2 mb-3"
+          class="d-flex gap-2 mb-"
         >
           <template v-if="ajuanDetail.type === 'ajuan'">
             <b-button
@@ -322,7 +322,7 @@
               <i class="bx bx-x-circle me-1"></i>Tolak Refund
             </b-button>
           </template>
-        </div>
+        </div> -->
 
         <hr class="my-3" />
 
@@ -480,24 +480,6 @@
         <p v-else class="text-muted small fst-italic">
           Tidak ada data pengaju.
         </p>
-
-        <hr class="my-3" />
-
-        <!-- Timestamps -->
-        <div class="d-flex gap-3">
-          <div>
-            <small class="text-muted d-block">Dibuat</small>
-            <small class="fw-semibold">{{
-              formatDateTime(ajuanDetail.created_at)
-            }}</small>
-          </div>
-          <div>
-            <small class="text-muted d-block">Diperbarui</small>
-            <small class="fw-semibold">{{
-              formatDateTime(ajuanDetail.updated_at)
-            }}</small>
-          </div>
-        </div>
       </div>
     </b-offcanvas>
 

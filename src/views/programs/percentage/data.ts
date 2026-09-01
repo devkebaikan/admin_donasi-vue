@@ -4,6 +4,10 @@ import {
   getAllPercentage,
   deletePercentage,
 } from "@/services/percentageService";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanEdit = hasPermission("program:update");
+const isCanDelete = hasPermission("program:delete");
 
 export function usePercentageTable() {
   const table = useDataTable({
@@ -46,20 +50,28 @@ export function usePercentageTable() {
         formatter: (item: { id: number }) =>
           html(`
             <div class="d-flex gap-2 justify-content-center">
-              <button
+              ${
+                isCanEdit
+                  ? `<button
                 class="btn btn-sm btn-soft-warning edit-btn"
                 data-action="edit"
                 data-id="${item.id}"
                 title="Edit Persentase">
                 <i class="bx bx-edit fs-16"></i>
-              </button>
-              <button
+              </button>`
+                  : ""
+              }
+              ${
+                isCanDelete
+                  ? `<button
                 class="btn btn-sm btn-soft-danger delete-btn"
                 data-action="delete"
                 data-id="${item.id}"
                 title="Hapus Persentase">
                 <i class="bx bx-trash fs-16"></i>
-              </button>
+              </button>`
+                  : ""
+              }
             </div>
           `),
       },

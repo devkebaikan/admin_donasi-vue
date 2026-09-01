@@ -69,12 +69,14 @@ export function useTransactionTable() {
       {
         name: "Invoice",
         width: "200px",
-        formatter: (item: { program: string; inv: string }) =>
+        formatter: (item: { program: string; inv: string; type: string }) =>
           html(`
           <small class="d-flex flex-column">
-            <span class="fw-semibold text-dark">
-              ${item.program ?? "-"}
-            </span>
+             ${
+               item.program?.trim()
+                 ? `<span class="fw-semibold text-dark">${item.program}</span>`
+                 : `<span class="fw-semibold text-warning">${item.type === "Donasi" ? "Belum ada program" : item.type}</span>`
+             }
 
             <span class="text-primary font-monospace">
               ${item.inv || "-"}
@@ -119,7 +121,7 @@ export function useTransactionTable() {
 
             <div class="mt-1">
               <span class="badge bg-primary-subtle text-primary border">
-                Donasi #${item.donation_number}
+                Donasi ke #${item.donation_number}
               </span>
             </div>
 
@@ -158,32 +160,42 @@ export function useTransactionTable() {
         name: "Actions",
         width: "90px",
         sort: false,
-        formatter: (cell) =>
+        formatter: (item: { id: number; status: string }) =>
           html(`
             <div class="d-flex gap-1 justify-content-center">
               <button class="btn btn-sm btn-soft-info detail-btn w-fit"
-                data-action="detail" data-id="${cell}" title="Detail">
+                data-action="detail" data-id="${item.id}" title="Detail">
                 <i class="bx bx-show fs-16"></i>
               </button>
               
+              <button class="btn btn-sm btn-soft-warning edit-btn"
+                data-action="edit" data-id="${item.id}" title="Edit">
+                <i class="bx bx-edit fs-16"></i>
+              </button>
+              
               <button class="btn btn-sm btn-soft-danger delete-btn"
-                data-action="delete" data-id="${cell}" title="Hapus">
+                data-action="delete" data-id="${item.id}" title="Hapus">
                 <i class="bx bx-trash fs-16"></i>
               </button>
+              ${
+                item.status === "Pending"
+                  ? `<button class="btn btn-sm btn-soft-success verifikasi-btn"
+                data-action="verifikasi" data-id="${item.id}" title="verifikasi">
+                <i class="bx bx-check fs-16"></i>
+                </button>`
+                  : ""
+              }
             </div>
           `),
       },
     ],
-    // <button class="btn btn-sm btn-soft-warning edit-btn"
-    //   data-action="edit" data-id="${cell}" title="Edit">
-    //   <i class="bx bx-edit fs-16"></i>
-    // </button>
 
     rowMapper: (item: any, index: number) => [
       index,
       {
-        program: item?.transaction_details[0].program?.name,
+        program: item?.transaction_details?.[0]?.program?.name,
         inv: item.invoice,
+        type: item.transaction_type.name,
       },
       item.date,
       item.total,
@@ -195,7 +207,7 @@ export function useTransactionTable() {
       item.payment_method.bank_name,
       item.status,
       item.source,
-      item.id,
+      { id: item.id, status: item.status },
     ],
   });
 

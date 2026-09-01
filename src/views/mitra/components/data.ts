@@ -2,6 +2,10 @@ import { computed, ref } from "vue";
 import { html } from "gridjs";
 import { useDataTable } from "@/composables/useDataTable";
 import { getAllMitra, deleteMitra } from "@/services/mitraService";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanEdit = hasPermission("mitra:update");
+const isCanDelete = hasPermission("mitra:delete");
 
 export function useMitraTable() {
   const selectedStatus = ref<string>("");
@@ -82,20 +86,28 @@ export function useMitraTable() {
         formatter: (mitra: { id: number }) =>
           html(`
             <div class="d-flex gap-2 justify-content-center">
-               <button
+            ${
+              isCanEdit
+                ? `<button
                 class="btn btn-sm btn-soft-warning edit-btn"
                 data-action="edit"
                 data-id="${mitra.id}"
                 title="Edit Mitra">
                 <i class="bx bx-edit fs-16"></i>
-              </button>
-              <button
+              </button> `
+                : ""
+            }
+            ${
+              isCanDelete
+                ? `<button
                 class="btn btn-sm btn-soft-danger delete-btn"
                 data-action="delete"
                 data-id="${mitra.id}"
                 title="Hapus Mitra">
                 <i class="bx bx-trash fs-16"></i>
-              </button>
+              </button>`
+                : ""
+            }
             </div>
           `),
       },

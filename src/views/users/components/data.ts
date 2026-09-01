@@ -2,6 +2,9 @@ import { computed, ref } from "vue";
 import { html } from "gridjs";
 import { useDataTable } from "@/composables/useDataTable";
 import { getUsers, deleteUser } from "@/services/userService";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanEdit = hasPermission("user:update");
 
 export function useUsersTable() {
   const selectedRoleId = ref<string>("");
@@ -71,14 +74,18 @@ export function useUsersTable() {
                 title="Detail User">
                 <i class="bx bx-show fs-16"></i>
               </button>
-              <button
+              ${
+                isCanEdit
+                  ? `<button
                 class="btn btn-sm btn-soft-warning edit-btn"
                 data-action="edit"
                 data-id="${id}"
                 title="Edit User">
                 <i class="bx bx-edit fs-16"></i>
-              </button>
-              
+              </button>`
+                  : ""
+              }
+
             </div>
           `),
       },

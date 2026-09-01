@@ -2,7 +2,7 @@
   <b-card
     no-body
     class="h-100 d-flex flex-column border-0 shadow-sm"
-    style="margin-bottom: 0; max-height: 86vh; position: relative"
+    style="margin-bottom: 0; max-height: 91vh; position: relative"
   >
     <div
       v-if="!donorId"
@@ -25,13 +25,17 @@
     <template v-else>
       <!-- ============ Header ============ -->
       <b-card-header
-        class="d-flex flex-wrap align-items-center justify-content-between gap-2 py-2 flex-shrink-0 bg-white border-bottom"
+        class="d-flex flex-wrap align-items-center justify-content-between gap-2 py-2 flex-shrink-0 border-bottom"
       >
         <div class="d-flex align-items-center">
           <div
             class="avatar-title rounded-circle flex-shrink-0 fs-12 fw-semibold"
-            :class="`bg-soft-${colorTagVariant(detail.color_tag)} text-${colorTagVariant(detail.color_tag)}`"
-            style="width: 32px; height: 32px"
+            :style="`
+              width: 32px;
+              height: 32px;
+              background-color: ${!detail.color_tag ? '#6c757d' : detail.color_tag === 'amber' ? '#f59e0b' : detail.color_tag};
+              opacity: 0.5;
+            `"
           >
             {{ initialsOf(detail.name) }}
           </div>
@@ -50,7 +54,6 @@
 
         <div
           class="btn-group rounded p-1"
-          role="group"
           style="background-color: #f1f2f6; gap: 2px"
         >
           <button
@@ -81,375 +84,54 @@
         style="min-height: 0; overflow-y: auto; background-color: #f8f9fb"
       >
         <b-card-body class="pb-2">
-          <!-- Profile summary — soft indigo -->
-          <div class="rounded-3 p-3 mb-3" style="background-color: #eef1fd">
-            <div class="d-flex align-items-start gap-3">
-              <div
-                class="avatar-title rounded-circle flex-shrink-0 fs-14 fw-semibold text-white"
-                :style="`
-                width: 42px;
-                height: 42px;
-                background-color: ${detail.color_tag ?? '#6c757d'};
-                 opacity: 0.5;
-              `"
-              >
-                {{ initialsOf(detail.name) }}
-              </div>
+          <DonorDetailProfileSection
+            :detail="detail"
+            :userId="transaction?.user_id"
+          />
 
-              <div class="flex-grow-1">
-                <div class="d-flex justify-content-between align-items-start">
-                  <div>
-                    <h6 class="mb-1 fw-semibold">
-                      {{ detail.name }}
-                      <span
-                        v-if="detail.nick"
-                        class="text-muted fw-normal fs-12"
-                      >
-                        ({{ detail.nick }})
-                      </span>
-                    </h6>
+          <DonorDetailTransactionSection
+            :pipeline-case="pipelineCase"
+            :is-transaction-loading="isTransactionLoading"
+            :transaction="transaction"
+            :transaction-time="transactionTime"
+            :current-transaction-details="currentTransactionDetails"
+            :kegiatan-list="kegiatanList"
+            :is-kegiatan-loading="isKegiatanLoading"
+            :format-currency="formatCurrency"
+            :format-date="formatDate"
+            :transaction-status-variant="transactionStatusVariant"
+            @open-project="openProjectModal"
+          />
 
-                    <div
-                      class="text-muted fs-12 d-flex align-items-center gap-1"
-                    >
-                      <i class="bx bx-phone"></i>
-                      {{ detail.phone }}
-                    </div>
-                  </div>
+          <DonorDetailFollowUpsSection
+            :detail="detail"
+            :is-sending-fu="isSendingFu"
+            :format-date="formatDate"
+            :follow-up-status-variant="followUpStatusVariant"
+            @add-follow-up="openFollowUpModal"
+            @send-follow-up="handleSendFollowUp"
+            @set-follow-up-status="handleSetFollowUpStatus"
+          />
 
-                  <div class="d-flex gap-1">
-                    <span
-                      class="badge"
-                      :class="`badge-soft-${cycleStatusVariant(detail.cycle_status)}`"
-                    >
-                      {{ detail.cycle_status }}
-                    </span>
-                    <span
-                      class="badge"
-                      :style="`
-                        background-color: ${detail.color_tag};
-                        opacity: 0.5;
-                      `"
-                    >
-                      {{ detail.color_tag }}
-                    </span>
-                  </div>
-                </div>
-
-                <div class="d-flex flex-wrap gap-1 mt-2">
-                  <b-badge
-                    :variant="null"
-                    class="fw-medium fs-10 badge-soft-secondary"
-                  >
-                    {{ detail.level }}
-                  </b-badge>
-
-                  <b-badge :variant="null" class="badge-soft-danger">
-                    <i class="bx bx-time me-1"></i>
-                    {{ detail.hari_tidak_aktif }} Hari Tidak Aktif
-                  </b-badge>
-
-                  <b-badge :variant="null" class="badge-soft-info">
-                    <i class="bx bx-task me-1"></i>
-                    {{ detail.follow_ups.length }} Follow Up
-                  </b-badge>
-
-                  <b-badge :variant="null" class="badge-soft-warning">
-                    <i class="bx bx-task me-1"></i>
-                    Donasi ke - {{ detail.follow_ups.length }}
-                  </b-badge>
-
-                  <b-badge :variant="null" class="badge-soft-primary">
-                    <i class="bx bx-star me-1"></i>
-                    {{ detail.poin }} Poin
-                  </b-badge>
-                </div>
-              </div>
-            </div>
-
-            <div
-              v-if="detail.assigned_cs"
-              class="d-flex align-items-center gap-2 bg-white mt-2 rounded-2 py-1 px-3 fs-12"
-            >
-              <i class="bx bx-headphone fs-16 text-muted"></i>
-              <span
-                >CS:
-                <span class="fw-semibold">{{
-                  detail.assigned_cs.nama
-                }}</span></span
-              >
-            </div>
-          </div>
-
-          <!-- Transaksi Saat Ini — soft blue -->
-          <div class="rounded-3 mb-3">
-            <h6
-              class="fs-11 fw-semibold text-uppercase mb-2"
-              style="color: #6b8bb5"
-            >
-              <i class="bx bx-receipt me-1"></i>Transaksi Saat Ini
-            </h6>
-
-            <p
-              v-if="pipelineCase?.keterangan"
-              class="mb-2 fs-12 text-muted fst-italic"
-            >
-              <i class="bx bx-message-square-detail me-1"></i
-              >{{ pipelineCase.keterangan }}
-            </p>
-
-            <div v-if="isTransactionLoading" class="text-center p-3">
-              <b-spinner small variant="primary" />
-            </div>
-            <p v-else-if="!transaction" class="text-muted fs-13 mb-0">
-              Detail transaksi tidak tersedia
-            </p>
-            <div v-else>
-              <div
-                class="d-flex align-items-center justify-content-between mb-2"
-              >
-                <span class="font-monospace fw-semibold small">{{
-                  transaction.invoice
-                }}</span>
-                <b-badge
-                  :variant="null"
-                  class="fw-medium fs-10"
-                  :class="`badge-soft-${transactionStatusVariant(transaction.status)}`"
-                >
-                  {{ transaction.status }}
-                </b-badge>
-              </div>
-
-              <b-row class="g-2 mb-2">
-                <b-col cols="4">
-                  <div class="bg-light rounded p-2">
-                    <small class="text-muted d-block">Donasi sebesar</small>
-                    <span class="fw-semibold font-monospace small text-success">
-                      {{ formatCurrency(transaction.total) }}
-                    </span>
-                  </div>
-                </b-col>
-                <b-col cols="4">
-                  <div class="bg-light rounded p-2">
-                    <small class="text-muted d-block">Tanggal</small>
-                    <span class="fw-semibold small">
-                      {{ formatDate(transaction.date) }}
-                      <template v-if="transactionTime">
-                        · {{ transactionTime }}</template
-                      >
-                    </span>
-                  </div>
-                </b-col>
-                <b-col cols="4">
-                  <div class="bg-light rounded p-2">
-                    <small class="text-muted d-block">Metode Pembayaran</small>
-                    <span class="fw-semibold small">
-                      {{
-                        transaction.payment_method?.bank_name ??
-                        transaction.payment_method?.bank_provider ??
-                        "-"
-                      }}
-                    </span>
-                  </div>
-                </b-col>
-              </b-row>
-
-              <b-badge
-                v-if="transaction.anonim"
-                :variant="null"
-                class="badge-soft-secondary fs-10"
-              >
-                <i class="bx bx-incognito me-1"></i>Donasi Anonim
-              </b-badge>
-            </div>
-          </div>
-
-          <!-- Project Salur — soft cyan -->
-          <div class="rounded-3 mb-3">
-            <h6
-              class="fs-11 fw-semibold text-uppercase mb-2"
-              style="color: #4f9ba3"
-            >
-              <i class="bx bx-folder-open me-1"></i>Sudah Masuk Project
-            </h6>
-            <div v-if="isTransactionLoading" class="text-center p-3">
-              <b-spinner small variant="primary" />
-            </div>
-            <template
-              v-else-if="
-                currentTransactionDetails.length > 0 &&
-                currentTransactionDetails[0].project
-              "
-            >
-              <div
-                v-for="(td, idx) in currentTransactionDetails"
-                :key="td.id"
-                class="d-flex align-items-center justify-content-between p-3 rounded-1"
-                :class="idx ? 'mt-2' : ''"
-                style="background-color: #eaf7f8"
-              >
-                <div>
-                  <h6 class="mb-0 fs-13 fw-semibold">
-                    {{ td.project?.judul ?? "-" }}
-                  </h6>
-                  <p class="mb-0 text-muted fs-11">
-                    Program : {{ td.program?.name ?? "-" }} ·
-                    {{ formatCurrency(td.nominal) }}
-                  </p>
-                </div>
-                <b-badge
-                  :variant="null"
-                  class="fw-medium fs-10 badge-soft-cyan flex-shrink-0 ms-2"
-                >
-                  {{ td.project?.status ?? td.activity }}
-                </b-badge>
-              </div>
-            </template>
-            <p v-else class="text-muted fs-13 mb-0">Belum masuk project</p>
-          </div>
-
-          <!-- Update Kegiatan — soft mint -->
-          <div class="rounded-3 mb-3">
-            <h6
-              class="fs-11 fw-semibold text-uppercase mb-2"
-              style="color: #4e9c82"
-            >
-              <i class="bx bx-news me-1"></i>Update Kegiatan
-            </h6>
-            <div v-if="isKegiatanLoading" class="text-center p-3">
-              <b-spinner small variant="primary" />
-            </div>
-            <template v-else-if="kegiatanList.length">
-              <div
-                v-for="(act, idx) in kegiatanList"
-                :key="act.id"
-                class="py-1 p-3 rounded-1"
-                :style="idx ? 'border-top: 1px solid rgba(0,0,0,0.06)' : ''"
-                style="background-color: #eaf8f3"
-              >
-                <p class="mb-0 fs-12 fw-semibold">{{ act.judul }}</p>
-                <p class="mb-0 text-muted fs-11">
-                  {{ formatDate(act.date) }} · {{ act.type }}
-                </p>
-              </div>
-            </template>
-            <p v-else class="text-muted fs-13 mb-0">
-              Belum ada update kegiatan
-            </p>
-          </div>
-
-          <!-- Riwayat Follow Up — soft amber -->
-          <div class="rounded-3 mb-3">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-              <h6
-                class="fs-11 fw-semibold text-uppercase mb-0"
-                style="color: #b3903f"
-              >
-                <i class="bx bx-calendar-check me-1"></i>Riwayat Follow Up
-              </h6>
-              <b-button
-                size="sm"
-                :variant="null"
-                class="btn-outline-secondary rounded-pill fs-12"
-              >
-                <i class="bx bx-plus me-1"></i>Tambah FU
-              </b-button>
-            </div>
-            <div
-              v-if="detail.follow_ups.length"
-              style="background-color: #fdf5e7"
-            >
-              <div
-                v-for="(fu, idx) in detail.follow_ups"
-                :key="fu.id"
-                class="d-flex p-3 align-items-start justify-content-between py-2"
-                :style="idx ? 'border-top: 1px solid rgba(0,0,0,0.06)' : ''"
-              >
-                <div>
-                  <h6 class="mb-0 fs-13 fw-semibold">{{ fu.jenis }}</h6>
-                  <p class="mb-0 text-muted fs-11">
-                    {{ formatDate(fu.scheduled_date) }} · {{ fu.waktu_slot }} ·
-                    {{ fu.channel
-                    }}<template v-if="fu.assigned_user">
-                      · {{ fu.assigned_user.name }}</template
-                    >
-                  </p>
-                  <p v-if="fu.note" class="mb-0 text-muted fs-11 fst-italic">
-                    {{ fu.note }}
-                  </p>
-                </div>
-                <b-badge
-                  :variant="null"
-                  class="fw-medium fs-10 flex-shrink-0 ms-2"
-                  :class="`badge-soft-${followUpStatusVariant(fu.status)}`"
-                >
-                  {{ fu.status }}
-                </b-badge>
-              </div>
-            </div>
-            <p v-else class="text-muted fs-13 mb-0">Belum ada follow up</p>
-          </div>
-
-          <!-- Riwayat Donasi — soft green -->
-          <div class="rounded-3 mb-3">
-            <h6
-              class="fs-11 fw-semibold text-uppercase mb-2"
-              style="color: #5a9c6a"
-            >
-              <i class="bx bx-history me-1"></i>Riwayat Donasi
-            </h6>
-
-            <div v-if="isHistoryLoading" class="text-center p-3">
-              <b-spinner small variant="primary" />
-            </div>
-            <template v-else-if="donationHistory.length">
-              <div
-                v-for="(don, idx) in donationHistory"
-                :key="don.id"
-                style="background-color: #ecf8ee"
-                class="d-flex p-3 align-items-center justify-content-between py-1"
-                :style="idx ? 'border-top: 1px solid rgba(0,0,0,0.06)' : ''"
-              >
-                <div>
-                  <p class="mb-0 fs-12 fw-semibold">
-                    {{ formatCurrency(don.total) }}
-                    <b-badge
-                      v-if="don.id === transaction?.id"
-                      :variant="null"
-                      class="badge-soft-primary fs-10 ms-1"
-                    >
-                      Transaksi Ini
-                    </b-badge>
-                  </p>
-                  <p class="mb-0 text-muted fs-11">
-                    {{ donationPrograms(don) }} · {{ don.invoice }}
-                  </p>
-                </div>
-                <div class="text-end flex-shrink-0 ms-2">
-                  <p class="mb-1 text-muted fs-11">
-                    {{ formatDate(don.date) }}
-                  </p>
-                  <b-badge
-                    :variant="null"
-                    class="fw-medium fs-10"
-                    :class="`badge-soft-${transactionStatusVariant(don.status)}`"
-                  >
-                    {{ don.status }}
-                  </b-badge>
-                </div>
-              </div>
-            </template>
-            <p v-else class="text-muted fs-13 mb-0">Belum ada riwayat donasi</p>
-          </div>
+          <DonorDetailDonationHistorySection
+            :is-history-loading="isHistoryLoading"
+            :donation-history="donationHistory"
+            :transaction="transaction"
+            :format-currency="formatCurrency"
+            :format-date="formatDate"
+            :transaction-status-variant="transactionStatusVariant"
+          />
         </b-card-body>
 
         <div
-          class="border-top p-2 d-flex flex-wrap align-items-center gap-2 sticky-bottom bg-white"
+          class="border-top py-2 px-4 d-flex flex-wrap align-items-center gap-2 sticky-bottom bg-white"
+          style="position: absolute; bottom: 0; left: 0; right: 0"
         >
           <b-button
             size="sm"
             :variant="null"
             class="btn-outline-secondary d-inline-flex align-items-center"
+            @click="openProfiling"
           >
             <i class="bx bx-id-card me-1"></i>Profiling
           </b-button>
@@ -494,11 +176,154 @@
       />
     </template>
   </b-card>
+
+  <b-modal
+    v-model="showFuModal"
+    title="Tambah Follow Up"
+    size="md"
+    centered
+    @hidden="resetFuForm"
+  >
+    <b-form>
+      <b-form-group
+        label="Jenis Follow Up"
+        label-class="fw-semibold"
+        class="mb-3"
+      >
+        <b-form-input
+          v-model="fuForm.jenis"
+          maxlength="150"
+          placeholder="Contoh: Tindak lanjut donasi"
+          required
+        />
+      </b-form-group>
+
+      <b-form-group label="Channel" label-class="fw-semibold" class="mb-3">
+        <b-form-select
+          v-model="fuForm.channel"
+          :options="channelOptions"
+          required
+        />
+      </b-form-group>
+
+      <b-form-group
+        label="Template WA (Opsional)"
+        label-class="fw-semibold"
+        class="mb-3"
+      >
+        <b-form-select
+          v-model="fuForm.template_id"
+          :options="templateOptions"
+          :disabled="isLoadingTemplates"
+        />
+      </b-form-group>
+
+      <b-form-group
+        label="Jadwal Tindakan"
+        label-class="fw-semibold"
+        class="mb-3"
+      >
+        <b-form-input v-model="fuForm.scheduled_date" type="date" required />
+      </b-form-group>
+
+      <b-form-group label="Waktu Slot" label-class="fw-semibold" class="mb-3">
+        <b-form-select
+          v-model="fuForm.waktu_slot"
+          :options="waktuSlotOptions"
+        />
+      </b-form-group>
+
+      <b-form-group
+        label="Penanggungjawab"
+        label-class="fw-semibold"
+        class="mb-3"
+      >
+        <b-form-select
+          v-model="fuForm.assigned_user_id"
+          :options="assignedUserOptions"
+        />
+      </b-form-group>
+
+      <b-form-group label="Catatan" label-class="fw-semibold" class="mb-0">
+        <b-form-textarea
+          v-model="fuForm.note"
+          rows="2"
+          placeholder="Catatan tambahan"
+        />
+      </b-form-group>
+    </b-form>
+
+    <template #footer>
+      <b-button variant="light" @click="showFuModal = false"> Batal </b-button>
+      <b-button
+        variant="primary"
+        :disabled="isSubmittingFu"
+        @click="handleCreateFollowUp"
+      >
+        <b-spinner v-if="isSubmittingFu" small class="me-2" />
+        Simpan Follow Up
+      </b-button>
+    </template>
+  </b-modal>
+
+  <b-modal
+    v-model="showProjectModal"
+    title="Pilih Project"
+    size="lg"
+    centered
+    @hidden="selectedProjectId = null"
+  >
+    <div class="mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <h6 class="mb-0 fs-14">Pilih project untuk program ini</h6>
+          <p class="mb-1 fs-12 text-muted">
+            Jika project tidak ada, maka program ini belum memiliki project
+            aktif. Silakan buat project baru di menu Project.
+          </p>
+        </div>
+        <b-spinner v-if="isProjectsLoading" small />
+      </div>
+
+      <b-form-select
+        v-model="selectedProjectId"
+        :options="projectOptions"
+        :disabled="isProjectsLoading || !projectOptions.length"
+      />
+    </div>
+
+    <div
+      v-if="!isProjectsLoading && !projects.length"
+      class="text-muted fs-12 mb-3"
+    >
+      Tidak ada project ditemukan untuk program ini.
+    </div>
+
+    <div v-else-if="selectedProject" class="p-3 rounded-2 bg-light">
+      <p class="mb-1 fw-semibold">Project terpilih</p>
+      <p class="mb-1 fs-12">Judul Project : {{ selectedProject.judul }}</p>
+      <p class="mb-0 fs-12">Status : {{ selectedProject.status }}</p>
+    </div>
+
+    <template #footer>
+      <b-button variant="light" @click="showProjectModal = false"
+        >Batal</b-button
+      >
+      <b-button
+        variant="primary"
+        :disabled="isProjectsLoading"
+        @click="handleAssignProject"
+      >
+        Pilih Project
+      </b-button>
+    </template>
+  </b-modal>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { useQuery } from "@tanstack/vue-query";
+import { useRouter } from "vue-router";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/vue-query";
 import { toast, type ToastOptions } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { formatCurrency, formatDate } from "@/helpers/format";
@@ -507,14 +332,23 @@ import {
   getCrmTransactionById,
   getCrmTransactions,
   getCrmKegiatans,
+  getCrmChatTemplates,
   sendCrmChatToDonor,
+  createFollowUp,
+  updateStatusFollowUp,
 } from "@/services/crmService";
+import { getProjects } from "@/services/projectService";
+import { updateTransactionDetailProject } from "@/services/transactionService";
 import {
   colorTagVariant,
   cycleStatusVariant,
   initialsOf,
 } from "@/utils/crmAdapters";
 import DonorChat from "./DonorChat.vue";
+import DonorDetailProfileSection from "./donor-detail/DonorDetailProfileSection.vue";
+import DonorDetailTransactionSection from "./donor-detail/DonorDetailTransactionSection.vue";
+import DonorDetailFollowUpsSection from "./donor-detail/DonorDetailFollowUpsSection.vue";
+import DonorDetailDonationHistorySection from "./donor-detail/DonorDetailDonationHistorySection.vue";
 import type {
   ChatMessageItem,
   CrmChatCard,
@@ -525,6 +359,7 @@ import type {
 
 const showToast = (message: string, options: ToastOptions) =>
   toast(message, options);
+const router = useRouter();
 
 const props = defineProps<{
   donorId: number;
@@ -533,6 +368,46 @@ const props = defineProps<{
 
 const activeTab = ref<"detail" | "chat">("detail");
 const localMessages = ref<ChatMessageItem[]>([]);
+const showFuModal = ref(false);
+const isSendingFu = ref(false);
+const isSubmittingFu = ref(false);
+const queryClient = useQueryClient();
+
+const fuForm = ref({
+  jenis: "",
+  channel: "crm",
+  template_id: null as number | null,
+  scheduled_date: "",
+  waktu_slot: "Pagi",
+  // assigned_user_id: null as number | null,
+  assigned_user_id: 459561500707, // siti aminah (default) — sementara belum ada API untuk ambil list user
+  note: "",
+});
+
+const channelOptions = [
+  { value: "crm", text: "CRM" },
+  { value: "Official WA", text: "Official WA" },
+];
+
+const waktuSlotOptions = [
+  { value: "Pagi", text: "Pagi" },
+  { value: "Siang", text: "Siang" },
+  { value: "Sore", text: "Sore" },
+  { value: "Malam", text: "Malam" },
+  { value: "Segera", text: "Segera" },
+];
+
+const resetFuForm = () => {
+  fuForm.value = {
+    jenis: "",
+    channel: "crm",
+    template_id: null,
+    scheduled_date: "",
+    waktu_slot: "Pagi",
+    assigned_user_id: 459561500707,
+    note: "",
+  };
+};
 
 watch(
   () => props.donorId,
@@ -550,10 +425,39 @@ const transactionId = computed(() => props.case?.transaction_id ?? 0);
 const donorProfileId = computed(() => props.case?.donor_profile_id ?? 0);
 
 // Fetch detail
-const { data: detail, isLoading } = useQuery({
+const {
+  data: detail,
+  isLoading,
+  refetch: refetchDetail,
+} = useQuery({
   queryKey: computed(() => ["crm-donor-detail", donorProfileId.value]),
   queryFn: () => getDonorDetail(donorProfileId.value),
   enabled: computed(() => donorProfileId.value > 0),
+});
+
+// Fetch chat templates untuk digunakan di FU
+const { data: templatesRaw, isLoading: isLoadingTemplates } = useQuery({
+  queryKey: computed(() => [
+    "crm-chat-templates",
+    pipelineCase.value?.pipeline_stage?.id,
+  ]),
+  queryFn: () =>
+    getCrmChatTemplates({
+      stage_id: pipelineCase.value?.pipeline_stage?.id,
+    }),
+  enabled: computed(() => !!pipelineCase.value?.pipeline_stage?.id),
+});
+
+const templateOptions = computed(() => {
+  const templates = (templatesRaw.value ?? []) as any[];
+  return [
+    { value: null, text: "- Tidak pakai template -" },
+    ...templates.map((t: any) => ({ value: t.id, text: t.name })),
+  ];
+});
+
+const assignedUserOptions = computed(() => {
+  return [{ value: null, text: "- Belum ditentukan -" }];
 });
 
 // Transaksi yang sedang berjalan di kartu pipeline ini
@@ -570,22 +474,138 @@ const { data: donationHistoryRaw, isLoading: isHistoryLoading } = useQuery({
     transaction.value?.user_id,
   ]),
   queryFn: () =>
-    getCrmTransactions({ user_id: transaction.value?.user_id, limit: 3 }),
+    getCrmTransactions({
+      user_id: transaction.value?.user_id,
+      limit: 3,
+      status: "Paid",
+    }),
   enabled: computed(() => !!transaction.value?.user_id),
 });
 const donationHistory = computed<CrmTransactionHistoryItem[]>(
   () => donationHistoryRaw.value ?? [],
 );
 
+const openProfiling = () => {
+  const profileUserId = Number(transaction.value?.user_id ?? 0);
+  if (!profileUserId) {
+    showToast("User ID untuk profiling belum tersedia", {
+      type: "warning",
+      position: "top-center",
+    });
+    return;
+  }
+
+  router.push({ name: "crm.profiling", params: { id: profileUserId } });
+};
+
 // Project/program tempat transaksi saat ini disalurkan — dari transaction_details
 const currentTransactionDetails = computed(
   () => transaction.value?.transaction_details ?? [],
+);
+const currentTransactionDetailId = computed(() =>
+  Number(currentTransactionDetails.value[0]?.id ?? 0),
 );
 
 // Ambil project_id pertama untuk cari update kegiatannya (umumnya 1 transaksi = 1 project)
 const currentProjectId = computed(
   () => currentTransactionDetails.value[0]?.project_id ?? 0,
 );
+
+const showProjectModal = ref(false);
+const selectedProjectId = ref<number | null>(null);
+
+const currentProgramId = computed(
+  () =>
+    transaction.value?.program_id ??
+    currentTransactionDetails.value[0]?.program?.id ??
+    0,
+);
+
+const { data: projectsRaw, isLoading: isProjectsLoading } = useQuery({
+  queryKey: computed(() => ["crm-projects-by-program", currentProgramId.value]),
+  queryFn: () => getProjects({ program_id: currentProgramId.value }),
+  enabled: computed(() => currentProgramId.value > 0 && showProjectModal.value),
+});
+
+const projects = computed(() => (projectsRaw.value ?? []) as any[]);
+const projectOptions = computed(() => [
+  { value: null, text: "- Pilih project -" },
+  ...projects.value.map((project) => ({
+    value: project.id,
+    text: `${project.judul} · ${project.status ?? "-"}`,
+  })),
+]);
+
+const selectedProject = computed(
+  () =>
+    projects.value.find((project) => project.id === selectedProjectId.value) ??
+    null,
+);
+
+const openProjectModal = () => {
+  if (!currentProgramId.value) {
+    showToast("Donasi belum masuk program", {
+      type: "error",
+      position: "top-center",
+    });
+    return;
+  }
+
+  selectedProjectId.value = null;
+  showProjectModal.value = true;
+};
+
+const openFollowUpModal = () => {
+  showFuModal.value = true;
+};
+
+const assignProjectMutation = useMutation({
+  mutationFn: ({ id, project_id }: { id: number; project_id: number }) =>
+    updateTransactionDetailProject(id, { project_id }),
+});
+
+const handleAssignProject = async () => {
+  if (!selectedProjectId.value) {
+    showToast("Pilih project terlebih dahulu.", {
+      type: "error",
+      position: "top-center",
+    });
+    return;
+  }
+
+  if (!currentTransactionDetailId.value) {
+    showToast("Detail transaksi tidak ditemukan.", {
+      type: "error",
+      position: "top-center",
+    });
+    return;
+  }
+
+  try {
+    await assignProjectMutation.mutateAsync({
+      id: currentTransactionDetailId.value,
+      project_id: selectedProjectId.value,
+    });
+
+    await queryClient.invalidateQueries({
+      queryKey: ["crm-transaction-detail", transactionId.value],
+    });
+    await queryClient.invalidateQueries({
+      queryKey: ["crm-kegiatan", currentProjectId.value],
+    });
+
+    showProjectModal.value = false;
+    showToast("Project berhasil di-assign ke detail transaksi", {
+      type: "success",
+      position: "top-center",
+    });
+  } catch (err: any) {
+    showToast(err?.response?.data?.message ?? "Gagal assign project", {
+      type: "error",
+      position: "top-center",
+    });
+  }
+};
 
 const { data: kegiatanListRaw, isLoading: isKegiatanLoading } = useQuery({
   queryKey: computed(() => ["crm-kegiatan", currentProjectId.value]),
@@ -594,11 +614,11 @@ const { data: kegiatanListRaw, isLoading: isKegiatanLoading } = useQuery({
 });
 const kegiatanList = computed<CrmKegiatan[]>(() => kegiatanListRaw.value ?? []);
 
-const totalDonasiLifetime = computed(() =>
-  donationHistory.value
-    .filter((tx) => tx.status === "Paid")
-    .reduce((sum, tx) => sum + Number(tx.total ?? 0), 0),
-);
+// const totalDonasiLifetime = computed(() =>
+//   donationHistory.value
+//     .filter((tx) => tx.status === "Paid")
+//     .reduce((sum, tx) => sum + Number(tx.total ?? 0), 0),
+// );
 
 const lastDonationDate = computed(() => {
   const paid = donationHistory.value.filter((tx) => tx.status === "Paid");
@@ -623,13 +643,6 @@ const TRANSACTION_STATUS_VARIANT: Record<string, string> = {
 };
 const transactionStatusVariant = (status?: string) =>
   TRANSACTION_STATUS_VARIANT[status ?? ""] ?? "secondary";
-
-const donationPrograms = (tx: CrmTransactionHistoryItem) => {
-  const names = (tx.transaction_details ?? [])
-    .map((d) => d.program?.name)
-    .filter(Boolean);
-  return names.length ? names.join(", ") : "Program tidak diketahui";
-};
 
 const chatCard = computed<CrmChatCard | null>(() => {
   if (!detail.value) return null;
@@ -676,6 +689,143 @@ const handleSend = async (text: string, templateId: number | null) => {
       type: "error",
       position: "top-center",
     });
+  }
+};
+
+// Mutation untuk create follow-up
+const createFuMutation = useMutation({
+  mutationFn: (data: any) => createFollowUp(data),
+  onSuccess: async () => {
+    await queryClient.invalidateQueries({
+      queryKey: ["crm-donor-detail", donorProfileId.value],
+    });
+    showFuModal.value = false;
+    resetFuForm();
+    showToast("Follow up berhasil ditambahkan", {
+      type: "success",
+      position: "top-center",
+    });
+  },
+  onError: (err: any) => {
+    showToast(err?.response?.data?.message ?? "Gagal menambahkan follow up", {
+      type: "error",
+      position: "top-center",
+    });
+  },
+});
+
+// Mutation untuk update status follow-up
+const updateStatusFuMutation = useMutation({
+  mutationFn: ({ id, status }: { id: number; status: string }) =>
+    updateStatusFollowUp(id, { status }),
+  onSuccess: async () => {
+    await queryClient.invalidateQueries({
+      queryKey: ["crm-donor-detail", donorProfileId.value],
+    });
+    showToast("Status follow up berhasil diperbarui", {
+      type: "success",
+      position: "top-center",
+    });
+  },
+  onError: (err: any) => {
+    showToast(err?.response?.data?.message ?? "Gagal memperbarui status", {
+      type: "error",
+      position: "top-center",
+    });
+  },
+});
+
+// Handle create follow-up
+const handleCreateFollowUp = async () => {
+  if (!fuForm.value.jenis.trim()) {
+    showToast("Jenis follow up tidak boleh kosong", {
+      type: "warning",
+      position: "top-center",
+    });
+    return;
+  }
+
+  if (!fuForm.value.scheduled_date) {
+    showToast("Jadwal tindakan harus dipilih", {
+      type: "warning",
+      position: "top-center",
+    });
+    return;
+  }
+
+  isSubmittingFu.value = true;
+  try {
+    await createFuMutation.mutateAsync({
+      jenis: fuForm.value.jenis,
+      channel: fuForm.value.channel,
+      template_id: fuForm.value.template_id,
+      scheduled_date: fuForm.value.scheduled_date,
+      waktu_slot: fuForm.value.waktu_slot,
+      assigned_user_id: fuForm.value.assigned_user_id,
+      note: fuForm.value.note,
+      donor_profile_id: donorProfileId.value,
+      transaction_id: transactionId.value || null,
+      // lead_profile_id: null,
+    });
+  } finally {
+    isSubmittingFu.value = false;
+  }
+};
+
+// Handle update status follow-up
+const updateFollowUpStatus = async (fuId: number, status: string) => {
+  try {
+    await updateStatusFuMutation.mutateAsync({
+      id: fuId,
+      status,
+    });
+  } catch {
+    // Error handled in mutation error callback
+  }
+};
+
+const handleSetFollowUpStatus = async (payload: {
+  id: number;
+  status: string;
+}) => {
+  await updateFollowUpStatus(payload.id, payload.status);
+};
+
+// Handle send follow-up message
+const handleSendFollowUp = async (fu: any) => {
+  if (!fu.template_id) {
+    showToast("Pilih template WA terlebih dahulu", {
+      type: "warning",
+      position: "top-center",
+    });
+    return;
+  }
+
+  isSendingFu.value = true;
+  try {
+    // Send message via template
+    const templateText = fu.jenis; // Fallback ke jenis jika tidak ada template content
+    activeTab.value = "chat";
+
+    await handleSend(templateText, fu.template_id);
+
+    // Update status to selesai after sending
+    await updateStatusFuMutation.mutateAsync({
+      id: fu.id,
+      status: "selesai",
+    });
+
+    showToast("Pesan berhasil dikirim", {
+      type: "success",
+      position: "top-center",
+    });
+  } catch (err: any) {
+    showToast(err?.response?.data?.message ?? "Gagal mengirim pesan", {
+      type: "error",
+      position: "top-center",
+    });
+  } finally {
+    isSendingFu.value = false;
   }
 };
 

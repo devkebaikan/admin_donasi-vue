@@ -65,7 +65,7 @@
     <b-row>
       <b-col>
         <UIComponentCard id="basic" title="Daftar Bank Reference">
-          <div class="d-flex justify-content-end mb-3">
+          <div v-if="isCanCreate" class="d-flex justify-content-end mb-3">
             <b-button
               variant="primary"
               @click="router.push('/bank-reference/create')"
@@ -168,7 +168,10 @@ import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
 import { useBankReferenceTable } from "./components/data";
 import { toggleBankReferenceStatus } from "@/services/bankReferenceService";
+import { hasPermission } from "@/helpers/permission";
 import router from "@/router";
+
+const isCanCreate = hasPermission("bank:create");
 
 const queryClient = useQueryClient();
 

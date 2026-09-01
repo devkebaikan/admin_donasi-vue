@@ -184,7 +184,7 @@
           </b-input-group>
         </b-col>
 
-        <b-col cols="12" md="4">
+        <!-- <b-col cols="12" md="4">
           <label class="form-label fw-semibold">Project</label>
           <ChoicesSelect
             id="filter-project"
@@ -199,9 +199,9 @@
             :isLoading="isProjectLoading"
             :key="projectOptions.length"
           />
-        </b-col>
+        </b-col> -->
 
-        <b-col cols="12" md="4">
+        <!-- <b-col cols="12" md="4">
           <label class="form-label fw-semibold">Kegiatan</label>
           <ChoicesSelect
             id="filter-kegiatan"
@@ -216,7 +216,7 @@
             :isLoading="isKegiatanLoading"
             :key="kegiatanOptions.length"
           />
-        </b-col>
+        </b-col> -->
 
         <b-col cols="12" md="2">
           <label class="form-label fw-semibold">Tipe</label>
@@ -297,7 +297,7 @@
     <b-row>
       <b-col>
         <UIComponentCard id="basic" title="Daftar Laporan Project">
-          <div class="d-flex justify-content-end mb-3">
+          <div v-if="isCanCreate" class="d-flex justify-content-end mb-3">
             <b-button
               v-if="selectedProjectId"
               variant="primary"
@@ -364,6 +364,9 @@ import { getProjects } from "@/services/projectService";
 import { getAllKegiatan } from "@/services/kegiatanService";
 import router from "@/router";
 import { useRoute } from "vue-router";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanCreate = hasPermission("finance:report");
 
 const {
   tableOptions,
@@ -439,18 +442,12 @@ const selectedKegiatanLabel = computed(
 // ── Filter helpers ────────────────────────────────────────────────────────
 
 const hasActiveFilters = computed(
-  () =>
-    !!(
-      searchQuery.value ||
-      selectedProjectId.value ||
-      selectedKegiatanId.value ||
-      selectedType.value
-    ),
+  () => !!(searchQuery.value || selectedKegiatanId.value || selectedType.value),
 );
 
 const clearFilters = () => {
   searchQuery.value = "";
-  selectedProjectId.value = "";
+  // selectedProjectId.value = "";
   selectedKegiatanId.value = "";
   selectedType.value = "";
   resetPage();
