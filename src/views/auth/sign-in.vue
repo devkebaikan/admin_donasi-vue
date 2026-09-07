@@ -154,8 +154,8 @@ import type { AxiosResponse } from "axios";
 import type { User } from "@/types/auth";
 
 const credentials = reactive({
-  email: "superadmin@example.com",
-  password: "password123",
+  email: "",
+  password: "",
 });
 
 const vuelidateRules = computed(() => ({

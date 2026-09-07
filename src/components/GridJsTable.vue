@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import { Grid } from 'gridjs'
-import { onMounted } from 'vue'
+import { onMounted, watch } from 'vue'
 
 type GridJsTablePropsType = {
   is?: string
@@ -14,9 +14,23 @@ type GridJsTablePropsType = {
 
 const props = defineProps<GridJsTablePropsType>()
 
-onMounted(() => {
+const renderGrid = () => {
   const ele = document.getElementById(props.id)
+  if (ele) {
+    ele.innerHTML = ''
+    new Grid(props.options).render(ele)
+  }
+}
 
-  if (ele) new Grid(props.options).render(ele)
+onMounted(() => {
+  renderGrid()
 })
+
+watch(
+  () => props.options,
+  () => {
+    renderGrid()
+  },
+  { deep: true }
+)
 </script>

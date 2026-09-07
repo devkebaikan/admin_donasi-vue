@@ -170,7 +170,7 @@
               </b-form-select>
               <small v-if="selectedProgramId !== 0" class="text-muted">
                 Yang bisa diclaim
-                <span class="fw-semibold text-success">{{
+                <span class="fw-semibold text-info">{{
                   formatCurrency(canClaim)
                 }}</span>
               </small>
@@ -392,7 +392,7 @@ const canClaim = computed(() => {
   const program = programs.value.find(
     (p) => p.program_id === selectedProgramId.value,
   );
-  return program?.can_claim ?? 0;
+  return program?.available_donation ?? 0;
 });
 
 // Project detail — provides related programs + project nominal
@@ -431,10 +431,10 @@ watch(programs, (list) => {
 
 const finance = computed(() => ({
   nominal_proyek:
-    projectDetail.value?.nominal_acc || projectDetail.value?.nominal_ajuan || 0,
-  nominal_terkumpul: fundCheck.value?.total_allocated ?? 0,
-  sisa_saldo_sebelumnya: fundCheck.value?.available_amount ?? 0,
-  dana_dicairkan: fundCheck.value?.total_disbursed ?? 0,
+    projectDetail.value?.nominal_acc || 0,
+  nominal_terkumpul: projectDetail.value?.total_allocated ?? 0,
+  sisa_saldo_sebelumnya: fundCheck.value?.saldo_awal_program ?? 0,
+  dana_dicairkan: projectDetail.value?.total_tf_ke_mitra ?? 0,
   project_name: fundCheck.value?.project_name ?? "Proyek",
 }));
 
@@ -447,7 +447,6 @@ const danaBelumDicairkan = computed(() =>
 );
 
 // Claimable donations for the selected program
-
 type Trx = {
   id: number;
   owner: string;

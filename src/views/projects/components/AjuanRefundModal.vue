@@ -33,13 +33,14 @@
               Maksimal: Rp {{ formatRupiah(maxNominal) }}
             </small>
             <b-button
+              v-if="config.label === 'Refund'"
               size="sm"
               variant="outline-primary"
               class="ms-1"
               :disabled="maxNominal <= 0"
               @click="applyMaxNominal"
             >
-              Pakai Maksimal
+              Refund Semua
             </b-button>
           </div>
           <div v-if="nominalError" class="invalid-feedback d-block">
@@ -48,9 +49,9 @@
         </b-form-group>
       </b-col>
 
-      <!-- Bank Sumber -->
-      <b-col cols="12">
-        <b-form-group label="Bank Sumber" label-for="form-bank-id">
+      <!-- Bank Tujuan -->
+      <b-col v-if="config.label === 'Refund'" cols="12">
+        <b-form-group label="Bank Tujuan" label-for="form-bank-id">
           <ChoicesSelect
             id="form-bank-id"
             :modelValue="String(form.bank_reference_id || 0)"
@@ -61,7 +62,7 @@
             "
             :options="bankOptions"
             :isLoading="isBankLoading"
-            :key="bankOptions.length"
+            :key="`bank-${showModal}-${bankOptions.length}`"
           />
           <div v-if="bankError" class="invalid-feedback d-block">
             {{ bankError }}
@@ -120,6 +121,7 @@
           />
         </b-form-group>
       </b-col>
+      {{config.label}}
     </b-row>
 
     <div v-if="isActionPending" class="text-center mt-3">
@@ -215,7 +217,7 @@ const queryClient = useQueryClient();
 
 const form = reactive({
   mitra_id: "",
-  bank_reference_id: 0,
+  bank_reference_id: null,
   account_behalf: "",
   account_number: "",
   nominal_ajuan: 0,
@@ -284,7 +286,7 @@ watch(
     if (!mitra) {
       form.account_behalf = "";
       form.account_number = "";
-      form.bank_reference_id = 0;
+      form.bank_reference_id = null;
       return;
     }
 
@@ -292,7 +294,7 @@ watch(
 
     form.account_behalf = data.account_behalf ?? "";
     form.account_number = data.account_number ?? "";
-    form.bank_reference_id = data.bank_refferences_id ?? 0;
+    form.bank_reference_id = data.bank_refferences_id ?? null;
   },
   { immediate: true },
 );
@@ -300,14 +302,14 @@ watch(
   () => showModal.value,
   (isOpen) => {
     if (!isOpen) {
-      form.mitra_id = "";
-      form.bank_reference_id = 0;
-      form.account_behalf = "";
-      form.account_number = "";
-      form.nominal_ajuan = 0;
-      form.biaya = 0;
-      nominalError.value = "";
-      bankError.value = "";
+  form.mitra_id = "";
+  form.bank_reference_id = null;
+  form.account_behalf = "";
+  form.account_number = "";
+  form.nominal_ajuan = 0;
+  form.biaya = 0;
+  nominalError.value = "";
+  bankError.value = "";
     }
   },
 );
@@ -363,7 +365,9 @@ const handleSubmit = () => {
     return;
   }
 
-  if (!form.bank_reference_id) {
+
+  // Bank tidak wajib diisi untuk ajuan project, tapi wajib diisi untuk refund
+  if (config.label === 'Refund' && !form.bank_reference_id) {
     bankError.value = "Bank wajib dipilih";
     return;
   }

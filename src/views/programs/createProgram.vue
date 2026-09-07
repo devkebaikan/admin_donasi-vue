@@ -25,7 +25,7 @@
                 <!-- Mitra -->
                 <b-col md="6">
                   <b-form-group label="Mitra" label-for="mitra-id">
-                    <ChoicesSelect
+                    <SearchSelect
                       id="mitra-id"
                       :modelValue="String(v$.mitra_id.$model || 0)"
                       @update:modelValue="
@@ -33,9 +33,13 @@
                           v$.mitra_id.$model = val === '0' ? null : Number(val);
                         }
                       "
+                      @search="
+                        (query: string) => {
+                          mitraSearchQuery = query;
+                        }
+                      "
                       :options="mitraList"
                       :isLoading="isMitraLoading"
-                      :key="mitraList.length"
                     />
                     <div
                       v-if="v$.mitra_id.$error"
@@ -508,6 +512,8 @@ import { useRouter } from "vue-router";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
+import SearchSelect from "@/components/SearchSelect.vue";
+import { useSearchSelect } from "@/composables/useSearchSelect";
 // import CurrencyInput from "@/components/CurrencyInput.vue";
 import { QuillEditor } from "@vueup/vue-quill";
 import { FormWizard, TabContent } from "vue3-form-wizard";
@@ -610,20 +616,20 @@ const validateStep3 = () => touchAndCheck(["image"]);
 // ── Data fetching ──────────────────────────────────────────────────────────
 const queryClient = useQueryClient();
 
-const { data: mitraData, isLoading: isMitraLoading } = useQuery({
-  queryKey: ["mitra"],
-  queryFn: getAllMitra,
-});
-
-const mitraList = computed(() => {
-  if (!mitraData.value) return [{ value: 0, text: "Choose Mitra..." }];
-  return [
-    { value: 0, text: "Choose Mitra..." },
-    ...mitraData.value.map((item: any) => ({
-      value: item.id,
-      text: item.nama,
-    })),
-  ];
+// mitra search select
+const {
+  searchQuery: mitraSearchQuery,
+  options: mitraList,
+  isLoading: isMitraLoading,
+} = useSearchSelect({
+  queryKey: "mitra",
+  fetchFn: getAllMitra,
+  optionsMapper: (mitra: any) => ({
+    value: mitra.id,
+    text: mitra.nama,
+  }),
+  placeholder: "Cari mitra...",
+  limit: 10,
 });
 
 const { data: tipeData, isLoading: isTipeLoading } = useQuery({
@@ -708,12 +714,12 @@ const handleImageWaChange = (event: Event) => {
 const { mutate: createProgramPayload, isPending } = useMutation({
   mutationFn: (payload: FormData) => createProgram(payload),
   onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ["programs"] });
+    queryClient.invalidateQueries({ queryKey: ["programs"], exact: false });
     showToast("Program berhasil dibuat", {
       type: "success",
       position: "top-center",
     });
-    setTimeout(() => (window.location.href = "/programs"), 1500);
+    setTimeout(() => router.push("/programs"), 1500);
   },
   onError: (err: any) => {
     const msg = err?.response?.data?.message ?? "Gagal membuat program";

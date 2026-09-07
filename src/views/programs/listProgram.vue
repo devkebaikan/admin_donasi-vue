@@ -267,6 +267,15 @@
               </span>
             </div>
           </b-col>
+         
+          <b-col cols="4">
+            <div class="bg-light rounded p-2">
+              <small class="text-muted d-block">Belum masuk proyek</small>
+              <span class="fw-semibold font-monospace small text-warning">
+                {{ formatCurrency(Number(programDetail.no_project_nominal.nominal)) }}
+              </span>
+            </div>
+          </b-col>
           <b-col cols="4">
             <div class="bg-light rounded p-2">
               <small class="text-muted d-block">Menunggu Salur</small>
@@ -286,7 +295,7 @@
           <b-col cols="4">
             <div class="bg-light rounded p-2">
               <small class="text-muted d-block">Dana Tersalurkan</small>
-              <span class="fw-semibold font-monospace small text-warning">
+              <span class="fw-semibold font-monospace small text-success">
                 {{ formatCurrency(Number(programDetail.nominal_used)) }}
               </span>
             </div>
@@ -370,7 +379,7 @@
         <hr class="my-3" />
 
         <!-- Dates -->
-        <div class="d-flex gap-3 mb-3">
+        <!-- <div class="d-flex gap-3 mb-3">
           <div>
             <small class="text-muted d-block">Dibuat</small>
             <small class="fw-semibold">{{
@@ -383,7 +392,7 @@
               formatDateTime(programDetail.updated_at)
             }}</small>
           </div>
-        </div>
+        </div> -->
 
         <!-- Link -->
         <div class="mb-3">
@@ -623,6 +632,7 @@ const {
   totalPages,
   resetPage,
   handleDelete,
+  refetch,
 } = useProgramsTable();
 
 // Preserve list state & scroll position
@@ -723,6 +733,7 @@ const handlePublish = async (id: number) => {
       queryKey: ["programs"],
       exact: false,
     });
+    await refetch();
     tableKey.value++;
     if (selectedProgramLink.value) {
       await queryClient.invalidateQueries({
@@ -828,6 +839,9 @@ const handleGlobalClick = (event: Event) => {
   }
 };
 
-onMounted(() => document.addEventListener("click", handleGlobalClick));
+onMounted(() => {
+  refetch();
+  document.addEventListener("click", handleGlobalClick);
+});
 onBeforeUnmount(() => document.removeEventListener("click", handleGlobalClick));
 </script>
