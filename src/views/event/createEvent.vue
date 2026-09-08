@@ -268,13 +268,11 @@
                 <!-- Deskripsi -->
                 <b-col cols="12">
                   <b-form-group label="Deskripsi" label-for="description">
-                    <QuillEditor
-                      theme="snow"
-                      :toolbar="quillToolbar"
-                      style="height: 280px"
+                    <CustomQuillEditor
+                      storage="event-content"
+                      :style="{ height: '280px' }"
                       placeholder="Deskripsi lengkap event..."
                       v-model:content="formState.description"
-                      content-type="html"
                     />
                   </b-form-group>
                 </b-col>
@@ -403,8 +401,7 @@ import {
 import { useRouter } from "vue-router";
 import { FormWizard, TabContent } from "vue3-form-wizard";
 import "vue3-form-wizard/dist/style.css";
-import { QuillEditor } from "@vueup/vue-quill";
-import "@vueup/vue-quill/dist/vue-quill.snow.css";
+import CustomQuillEditor from "@/components/CustomQuillEditor.vue";
 import { toast, type ToastOptions } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
@@ -448,14 +445,6 @@ const formState = reactive({
 });
 
 const regOnlyBool = ref(false);
-
-const quillToolbar = [
-  ["bold", "italic", "underline", "strike"],
-  [{ header: [1, 2, 3, false] }],
-  [{ list: "ordered" }, { list: "bullet" }],
-  ["link"],
-  ["clean"],
-];
 
 const rules = {
   mitra_id: { required, minValue: minValue(1) },

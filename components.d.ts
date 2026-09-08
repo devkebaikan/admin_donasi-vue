@@ -69,6 +69,7 @@ declare module 'vue' {
     ChoicesInput: typeof import('./src/components/ChoicesInput.vue')['default']
     ChoicesSelect: typeof import('./src/components/ChoicesSelect.vue')['default']
     CurrencyInput: typeof import('./src/components/CurrencyInput.vue')['default']
+    CustomQuillEditor: typeof import('./src/components/CustomQuillEditor.vue')['default']
     DropDown: typeof import('./src/components/DropDown.vue')['default']
     FlatPicker: typeof import('./src/components/FlatPicker.vue')['default']
     GridJsTable: typeof import('./src/components/GridJsTable.vue')['default']

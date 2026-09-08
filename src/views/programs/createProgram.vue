@@ -224,31 +224,15 @@
                 <!-- Isi Konten -->
                 <b-col cols="12">
                   <b-form-group label="Isi Konten" label-for="isi">
-                    <QuillEditor
-                      ref="quillRef"
-                      id="snow-editor"
-                      data-storage="program-content"
-                      theme="snow"
-                      :toolbar="quillToolbarOptions"
-                      style="height: 460px"
-                      placeholder="Konten program..."
-                      v-model="formState.isi"
-                      content-type="html"
-                      @text-change="syncQuillContent"
-                      @selection-change="syncQuillContent"
-                    />
-
-                    <!-- <QuillEditor
-                      theme="snow"
-                      :toolbar="toolbar1"
-                      style="height: 460px"
+                    <CustomQuillEditor
+                      storage="program-content"
+                      :style="{ height: '460px' }"
                       placeholder="Konten program..."
                       v-model:content="formState.isi"
-                      content-type="html"
-                    /> -->
+                    />
                   </b-form-group>
                   <small class="text-muted"
-                    >Opsional — klik ikon gambar untuk upload</small
+                    >Opsional — klik ikon gambar, drag-and-drop, atau paste gambar untuk upload otomatis</small
                   >
                 </b-col>
 
@@ -515,7 +499,7 @@ import ChoicesSelect from "@/components/ChoicesSelect.vue";
 import SearchSelect from "@/components/SearchSelect.vue";
 import { useSearchSelect } from "@/composables/useSearchSelect";
 // import CurrencyInput from "@/components/CurrencyInput.vue";
-import { QuillEditor } from "@vueup/vue-quill";
+import CustomQuillEditor from "@/components/CustomQuillEditor.vue";
 import { FormWizard, TabContent } from "vue3-form-wizard";
 
 import "vue3-form-wizard/dist/style.css";
@@ -528,7 +512,6 @@ import {
   getProgramCategories,
 } from "@/services/programService";
 import { getAllMitra } from "@/services/mitraService";
-import { uploadImage } from "@/services/utilityService";
 import { toast, type ToastOptions } from "vue3-toastify";
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -783,82 +766,4 @@ const handleSubmit = async () => {
   createProgramPayload(formData);
   // console.log(formState);
 };
-
-const quillRef = ref();
-
-// ── Sync Quill content ke formState ────────────────────────────────────────
-const syncQuillContent = () => {
-  const quill = quillRef.value?.getQuill();
-  if (quill) {
-    formState.isi = quill.root.innerHTML;
-  }
-};
-
-// ── Image upload handler ───────────────────────────────────────────────────
-const imageHandler = () => {
-  const quill = quillRef.value?.getQuill();
-  if (!quill) return;
-
-  // simpan posisi cursor SEBELUM file dialog dibuka
-  const range = quill.getSelection(true) ?? {
-    index: quill.getLength(),
-    length: 0,
-  };
-
-  const input = document.createElement("input");
-  input.setAttribute("type", "file");
-  input.setAttribute("accept", "image/jpeg,image/png,image/webp");
-  input.click();
-
-  input.onchange = async () => {
-    const file = input.files?.[0];
-    if (!file) return;
-
-    quill.enable(false);
-
-    try {
-      const imageUrl = await uploadImage(file);
-
-      if (!imageUrl) {
-        throw new Error("URL gambar tidak ditemukan pada response");
-      }
-
-      quill.insertEmbed(range.index, "image", imageUrl, "user");
-      quill.setSelection(range.index + 1, 0);
-
-      // Sync content ke formState setelah insert image
-      syncQuillContent();
-
-      showToast("Gambar berhasil diunggah", {
-        type: "success",
-        position: "top-center",
-      });
-    } catch (err: any) {
-      const msg = err?.response?.data?.message ?? "Gagal mengupload gambar";
-      showToast(msg, { type: "error", position: "top-center" });
-    } finally {
-      quill.enable(true);
-    }
-  };
-};
-
-const quillToolbarOptions = computed(() => ({
-  container: toolbar1,
-  handlers: {
-    image: imageHandler,
-  },
-}));
-
-// ── Quill toolbar ──────────────────────────────────────────────────────────
-const toolbar1 = [
-  [{ font: [] }, { size: [] }],
-  ["bold", "italic", "underline", "strike"],
-  [{ color: [] }, { background: [] }],
-  [{ script: "super" }, { script: "sub" }],
-  [{ header: [false, 1, 2, 3, 4, 5, 6] }, "blockquote", "code-block"],
-  [{ list: "ordered" }, { list: "bullet" }, { indent: "-1" }, { indent: "+1" }],
-  ["direction", { align: [] }],
-  ["link", "image", "video"],
-  ["clean"],
-];
 </script>

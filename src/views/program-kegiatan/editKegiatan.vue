@@ -138,12 +138,11 @@
               <!-- Deskripsi -->
               <b-col cols="12">
                 <b-form-group label="Deskripsi" label-for="deskripsi">
-                  <QuillEditor
-                    theme="snow"
-                    style="height: 260px"
-                    placeholder="Deskripsi project..."
+                  <CustomQuillEditor
+                    storage="kegiatan-content"
+                    :style="{ height: '260px' }"
+                    placeholder="Deskripsi kegiatan..."
                     v-model:content="formState.deskripsi"
-                    content-type="html"
                   />
                 </b-form-group>
                 <small class="text-muted">Opsional</small>
@@ -191,8 +190,7 @@ import { required, minValue, helpers } from "@vuelidate/validators";
 import { useRoute } from "vue-router";
 import { toast, type ToastOptions } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
-import { QuillEditor } from "@vueup/vue-quill";
-import "@vueup/vue-quill/dist/vue-quill.snow.css";
+import CustomQuillEditor from "@/components/CustomQuillEditor.vue";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import { getKegiatanById, updateKegiatan } from "@/services/kegiatanService";

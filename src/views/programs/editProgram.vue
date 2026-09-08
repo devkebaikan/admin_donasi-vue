@@ -221,16 +221,16 @@
                 <!-- Isi Konten -->
                 <b-col cols="12">
                   <b-form-group label="Isi Konten" label-for="isi">
-                    <QuillEditor
-                      theme="snow"
-                      :toolbar="toolbar1"
-                      style="height: 460px"
+                    <CustomQuillEditor
+                      storage="program-content"
+                      :style="{ height: '460px' }"
                       placeholder="Konten HTML program..."
                       v-model:content="formState.isi"
-                      content-type="html"
                     />
                   </b-form-group>
-                  <small class="text-muted">Opsional</small>
+                  <small class="text-muted"
+                    >Opsional — klik ikon gambar, drag-and-drop, atau paste gambar untuk upload otomatis</small
+                  >
                 </b-col>
 
                 <!-- Video URL -->
@@ -562,7 +562,7 @@ import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
 // import CurrencyInput from "@/components/CurrencyInput.vue";
-import { QuillEditor } from "@vueup/vue-quill";
+import CustomQuillEditor from "@/components/CustomQuillEditor.vue";
 import { FormWizard, TabContent } from "vue3-form-wizard";
 
 import "vue3-form-wizard/dist/style.css";

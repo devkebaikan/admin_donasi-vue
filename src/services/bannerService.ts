@@ -34,7 +34,7 @@ export const createBanner = async (data: FormData) => {
 
 export const updateBanner = async (id: number, data: FormData) => {
   try {
-    const res = await HttpClient.post(`/settings/banners/${id}`, data, {
+    const res = await HttpClient.put(`/settings/banners/${id}`, data, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return res.data.data;

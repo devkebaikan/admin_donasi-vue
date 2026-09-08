@@ -96,13 +96,11 @@
                     v$.content.$error ? 'is-invalid' : '',
                   ]"
                 >
-                  <QuillEditor
-                    theme="snow"
-                    :toolbar="toolbarOptions"
-                    style="height: 300px"
+                  <CustomQuillEditor
+                    storage="blog-content"
+                    :style="{ height: '300px' }"
                     placeholder="Tulis konten blog di sini..."
                     v-model:content="formState.content"
-                    content-type="html"
                     @update:content="v$.content.$touch()"
                   />
                 </div>
@@ -228,8 +226,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { useVuelidate } from "@vuelidate/core";
 import { required, minLength, maxLength } from "@vuelidate/validators";
 import { useRouter, useRoute } from "vue-router";
-import { QuillEditor } from "@vueup/vue-quill";
-import "@vueup/vue-quill/dist/vue-quill.snow.css";
+import CustomQuillEditor from "@/components/CustomQuillEditor.vue";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import { getBlogById, updateBlog, getBlogCategories } from "@/services/blogService";
@@ -249,17 +246,6 @@ const imageFile = ref<File | null>(null);
 const imagePreview = ref<string | null>(null);
 const existingImageUrl = ref<string | null>(null);
 const formReady = ref(false);
-
-const toolbarOptions = [
-  ["bold", "italic", "underline", "strike"],
-  ["blockquote", "code-block"],
-  [{ header: 1 }, { header: 2 }],
-  [{ list: "ordered" }, { list: "bullet" }],
-  [{ indent: "-1" }, { indent: "+1" }],
-  [{ align: [] }],
-  ["link", "image"],
-  ["clean"],
-];
 
 const formState = reactive({
   title: "",
