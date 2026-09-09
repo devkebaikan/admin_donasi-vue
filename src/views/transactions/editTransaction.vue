@@ -138,7 +138,7 @@
                   <CurrencyInput
                     v-model.number="item.gross_nominal"
                     placeholder="0"
-                    :state="null"
+                    :state="undefined"
                   />
                 </b-col>
 
@@ -147,7 +147,7 @@
                   <CurrencyInput
                     v-model.number="item.discount"
                     placeholder="0"
-                    :state="null"
+                    :state="undefined"
                   />
                 </b-col>
               </b-row>
@@ -174,7 +174,7 @@
                   <CurrencyInput
                     v-model.number="item.quantity"
                     placeholder="1"
-                    :state="null"
+                    :state="undefined"
                   />
                 </b-col>
 
@@ -228,7 +228,7 @@
                   <CurrencyInput
                     v-model.number="item.quantity"
                     placeholder="1"
-                    :state="null"
+                    :state="undefined"
                   />
                 </b-col>
 
@@ -239,7 +239,7 @@
                   <CurrencyInput
                     v-model.number="item.gross_nominal"
                     placeholder="0"
-                    :state="null"
+                    :state="undefined"
                   />
                 </b-col>
 
@@ -688,7 +688,7 @@ const { mutate, isPending } = useMutation({
     updateTransaction(txId.value, payload),
   onSuccess: () => {
     toast.success("Transaksi berhasil diperbarui.");
-    router.push(`/transactions/${txId.value}`);
+    router.push(`/transactions`);
   },
   onError: () => {
     toast.error("Gagal memperbarui transaksi. Coba lagi.");

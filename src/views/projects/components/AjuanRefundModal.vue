@@ -121,7 +121,6 @@
           />
         </b-form-group>
       </b-col>
-      {{config.label}}
     </b-row>
 
     <div v-if="isActionPending" class="text-center mt-3">
@@ -215,7 +214,16 @@ const isBankAccountIncomplete = computed(() => {
 });
 const queryClient = useQueryClient();
 
-const form = reactive({
+interface FormState {
+  mitra_id: string;
+  bank_reference_id: number | null;
+  account_behalf: string;
+  account_number: string;
+  nominal_ajuan: number;
+  biaya: number;
+}
+
+const form = reactive<FormState>({
   mitra_id: "",
   bank_reference_id: null,
   account_behalf: "",
@@ -234,22 +242,15 @@ const { data: projectData } = useQuery({
 });
 
 const maxNominal = computed(() => {
+  if (!projectData.value) return 0;
   const field = config.value.maxField;
-  // const value = Number(projectData.value?.[field] ?? 0);
-  // return Number.isFinite(value) ? value : 0;
-
-  // Number(
-  //   projectData.value?.claimed_donasi - projectData.value?.total_tf_ke_mitra ??
-  //     0,
-  // );
 
   if (field === "total_alokasi") {
-    return Number(
-      projectData.value?.claimed_donasi -
-        projectData.value?.total_tf_ke_mitra ?? 0,
-    );
+    const claimed = Number(projectData.value?.claimed_donasi ?? 0);
+    const totalTf = Number(projectData.value?.total_tf_ke_mitra ?? 0);
+    return Math.max(0, claimed - totalTf);
   } else {
-    return Number(projectData.value?.sisa_dana_mitra);
+    return Number(projectData.value?.sisa_dana_mitra ?? 0);
   }
 });
 
@@ -367,7 +368,7 @@ const handleSubmit = () => {
 
 
   // Bank tidak wajib diisi untuk ajuan project, tapi wajib diisi untuk refund
-  if (config.label === 'Refund' && !form.bank_reference_id) {
+  if (config.value.label === "Refund" && !form.bank_reference_id) {
     bankError.value = "Bank wajib dipilih";
     return;
   }
