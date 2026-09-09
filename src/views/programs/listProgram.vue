@@ -728,7 +728,7 @@ const handlePublish = async (id: number) => {
   if (!result.isConfirmed) return;
 
   try {
-    await publishProgram(id, { status: "PUBLISH" });
+    await publishProgram(id, { status: "REQUEST AKUN" });
     await queryClient.invalidateQueries({
       queryKey: ["programs"],
       exact: false,
