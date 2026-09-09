@@ -3,11 +3,10 @@
     class="d-flex flex-column h-100 overflow-hidden"
     style="max-height: 84vh"
   >
-    <div
+    <!-- <div
       class="p-3 border-bottom d-flex flex-wrap align-items-center justify-content-between gap-2"
     >
       <div class="d-flex align-items-center">
-        <!-- <i class="bx bxl-whatsapp text-success fs-2 me-2"></i> -->
 
         <h6 class="mb-0 fs-14 fw-semibold">
           {{ card.nickname || card.name }}
@@ -22,7 +21,7 @@
         size="sm"
         class="w-auto"
       />
-    </div>
+    </div> -->
 
     <div v-if="templates.length" class="p-3 border-bottom">
       <div class="d-flex justify-content-between align-items-center mb-2">
@@ -112,22 +111,27 @@
       <form @submit.prevent="handleSend">
         <b-row class="align-items-center g-2">
           <b-col>
-            <!-- <b-form-input
-              v-model="message"
-              placeholder="Tulis pesan..."
-              style="height: 48px"
-            /> -->
-            <b-form-textarea
-              v-model="message"
-              placeholder="Tulis pesan..."
-              rows="4"
-              max-rows="5"
-              no-resize
-            />
+            <div class="position-relative">
+              <b-form-input
+                v-model="message"
+                placeholder="Tulis pesan..."
+                style="height: 48px; padding-right: 40px;"
+                @click.self="isModalOpen = true"
+              />
+              <b-button
+                variant="link"
+                class="position-absolute end-0 top-50 translate-middle-y text-muted p-0 me-2"
+                title="Perbesar / Lihat Pesan Menyeluruh"
+                style="z-index: 5;"
+                @click="isModalOpen = true"
+              >
+                <i class="bx bx-expand-alt fs-18"></i>
+              </b-button>
+            </div>
           </b-col>
           <b-col cols="auto" class="align-self-end">
             <b-button-group>
-              <b-button :variant="null" class="btn-light" title="Salin pesan">
+              <b-button :variant="null" class="btn-light" title="Salin pesan" @click="copyMessage">
                 <i class="bx bx-copy fs-18"></i>
               </b-button>
               <b-button type="submit" variant="primary" title="Kirim pesan">
@@ -138,6 +142,33 @@
         </b-row>
       </form>
     </div>
+
+    <!-- Modal Pesan Menyeluruh (Hanya untuk Menulis & Melihat Pesan Lebih Detail) -->
+    <b-modal
+      v-model="isModalOpen"
+      title="Detail & Penulisan Pesan Menyeluruh"
+      size="lg"
+      centered
+      hide-footer
+    >
+      <div class="d-flex flex-column gap-3">
+        <div>
+          <label class="form-label fw-semibold fs-13 mb-1">Isi Pesan Lengkap:</label>
+          <b-form-textarea
+            v-model="message"
+            placeholder="Tulis atau edit pesan lengkap di sini..."
+            rows="10"
+            no-resize
+          />
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-2">
+          <b-button variant="primary" @click="isModalOpen = false">
+            Selesai
+          </b-button>
+        </div>
+      </div>
+    </b-modal>
   </div>
 </template>
 
@@ -166,6 +197,7 @@ const emit = defineEmits<{
 
 const message = ref("");
 const waAccount = ref(props.card.waAccount || "Official WA");
+const isModalOpen = ref(false);
 
 const stageId = computed(() => props.card.pipelineStageId ?? 0);
 
@@ -215,6 +247,7 @@ watch(
     waAccount.value = props.card.waAccount || "Official WA";
     message.value = "";
     selectedTemplateId.value = null;
+    isModalOpen.value = false;
   },
 );
 
@@ -223,6 +256,23 @@ const handleSend = () => {
   emit("send", message.value.trim(), selectedTemplateId.value);
   message.value = "";
   selectedTemplateId.value = null;
+  isModalOpen.value = false;
+};
+
+const copyMessage = async () => {
+  if (!message.value) return;
+  try {
+    await navigator.clipboard.writeText(message.value);
+    showToast("Pesan berhasil disalin", {
+      type: "success",
+      position: "top-center",
+    });
+  } catch (err) {
+    showToast("Gagal menyalin pesan", {
+      type: "error",
+      position: "top-center",
+    });
+  }
 };
 
 // Prepare messages: ensure timestamp/date exist and resolve template names
