@@ -326,7 +326,7 @@ const bankOptions = computed(() => {
   return [
     { value: 0, text: "-- Pilih Bank Reference --" },
     ...list.map((b: any) => ({
-      value: b.id,
+      value: b.bank_reference_id,
       text: `${b.fin_akun_detail.name}`,
     })),
   ];

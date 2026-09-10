@@ -222,7 +222,7 @@ const { mutate, isPending } = useMutation({
       type: "success",
       position: "top-center",
     });
-    setTimeout(() => router.push("/keuangan"), 1500);
+    setTimeout(() => router.push(`/keuangan?project_id=${formState.project_id}`), 1500);
   },
   onError: (err: any) => {
     const msg = err?.response?.data?.message ?? "Gagal menyimpan data keuangan";
@@ -240,7 +240,7 @@ const handleSubmit = async () => {
     });
     return;
   }
-  // console.log(formState);
+
   mutate();
 };
 </script>
