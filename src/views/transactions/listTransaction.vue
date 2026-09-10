@@ -576,8 +576,8 @@ const submitVerificationModal = () => {
   if (!selectedTransaction.value) return;
 
   const payload = {
-    // jurnal_id: Number(selectedJurnalId.value || 0),
-    // notes: verificationNotes.value.trim(),
+    jurnal_id: Number(selectedJurnalId.value || 0),
+    notes: verificationNotes.value.trim(),
     status: "Paid",
   };
 
