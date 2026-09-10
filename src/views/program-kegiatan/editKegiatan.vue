@@ -160,7 +160,7 @@
                   <b-button
                     variant="outline-secondary"
                     :disabled="isPending"
-                    @click="router.push('/kegiatan')"
+                    @click="router.back()"
                   >
                     Batal
                   </b-button>
