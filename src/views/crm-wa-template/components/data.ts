@@ -9,16 +9,16 @@ import { hasPermission } from "@/helpers/permission";
  * Ditampilkan sebagai keterangan bantuan di form create/edit.
  */
 export const CRM_TEMPLATE_VARIABLES = [
-  { code: "XnamaX", description: "Nama lengkap donatur" },
+  { code: "XnamadonaturX", description: "Nama lengkap donatur" },
   { code: "XwaX", description: "Nomor WhatsApp donatur" },
   { code: "XemailX", description: "Alamat email donatur" },
   { code: "XinvoiceX", description: "Nomor invoice / kode transaksi donasi" },
-  { code: "XprogramX", description: "Nama program donasi" },
+  { code: "XnamaprogramX", description: "Nama program donasi" },
   { code: "XprogramLinkX", description: "Link halaman program donasi" },
   { code: "XnominalX", description: "Nominal donasi (format rupiah)" },
-  { code: "XpaymentX", description: "Metode / channel pembayaran yang digunakan" },
+  { code: "XbankX", description: "Metode / channel / bank pembayaran yang digunakan" },
   { code: "XpanggilanX", description: "Sapaan donatur (Bapak/Ibu/Kak)" },
-  { code: "XbankAtasNamaX", description: "Nama pemilik rekening bank tujuan transfer" },
+  { code: "XnamapemilikrekX", description: "Nama pemilik rekening bank tujuan transfer" },
   { code: "XnorekX", description: "Nomor rekening tujuan transfer" },
   { code: "XlokasiPenyaluranX", description: "Lokasi penyaluran donasi" },
   { code: "XprojectX", description: "Nama project / kegiatan penyaluran" },

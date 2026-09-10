@@ -114,7 +114,7 @@
               id="isi"
               v-model="v$.isi.$model"
               :state="v$.isi.$error ? false : null"
-              rows="8"
+              rows="20"
               placeholder="Tulis isi pesan WhatsApp di sini, gunakan variable di atas sesuai kebutuhan..."
             />
             <b-form-invalid-feedback v-if="v$.isi.$error">

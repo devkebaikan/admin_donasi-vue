@@ -255,6 +255,7 @@ const defaultNominalRoutes = [
   },
 ];
 
+
 // Program type routes
 const programTypeRoutes = [
   {
@@ -1212,6 +1213,68 @@ const projectReportRoutes = [
   },
 ];
 
+// Tema Routes
+const temaRoutes = [
+  {
+    path: "/tema",
+    name: "tema.list",
+    meta: {
+      title: setTitle("Tema"),
+      authRequired: true,
+    },
+    component: () => import("@/views/tema/listTema.vue"),
+  },
+  {
+    path: "/tema/create",
+    name: "tema.create",
+    meta: {
+      title: setTitle("Create Tema"),
+      authRequired: true,
+    },
+    component: () => import("@/views/tema/createTema.vue"),
+  },
+  {
+    path: "/tema/:id/edit",
+    name: "tema.edit",
+    meta: {
+      title: setTitle("Tema"),
+      authRequired: true,
+    },
+    component: () => import("@/views/tema/editTema.vue"),
+  },
+];
+
+// Tema Routes
+const eventSalurRoutes = [
+  {
+    path: "/event-salur",
+    name: "event-salur.list",
+    meta: {
+      title: setTitle("Event Salur"),
+      authRequired: true,
+    },
+    component: () => import("@/views/event-salur/listEventSalur.vue"),
+  },
+  {
+    path: "/event-salur/create",
+    name: "event-salur.create",
+    meta: {
+      title: setTitle("CreateEvent Salur"),
+      authRequired: true,
+    },
+    component: () => import("@/views/event-salur/createEventSalur.vue"),
+  },
+  {
+    path: "/event-salur/:id/edit",
+    name: "event-salur.edit",
+    meta: {
+      title: setTitle("Event Salur"),
+      authRequired: true,
+    },
+    component: () => import("@/views/event-salur/editEventSalur.vue"),
+  },
+];
+
 // CRM Routes
 const crmRoutes = [
   {
@@ -2021,4 +2084,6 @@ export const allRoutes = [
   ...menuRoutes,
   ...transactionTypeRoutes,
   ...crmRoutes,
+  ...temaRoutes,
+  ...eventSalurRoutes,
 ];

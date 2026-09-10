@@ -295,13 +295,11 @@
                 <!-- Deskripsi -->
                 <b-col cols="12">
                   <b-form-group label="Deskripsi" label-for="deskripsi">
-                    <QuillEditor
-                      theme="snow"
-                      :toolbar="toolbar"
-                      style="height: 260px"
+                    <CustomQuillEditor
+                      storage="project-content"
+                      :style="{ height: '260px' }"
                       placeholder="Deskripsi project..."
                       v-model:content="formState.deskripsi"
-                      content-type="html"
                     />
                   </b-form-group>
                   <small class="text-muted">Opsional</small>
@@ -469,7 +467,7 @@ import UIComponentCard from "@/components/UIComponentCard.vue";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
 import SearchSelect from "@/components/SearchSelect.vue";
 import MapLocationPicker from "@/components/MapLocationPicker.vue";
-import { QuillEditor } from "@vueup/vue-quill";
+import CustomQuillEditor from "@/components/CustomQuillEditor.vue";
 import { FormWizard, TabContent } from "vue3-form-wizard";
 import "vue3-form-wizard/dist/style.css";
 import "vue3-toastify/dist/index.css";
@@ -672,15 +670,4 @@ const handleSubmit = async () => {
   submitCreate(formData);
   // console.log(formState);
 };
-
-// ── Quill toolbar ─────────────────────────────────────────────────────────────
-const toolbar = [
-  [{ font: [] }, { size: [] }],
-  ["bold", "italic", "underline", "strike"],
-  [{ color: [] }, { background: [] }],
-  [{ header: [false, 1, 2, 3, 4, 5, 6] }, "blockquote", "code-block"],
-  [{ list: "ordered" }, { list: "bullet" }, { indent: "-1" }, { indent: "+1" }],
-  ["link", "image"],
-  ["clean"],
-];
 </script>

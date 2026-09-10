@@ -46,30 +46,6 @@
               </p>
 
               <b-row class="g-3">
-                <!-- Mitra -->
-                <b-col md="6">
-                  <b-form-group label="Mitra" label-for="mitra-id">
-                    <ChoicesSelect
-                      id="mitra-id"
-                      :modelValue="String(v$.mitra_id.$model || 0)"
-                      @update:modelValue="
-                        (val) => {
-                          v$.mitra_id.$model = val === '0' ? null : Number(val);
-                        }
-                      "
-                      :options="mitraList"
-                      :isLoading="isMitraLoading"
-                      :key="mitraList.length"
-                    />
-                    <div
-                      v-if="v$.mitra_id.$error"
-                      class="invalid-feedback d-block"
-                    >
-                      Mitra wajib dipilih.
-                    </div>
-                  </b-form-group>
-                </b-col>
-
                 <!-- Tipe Program -->
                 <b-col md="6">
                   <b-form-group label="Tipe Program" label-for="tipe-id">
@@ -151,6 +127,7 @@
                     <b-form-invalid-feedback v-if="v$.judul.$error">
                       Judul wajib diisi.
                     </b-form-invalid-feedback>
+                    <small> Mitra: {{ formState.mitra_name }} </small>
                   </b-form-group>
                 </b-col>
 
@@ -244,16 +221,16 @@
                 <!-- Isi Konten -->
                 <b-col cols="12">
                   <b-form-group label="Isi Konten" label-for="isi">
-                    <QuillEditor
-                      theme="snow"
-                      :toolbar="toolbar1"
-                      style="height: 460px"
+                    <CustomQuillEditor
+                      storage="program-content"
+                      :style="{ height: '460px' }"
                       placeholder="Konten HTML program..."
                       v-model:content="formState.isi"
-                      content-type="html"
                     />
                   </b-form-group>
-                  <small class="text-muted">Opsional</small>
+                  <small class="text-muted"
+                    >Opsional — klik ikon gambar, drag-and-drop, atau paste gambar untuk upload otomatis</small
+                  >
                 </b-col>
 
                 <!-- Video URL -->
@@ -585,7 +562,7 @@ import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
 // import CurrencyInput from "@/components/CurrencyInput.vue";
-import { QuillEditor } from "@vueup/vue-quill";
+import CustomQuillEditor from "@/components/CustomQuillEditor.vue";
 import { FormWizard, TabContent } from "vue3-form-wizard";
 
 import "vue3-form-wizard/dist/style.css";
@@ -599,11 +576,11 @@ import {
   getProgramCategories,
   getProgramById,
 } from "@/services/programService";
-import { getAllMitra } from "@/services/mitraService";
 import { toast, type ToastOptions } from "vue3-toastify";
 
 // ── Route params ───────────────────────────────────────────────────────────
 const route = useRoute();
+const router = useRouter();
 const programId = computed(() => Number(route.params.id));
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -642,6 +619,7 @@ const formReady = ref(false);
 
 const formState = reactive({
   mitra_id: null as number | null,
+  mitra_name: null as string | null,
   id: null as number | null,
   tipe_id: null as number | null,
   cateogry_id: null as number | null,
@@ -665,7 +643,6 @@ const formState = reactive({
 
 // ── Validation ─────────────────────────────────────────────────────────────
 const rules = computed(() => ({
-  mitra_id: { required },
   tipe_id: { required },
   judul: { required },
   link: { required },
@@ -693,7 +670,7 @@ const touchAndCheck = (fields: string[]): boolean => {
 };
 
 const validateStep1 = () =>
-  touchAndCheck(["mitra_id", "tipe_id", "judul", "link", "kode", "status"]);
+  touchAndCheck(["tipe_id", "judul", "link", "kode", "status"]);
 
 const validateStep2 = () => touchAndCheck(["rangkuman"]);
 
@@ -720,6 +697,7 @@ watch(
     // console.log(data);
     formState.id = data.id ?? null;
     formState.mitra_id = data.mitra?.id ?? null;
+    formState.mitra_name = data.mitra?.nama ?? data.mitra?.name ?? null;
     formState.tipe_id = data.tipe?.id ?? null;
     formState.cateogry_id = data.category?.id ?? null;
     formState.program_percentage_id = data.program_percentage_id ?? null;
@@ -765,22 +743,6 @@ watch(
 
 // ── Data fetching (dropdown options) ──────────────────────────────────────
 const queryClient = useQueryClient();
-
-const { data: mitraData, isLoading: isMitraLoading } = useQuery({
-  queryKey: ["mitra"],
-  queryFn: getAllMitra,
-});
-
-const mitraList = computed(() => {
-  if (!mitraData.value) return [{ value: 0, text: "Choose Mitra..." }];
-  return [
-    { value: 0, text: "Choose Mitra..." },
-    ...mitraData.value.map((item: any) => ({
-      value: item.id,
-      text: item.nama,
-    })),
-  ];
-});
 
 const { data: tipeData, isLoading: isTipeLoading } = useQuery({
   queryKey: ["program-tipe"],
@@ -888,13 +850,13 @@ const { mutate: updateProgramPayload, isPending } = useMutation({
   mutationFn: (payload: FormData) =>
     updateProgram(Number(formState.id), payload),
   onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ["programs"] });
+    queryClient.invalidateQueries({ queryKey: ["programs"], exact: false });
     queryClient.invalidateQueries({ queryKey: ["program", programId] });
     showToast("Program berhasil diperbarui", {
       type: "success",
       position: "top-center",
     });
-    setTimeout(() => (window.location.href = "/programs"), 1500);
+    setTimeout(() => router.push("/programs"), 1500);
   },
   onError: (err: any) => {
     const msg = err?.response?.data?.message ?? "Gagal memperbarui program";
@@ -920,7 +882,8 @@ const handleSubmit = async () => {
   // Method spoofing untuk Laravel (jika menggunakan _method)
   formData.append("_method", "PUT");
 
-  formData.append("mitra_id", String(formState.mitra_id));
+  if (formState.mitra_id)
+    formData.append("mitra_id", String(formState.mitra_id));
   formData.append("tipe_id", String(formState.tipe_id));
   formData.append("judul", formState.judul.trim());
   formData.append("link", formState.link.trim());

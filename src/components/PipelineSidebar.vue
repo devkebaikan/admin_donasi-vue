@@ -158,12 +158,12 @@ const modules = [
     description: "Kelola template pesan WhatsApp",
     icon: "bxl-whatsapp",
   },
-  {
-    to: "/crm/benefit",
-    label: "Marketing - Benefit",
-    description: "Kelola benefit donatur",
-    icon: "bx-book",
-  },
+  // {
+  //   to: "/crm/benefit",
+  //   label: "Marketing - Benefit",
+  //   description: "Kelola benefit donatur",
+  //   icon: "bx-book",
+  // },
 ];
 
 const { data, isLoading } = useQuery({

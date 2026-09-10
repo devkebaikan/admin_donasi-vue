@@ -33,13 +33,14 @@
               Maksimal: Rp {{ formatRupiah(maxNominal) }}
             </small>
             <b-button
+              v-if="config.label === 'Refund'"
               size="sm"
               variant="outline-primary"
               class="ms-1"
               :disabled="maxNominal <= 0"
               @click="applyMaxNominal"
             >
-              Pakai Maksimal
+              Refund Semua
             </b-button>
           </div>
           <div v-if="nominalError" class="invalid-feedback d-block">
@@ -48,9 +49,9 @@
         </b-form-group>
       </b-col>
 
-      <!-- Bank Sumber -->
-      <b-col cols="12">
-        <b-form-group label="Bank Sumber" label-for="form-bank-id">
+      <!-- Bank Tujuan -->
+      <b-col v-if="config.label === 'Refund'" cols="12">
+        <b-form-group label="Bank Tujuan" label-for="form-bank-id">
           <ChoicesSelect
             id="form-bank-id"
             :modelValue="String(form.bank_reference_id || 0)"
@@ -61,7 +62,7 @@
             "
             :options="bankOptions"
             :isLoading="isBankLoading"
-            :key="bankOptions.length"
+            :key="`bank-${showModal}-${bankOptions.length}`"
           />
           <div v-if="bankError" class="invalid-feedback d-block">
             {{ bankError }}
@@ -213,9 +214,18 @@ const isBankAccountIncomplete = computed(() => {
 });
 const queryClient = useQueryClient();
 
-const form = reactive({
+interface FormState {
+  mitra_id: string;
+  bank_reference_id: number | null;
+  account_behalf: string;
+  account_number: string;
+  nominal_ajuan: number;
+  biaya: number;
+}
+
+const form = reactive<FormState>({
   mitra_id: "",
-  bank_reference_id: 0,
+  bank_reference_id: null,
   account_behalf: "",
   account_number: "",
   nominal_ajuan: 0,
@@ -232,22 +242,15 @@ const { data: projectData } = useQuery({
 });
 
 const maxNominal = computed(() => {
+  if (!projectData.value) return 0;
   const field = config.value.maxField;
-  // const value = Number(projectData.value?.[field] ?? 0);
-  // return Number.isFinite(value) ? value : 0;
-
-  // Number(
-  //   projectData.value?.claimed_donasi - projectData.value?.total_tf_ke_mitra ??
-  //     0,
-  // );
 
   if (field === "total_alokasi") {
-    return Number(
-      projectData.value?.claimed_donasi -
-        projectData.value?.total_tf_ke_mitra ?? 0,
-    );
+    const claimed = Number(projectData.value?.claimed_donasi ?? 0);
+    const totalTf = Number(projectData.value?.total_tf_ke_mitra ?? 0);
+    return Math.max(0, claimed - totalTf);
   } else {
-    return Number(projectData.value?.sisa_dana_mitra);
+    return Number(projectData.value?.sisa_dana_mitra ?? 0);
   }
 });
 
@@ -284,7 +287,7 @@ watch(
     if (!mitra) {
       form.account_behalf = "";
       form.account_number = "";
-      form.bank_reference_id = 0;
+      form.bank_reference_id = null;
       return;
     }
 
@@ -292,7 +295,7 @@ watch(
 
     form.account_behalf = data.account_behalf ?? "";
     form.account_number = data.account_number ?? "";
-    form.bank_reference_id = data.bank_refferences_id ?? 0;
+    form.bank_reference_id = data.bank_refferences_id ?? null;
   },
   { immediate: true },
 );
@@ -300,14 +303,14 @@ watch(
   () => showModal.value,
   (isOpen) => {
     if (!isOpen) {
-      form.mitra_id = "";
-      form.bank_reference_id = 0;
-      form.account_behalf = "";
-      form.account_number = "";
-      form.nominal_ajuan = 0;
-      form.biaya = 0;
-      nominalError.value = "";
-      bankError.value = "";
+  form.mitra_id = "";
+  form.bank_reference_id = null;
+  form.account_behalf = "";
+  form.account_number = "";
+  form.nominal_ajuan = 0;
+  form.biaya = 0;
+  nominalError.value = "";
+  bankError.value = "";
     }
   },
 );
@@ -363,7 +366,9 @@ const handleSubmit = () => {
     return;
   }
 
-  if (!form.bank_reference_id) {
+
+  // Bank tidak wajib diisi untuk ajuan project, tapi wajib diisi untuk refund
+  if (config.value.label === "Refund" && !form.bank_reference_id) {
     bankError.value = "Bank wajib dipilih";
     return;
   }

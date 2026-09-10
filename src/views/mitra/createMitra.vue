@@ -268,7 +268,7 @@ const bankRefOptions = computed(() => {
     { value: 0, text: "-- Pilih Bank --" },
     ...list.map((b: any) => ({
       value: b.id,
-      text: `${b.name}${b.code && b.code !== "-" ? ` (${b.code})` : ""}`,
+      text: `${b.name}`,
     })),
   ];
 });

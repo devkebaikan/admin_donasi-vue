@@ -3,12 +3,6 @@ import { useDataTable } from "@/composables/useDataTable";
 import { getAllImages, deleteImage } from "@/services/imageService";
 import { hasPermission } from "@/helpers/permission";
 
-const STORAGE_BASE =
-  (import.meta.env.VITE_API_BASE_URL as string).replace("/api/v1", "") +
-  "/storage/";
-
-const buildImageUrl = (path: string) => (path ? `${STORAGE_BASE}${path}` : "");
-
 const isCanEdit = hasPermission("setting:image");
 const isCanDelete = hasPermission("setting:image");
 
@@ -36,10 +30,9 @@ export function useSettingImageTable() {
         width: "100px",
         sort: false,
         formatter: (cell: string) => {
-          const url = buildImageUrl(cell);
-          return url
+          return cell
             ? html(
-                `<img src="${url}" alt="image" style="width:80px;height:52px;object-fit:cover;border-radius:4px;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                `<img src="${cell}" alt="image" style="width:80px;height:52px;object-fit:cover;border-radius:4px;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
                  <div style="display:none;width:80px;height:52px;background:#f8f9fa;border-radius:4px;align-items:center;justify-content:center;">
                    <i class="bx bx-image text-muted fs-4"></i>
                  </div>`,
@@ -105,7 +98,7 @@ export function useSettingImageTable() {
 
     rowMapper: (item: any, index: number) => [
       index,
-      item.image,
+      item.image_url,
       item.name,
       item.link,
       { id: item.id },

@@ -126,7 +126,7 @@ export function useDataTable<T = any>(options: UseDataTableOptions<T>) {
 
   // ── Data fetch ───────────────────────────────────────────────────────────
 
-  const { data, error, isLoading, isFetching, isError } = useQuery({
+  const { data, error, isLoading, isFetching, isError, refetch, dataUpdatedAt } = useQuery({
     queryKey: reactiveQueryKey,
     queryFn: () => {
       const params: Record<string, any> = {
@@ -148,6 +148,12 @@ export function useDataTable<T = any>(options: UseDataTableOptions<T>) {
 
       return fetchFn(params);
     },
+    refetchOnMount: "always",
+  });
+
+  // Increment tableKey whenever data changes to trigger reactive updates
+  watch(data, () => {
+    tableKey.value++;
   });
 
   // ── Derived ──────────────────────────────────────────────────────────────
@@ -185,6 +191,7 @@ export function useDataTable<T = any>(options: UseDataTableOptions<T>) {
       sortOrder.value,
       // sortDir.value,
       tableKey.value,
+      dataUpdatedAt.value,
     ].join("-");
   });
 
@@ -213,6 +220,7 @@ export function useDataTable<T = any>(options: UseDataTableOptions<T>) {
           queryClient.invalidateQueries({ queryKey: [key], exact: false }),
         ),
       );
+      await refetch();
       tableKey.value++;
     },
     onError: (err: any) => {
@@ -270,6 +278,7 @@ export function useDataTable<T = any>(options: UseDataTableOptions<T>) {
     isFetching,
     isError,
     error,
+    refetch,
     // Derived
     tableData,
     totalRows,

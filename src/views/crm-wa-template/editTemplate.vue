@@ -96,8 +96,8 @@
           <h6 class="text-muted fw-semibold mb-2">Isi Pesan</h6></b-col
         >
 
-        <!-- Keterangan Variable — hanya untuk type crm (daftar variable tetap) -->
-        <b-col v-if="formState.type === 'crm'" cols="12">
+        <!-- Keterangan Variable (klik untuk menambahkan) -->
+        <b-col cols="12">
           <div class="bg-light rounded p-3 mb-1">
             <p class="small fw-semibold mb-2">
               <i class="bx bx-code-block me-1"></i>Variable yang bisa dipakai
@@ -131,7 +131,7 @@
               id="isi"
               v-model="v$.isi.$model"
               :state="v$.isi.$error ? false : null"
-              rows="8"
+              rows="20"
             />
             <b-form-invalid-feedback v-if="v$.isi.$error">
               {{ v$.isi.$errors[0].$message }}

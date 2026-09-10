@@ -3,12 +3,6 @@ import { useDataTable } from "@/composables/useDataTable";
 import { getBanners, deleteBanner } from "@/services/bannerService";
 import { hasPermission } from "@/helpers/permission";
 
-const STORAGE_BASE =
-  (import.meta.env.VITE_API_BASE_URL as string).replace("/api/v1", "") +
-  "/storage/";
-
-const buildImageUrl = (path: string) => (path ? `${STORAGE_BASE}${path}` : "");
-
 const isCanEdit = hasPermission("setting:banner");
 const isCanDelete = hasPermission("setting:banner");
 
@@ -36,10 +30,9 @@ export function useSettingBannerTable() {
         width: "120px",
         sort: false,
         formatter: (cell: string) => {
-          const url = buildImageUrl(cell);
-          return url
+          return cell
             ? html(
-                `<img src="${url}" alt="banner" style="width:100px;height:60px;object-fit:cover;border-radius:4px;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                `<img src="${cell}" alt="banner" style="width:100px;height:60px;object-fit:cover;border-radius:4px;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
                  <div style="display:none;width:100px;height:60px;background:#f8f9fa;border-radius:4px;align-items:center;justify-content:center;">
                    <i class="bx bx-image text-muted fs-4"></i>
                  </div>`,
@@ -103,7 +96,7 @@ export function useSettingBannerTable() {
     ],
     rowMapper: (item: any, index: number) => [
       index,
-      item.image,
+      item.image_url,
       item.link,
       item.is_new_tab,
       item.id,

@@ -34,7 +34,7 @@ export const createImage = async (data: FormData) => {
 
 export const updateImage = async (id: number, data: FormData) => {
   try {
-    const res = await HttpClient.post(`/settings/images/${id}`, data, {
+    const res = await HttpClient.put(`/settings/images/${id}`, data, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return res.data.data;

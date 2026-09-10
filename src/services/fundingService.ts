@@ -8,6 +8,7 @@ export interface FundCheckResult {
   total_allocated: number;
   total_disbursed: number;
   available_amount: number;
+  saldo_awal_program?: number;
   breakdown: any;
   status: string;
   message: string;

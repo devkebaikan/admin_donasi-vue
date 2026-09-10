@@ -93,10 +93,10 @@ export function useProgramsTable() {
                       class="btn btn-sm btn-soft-success publish-btn"
                       data-action="publish"
                       data-id="${item.id}"
-                      title="Publish Program"
+                      title="Request Akun"
                     >
                       <i class="bx bx-upload me-1"></i>
-                      Publish
+                      Request Akun
                     </button>
                   </div>
                 `
@@ -171,7 +171,7 @@ export function useProgramsTable() {
           const badgeClass =
             normalizedStatus === "PUBLISH"
               ? "bg-success"
-              : normalizedStatus === "DRAFT"
+              : normalizedStatus === "REQUEST AKUN"
                 ? "bg-warning"
                 : "bg-light text-dark";
 
