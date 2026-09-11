@@ -96,3 +96,24 @@ export const updateTransactionDetailProject = async (
     throw error;
   }
 };
+
+export interface ProposeRefundPayload {
+  account_behalf: string;
+  account_number: string;
+  bank_reference_id: number;
+  notes: string;
+  refund_amounts: number[];
+  transaction_detail_ids: number[];
+  transaction_id: number;
+}
+
+export const proposeRefund = async (data: ProposeRefundPayload) => {
+  try {
+    const res = await HttpClient.post("/admin/transactions/refund/propose", data);
+    return res.data.data;
+  } catch (error) {
+    console.error("Error proposing refund:", error);
+    throw error;
+  }
+};
+

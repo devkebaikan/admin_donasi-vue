@@ -54,10 +54,10 @@
         <b-form-group label="Bank Tujuan" label-for="form-bank-id">
           <ChoicesSelect
             id="form-bank-id"
-            :modelValue="String(form.bank_reference_id || 0)"
+            :modelValue="String(form.payment_method_id || 0)"
             @update:modelValue="
               (val: any) => {
-                form.bank_reference_id = val === '0' ? 0 : Number(val);
+                form.payment_method_id = val === '0' ? 0 : Number(val);
               }
             "
             :options="bankOptions"
@@ -137,7 +137,6 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
 import { createAjuan } from "@/services/ajuanService";
-// import { getAllBankReferences } from "@/services/bankReferenceService";
 import { getProjectById } from "@/services/projectService";
 import { getMitraById } from "@/services/mitraService";
 import { getAllPaymentMethods } from "@/services/paymentMethodService";
@@ -221,6 +220,7 @@ interface FormState {
   account_number: string;
   nominal_ajuan: number;
   biaya: number;
+  payment_method_id: number | null;
 }
 
 const form = reactive<FormState>({
@@ -230,6 +230,7 @@ const form = reactive<FormState>({
   account_number: "",
   nominal_ajuan: 0,
   biaya: 0,
+  payment_method_id: null,
 });
 
 const nominalError = ref("");
@@ -324,9 +325,9 @@ const bankOptions = computed(() => {
   const raw = bankData.value;
   const list = Array.isArray(raw) ? raw : (raw?.data ?? []);
   return [
-    { value: 0, text: "-- Pilih Bank Reference --" },
+    { value: 0, text: "-- Pilih bank tujuan --" },
     ...list.map((b: any) => ({
-      value: b.bank_reference_id,
+      value: b.id,
       text: `${b.fin_akun_detail.name}`,
     })),
   ];
@@ -341,6 +342,7 @@ const { mutate: mutateForm, isPending: isActionPending } = useMutation({
       account_behalf: form.account_behalf,
       account_number: form.account_number,
       nominal_ajuan: form.nominal_ajuan,
+      payment_method_id: form.payment_method_id,
       biaya: form.biaya,
       type: props.mode,
     }),
@@ -388,6 +390,14 @@ const handleSubmit = () => {
 
   if (!form.nominal_ajuan || form.nominal_ajuan <= 0) {
     toast(`Nominal ${config.value.label.toLowerCase()} harus lebih dari 0`, {
+      type: "warning",
+      position: "top-center",
+    });
+    return;
+  }
+  
+  if (!form.nominal_ajuan || form.nominal_ajuan > maxNominal.value) {
+    toast(`Nominal ${config.value.label.toLowerCase()} tidak boleh lebih dari ${formatRupiah(maxNominal.value)}`, {
       type: "warning",
       position: "top-center",
     });

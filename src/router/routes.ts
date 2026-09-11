@@ -722,6 +722,16 @@ const transactionRoutes = [
     },
     component: () => import("@/views/transactions/editTransaction.vue"),
   },
+  {
+    path: "/transactions/:id/refund",
+    name: "transaction.refund",
+    meta: {
+      title: setTitle("Refund Transaksi"),
+      authRequired: true,
+      middleware: [auth, menuAccess, permission("transaction:update")],
+    },
+    component: () => import("@/views/transactions/refundTransaction.vue"),
+  },
 ];
 
 // Transaction Type Routes

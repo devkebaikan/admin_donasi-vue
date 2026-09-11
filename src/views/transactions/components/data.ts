@@ -69,7 +69,7 @@ export function useTransactionTable() {
       {
         name: "Invoice",
         width: "200px",
-        formatter: (item: { program: string; inv: string; type: string }) =>
+        formatter: (item: { program: string; inv: string; type: string, source: string }) =>
           html(`
           <small class="d-flex flex-column">
              ${
@@ -82,6 +82,9 @@ export function useTransactionTable() {
               ${item.inv || "-"}
             </span>
           </small>
+          <div class="mt-1 ">
+            <small>Source : </small>  <span class="badge bg-light text-dark border">${item.source || "-"}</span>
+          </div>
       `),
       },
       {
@@ -148,14 +151,14 @@ export function useTransactionTable() {
           return html(`<span class="badge ${s.cls}">${s.label}</span>`);
         },
       },
-      {
-        name: "Source",
-        width: "90px",
-        formatter: (cell: string) =>
-          html(
-            `<span class="badge bg-light text-dark border">${cell || "-"}</span>`,
-          ),
-      },
+      // {
+      //   name: "Source",
+      //   width: "90px",
+      //   formatter: (cell: string) =>
+      //     html(
+      //       `<span class="badge bg-light text-dark border">${cell || "-"}</span>`,
+      //     ),
+      // },
       {
         name: "Actions",
         width: "90px",
@@ -177,11 +180,17 @@ export function useTransactionTable() {
                 data-action="delete" data-id="${item.id}" title="Hapus">
                 <i class="bx bx-trash fs-16"></i>
               </button>
-              ${
-                item.status === "Pending"
+              ${item.status === "Pending"
                   ? `<button class="btn btn-sm btn-soft-success verifikasi-btn"
                 data-action="verifikasi" data-id="${item.id}" title="verifikasi">
                 <i class="bx bx-check fs-16"></i>
+                </button>`
+                  : ""
+              }
+              ${item.status === "Paid"
+                  ? `<button class="btn btn-sm btn-soft-warning refund-btn"
+                data-action="refund" data-id="${item.id}" title="refund">
+                <i class="bx bx-revision fs-16"></i>
                 </button>`
                   : ""
               }
@@ -196,6 +205,7 @@ export function useTransactionTable() {
         program: item?.transaction_details?.[0]?.program?.name,
         inv: item.invoice,
         type: item.transaction_type.name,
+        source : item.source
       },
       item.date,
       item.total,
@@ -206,7 +216,6 @@ export function useTransactionTable() {
       },
       item.payment_method.bank_name,
       item.status,
-      item.source,
       { id: item.id, status: item.status },
     ],
   });

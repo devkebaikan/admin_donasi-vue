@@ -675,6 +675,9 @@ const handleGlobalClick = (event: Event) => {
   const verifikasiBtn = target.closest<HTMLElement>(
     '#table-gridjs .verifikasi-btn[data-action="verifikasi"]',
   );
+  const refundBtn = target.closest<HTMLElement>(
+    '#table-gridjs .refund-btn[data-action="refund"]',
+  );
 
   if (detailBtn) {
     event.preventDefault();
@@ -698,6 +701,12 @@ const handleGlobalClick = (event: Event) => {
     event.preventDefault();
     const id = verifikasiBtn.getAttribute("data-id");
     if (id) void openModal(Number(id));
+  }
+  if (refundBtn) {
+    event.preventDefault();
+    const id = refundBtn.getAttribute("data-id");
+    if (id) router.push(`/transactions/${id}/refund`);
+    return;
   }
 };
 
