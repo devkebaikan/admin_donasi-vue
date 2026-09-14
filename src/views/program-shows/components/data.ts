@@ -77,6 +77,8 @@ export function useProgramShowsTable(programId?: number) {
             home: "bg-primary",
             featured: "bg-warning text-dark",
             latest: "bg-info text-dark",
+            rutin: "bg-info text-dark",
+            ramadhan: "bg-danger",
             popular: "bg-success",
             trending: "bg-purple",
             special: "bg-secondary",
@@ -99,23 +101,30 @@ export function useProgramShowsTable(programId?: number) {
           return html(`<span class="text-muted small">${formatted}</span>`);
         },
       },
-      // {
-      //   name: "Actions",
-      //   width: "70px",
-      //   sort: false,
-      //   formatter: (id: number) =>
-      //     html(`
-      //       <div class="d-flex gap-1 justify-content-center">
-      //         <button
-      //           class="btn btn-sm btn-soft-danger delete-btn"
-      //           data-action="delete"
-      //           data-id="${id}"
-      //           title="Delete">
-      //           <i class="bx bx-trash fs-16"></i>
-      //         </button>
-      //       </div>
-      //     `),
-      // },
+      {
+        name: "Actions",
+        width: "90px",
+        sort: false,
+        formatter: (id: number) =>
+          html(`
+            <div class="d-flex gap-1 justify-content-center">
+              <button
+                class="btn btn-sm btn-soft-primary edit-btn"
+                data-action="edit"
+                data-id="${id}"
+                title="Edit">
+                <i class="bx bx-edit fs-16"></i>
+              </button>
+              <button
+                class="btn btn-sm btn-soft-danger delete-btn"
+                data-action="delete"
+                data-id="${id}"
+                title="Delete">
+                <i class="bx bx-trash fs-16"></i>
+              </button>
+            </div>
+          `),
+      },
     ],
 
     rowMapper: (item: any, index: number) => [
