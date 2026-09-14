@@ -152,18 +152,22 @@
             <!-- Bank Reference -->
             <b-col md="6">
               <b-form-group label="Bank Referensi" label-for="bank-ref">
-                <ChoicesSelect
-                  id="form-bank-id"
-                  :modelValue="String(formState.bank_references_id || 0)"
+                <SearchSelect
+                  id="bank-ref"
+                  :modelValue="String(formState.bank_refferences_id || 0)"
                   @update:modelValue="
                     (val: any) => {
-                      formState.bank_references_id =
-                        val === '0' ? 0 : Number(val);
+                      formState.bank_refferences_id =
+                        val === '0' || !val ? null : Number(val);
+                    }
+                  "
+                  @search="
+                    (query: string) => {
+                      bankSearchQuery = query;
                     }
                   "
                   :options="bankRefOptions"
                   :isLoading="isBankLoading"
-                  :key="bankRefOptions.length"
                 />
                 <small class="text-muted">Opsional</small>
               </b-form-group>
@@ -241,6 +245,8 @@ import { required } from "@vuelidate/validators";
 import { useRouter } from "vue-router";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
+import SearchSelect from "@/components/SearchSelect.vue";
+import { useSearchSelect } from "@/composables/useSearchSelect";
 import { createMitra } from "@/services/mitraService";
 import { getAllBankReferences } from "@/services/bankReferenceService";
 import { toast, type ToastOptions } from "vue3-toastify";
@@ -255,22 +261,20 @@ const queryClient = useQueryClient();
 const logoFile = ref<File | null>(null);
 const logoPreview = ref<string | null>(null);
 
-// bank ref option
-const { data: bankData, isLoading: isBankLoading } = useQuery({
-  queryKey: ["bank-references-list"],
-  queryFn: () => getAllBankReferences({ mode: "list" }),
-});
-
-const bankRefOptions = computed(() => {
-  const raw = bankData.value;
-  const list = Array.isArray(raw) ? raw : (raw?.data ?? []);
-  return [
-    { value: 0, text: "-- Pilih Bank --" },
-    ...list.map((b: any) => ({
-      value: b.id,
-      text: `${b.name}`,
-    })),
-  ];
+// ── Bank Ref SearchSelect ──────────────────────────────────────────────────
+const {
+  searchQuery: bankSearchQuery,
+  options: bankRefOptions,
+  isLoading: isBankLoading,
+} = useSearchSelect({
+  queryKey: "bank-references-search",
+  fetchFn: getAllBankReferences,
+  optionsMapper: (bank: any) => ({
+    value: bank.id,
+    text: `${bank.name}${bank.code && bank.code !== "-" ? ` (${bank.code})` : ""}`,
+  }),
+  placeholder: "Cari bank...",
+  limit: 10,
 });
 
 // ── Form state ─────────────────────────────────────────────────────────────
@@ -285,7 +289,7 @@ const formState = reactive({
   nomer: "",
   account_behalf: "",
   account_number: "",
-  bank_references_id: null as number | null,
+  bank_refferences_id: null as number | null,
 });
 
 // ── Validation ─────────────────────────────────────────────────────────────
@@ -359,8 +363,8 @@ const handleSubmit = async () => {
     formData.append("account_behalf", formState.account_behalf.trim());
   if (formState.account_number?.trim())
     formData.append("account_number", formState.account_number.trim());
-  if (formState.bank_references_id)
-    formData.append("bank_references_id", String(formState.bank_references_id));
+  if (formState.bank_refferences_id)
+    formData.append("bank_refferences_id", String(formState.bank_refferences_id));
   if (logoFile.value) formData.append("logo", logoFile.value);
 
   createMitraPayload(formData);
