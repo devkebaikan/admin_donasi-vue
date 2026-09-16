@@ -65,7 +65,7 @@ export function useProgramShowsTable(programId?: number) {
         width: "160px",
         formatter: (cell: string) =>
           html(
-            `<a href="https://don.aksiberbagi.com/donasi/${cell}" target="_blank" rel="noopener noreferrer" class="small">${cell}</a>`,
+            `<a href="https://beramalbersama.com/${cell}" target="_blank" rel="noopener noreferrer" class="small">${cell}</a>`,
           ),
       },
       {

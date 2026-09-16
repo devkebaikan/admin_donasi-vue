@@ -74,7 +74,7 @@ export function useProgramsTable() {
             >
               <i class="bx bx-link me-1"></i>
               <a
-                href="https://don.aksiberbagi.com/donasi/${item.link}"
+                href="https://beramalbersama.com/${item.link}"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="text-primary"

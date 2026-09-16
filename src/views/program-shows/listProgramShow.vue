@@ -165,6 +165,7 @@ const activeTab = ref(0);
 
 const tabs = [
   { id: "tab-all", label: "All", type: "" },
+  { id: "tab-rutin", label: "Rutin", type: "rutin" },
   { id: "tab-featured", label: "Featured", type: "featured" },
   { id: "tab-latest", label: "Latest", type: "latest" },
   { id: "tab-popular", label: "Popular", type: "popular" },

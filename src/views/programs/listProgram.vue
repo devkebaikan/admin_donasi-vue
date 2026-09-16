@@ -398,12 +398,12 @@
         <div class="mb-3">
           <small class="text-muted d-block mb-1">URL Program</small>
           <a
-            :href="`https://don.aksiberbagi.com/donasi/${programDetail.link}`"
+            :href="`https://beramalbersama.com/${programDetail.link}`"
             target="_blank"
             rel="noopener noreferrer"
             class="small text-break"
           >
-            don.aksiberbagi.com/donasi/{{ programDetail.link }}
+            beramalbersama.com/{{ programDetail.link }}
             <i class="bx bx-link-external ms-1"></i>
           </a>
         </div>

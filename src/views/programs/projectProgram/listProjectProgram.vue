@@ -408,7 +408,7 @@
               <div class="fw-semibold small">{{ program.description }}</div>
               <small class="text-muted">
                 <a
-                  :href="`https://don.aksiberbagi.com/donasi/${program.slug}`"
+                  :href="`https://beramalbersama.com/${program.slug}`"
                   target="_blank"
                   rel="noopener noreferrer"
                 >

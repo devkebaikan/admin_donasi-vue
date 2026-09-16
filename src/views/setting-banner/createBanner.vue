@@ -117,8 +117,8 @@ const { mutate: submitCreate, isPending } = useMutation({
   mutationFn: () => {
     const formData = new FormData();
     if (formState.image) formData.append("image", formState.image);
-    if (formState.link.trim()) formData.append("link", formState.link.trim());
-    formData.append("is_new_tab", formState.is_new_tab ? "1" : "0");
+    formData.append("link", formState.link.trim());
+    formData.append("is_new_tab", formState.is_new_tab ? "true" : "false");
     return createBanner(formData);
   },
   onSuccess: () => {

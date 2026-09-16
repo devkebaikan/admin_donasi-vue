@@ -222,7 +222,7 @@ watch(
     if (!data) return;
     formState.link = data.link ?? "";
     formState.is_new_tab = data.is_new_tab ?? false;
-    existingImageUrl.value = data.image ? `${STORAGE_BASE}${data.image}` : null;
+    existingImageUrl.value = data.image_url ?? null;
     formReady.value = true;
   },
   { immediate: true },
@@ -251,10 +251,9 @@ const clearNewImage = () => {
 const { mutate: submitUpdate, isPending } = useMutation({
   mutationFn: () => {
     const formData = new FormData();
-    formData.append("_method", "PUT");
     if (newImageFile.value) formData.append("image", newImageFile.value);
-    if (formState.link.trim()) formData.append("link", formState.link.trim());
-    formData.append("is_new_tab", formState.is_new_tab ? "1" : "0");
+    formData.append("link", formState.link.trim());
+    formData.append("is_new_tab", formState.is_new_tab ? "true" : "false");
     return updateBanner(bannerId.value, formData);
   },
   onSuccess: () => {
