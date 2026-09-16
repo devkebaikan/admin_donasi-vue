@@ -89,7 +89,7 @@
                     placeholder="Nomor nota atau keterangan..."
                     maxlength="255"
                   />
-                  <small class="text-muted">Opsional</small>
+                  <!-- <small class="text-muted">Opsional</small> -->
                 </b-form-group>
               </b-col>
 
@@ -105,7 +105,7 @@
                   <b-button
                     variant="outline-secondary"
                     :disabled="isPending"
-                    @click="router.push('/keuangan')"
+                    @click="router.back()"
                   >
                     Batal
                   </b-button>

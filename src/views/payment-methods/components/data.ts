@@ -6,10 +6,12 @@ import {
   deletePaymentMethod,
 } from "@/services/paymentMethodService";
 import { formatCurrency } from "@/helpers/format";
-// import { hasPermission } from "@/helpers/permission";
+import { hasPermission } from "@/helpers/permission";
 
-const isCanEdit = true;
-const isCanDelete = true;
+// NOTE: "payment:update" dipakai juga di middleware route edit (router/index.ts).
+// "payment:delete" masih asumsi — ganti kalau key permission delete di sistemmu beda.
+const isCanEdit = hasPermission("payment:edit");
+const isCanDelete = hasPermission("payment:delete");
 
 export function usePaymentMethodTable() {
   const selectedBankReferenceId = ref<number | string>("");
@@ -113,18 +115,18 @@ export function usePaymentMethodTable() {
       },
       {
         name: "Aksi",
-        width: "130px",
+        width: "160px",
         sort: false,
         formatter: (id: number) =>
           html(`
             <div class="d-flex gap-1 justify-content-center">
+              <button class="btn btn-sm btn-soft-primary detail-btn" data-action="detail" data-id="${id}" title="Detail"><i class="bx bx-show fs-16"></i></button>
               ${isCanEdit ? `<button class="btn btn-sm btn-soft-warning edit-btn" data-action="edit" data-id="${id}" title="Edit"><i class="bx bx-edit fs-16"></i></button>` : ""}
               ${isCanDelete ? `<button class="btn btn-sm btn-soft-danger delete-btn" data-action="delete" data-id="${id}" title="Hapus"><i class="bx bx-trash fs-16"></i></button>` : ""}
             </div>
           `),
       },
     ],
-    // <button class="btn btn-sm btn-soft-primary detail-btn" data-action="detail" data-id="${id}" title="Detail"><i class="bx bx-show fs-16"></i></button>
 
     rowMapper: (item: any, index: number) => [
       index,
@@ -133,7 +135,7 @@ export function usePaymentMethodTable() {
         number: item.account_number,
         bankName: item.bank_reference?.name ?? "-",
       },
-      item.bank_reference.type,
+      item.bank_reference?.type ?? "-",
       item.usage,
       { fee: item.fee, fee_type: item.fee_type },
       { id: item.id, is_active: item.is_active },

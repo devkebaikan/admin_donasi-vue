@@ -5,7 +5,7 @@
         <UIComponentCard title="Tambah Project Keuangan">
           <b-row class="g-3">
             <!-- Kegiatan -->
-            <b-col md="6">
+            <!-- <b-col md="6">
               <b-form-group label="Kegiatan (opsional)" label-for="kegiatan-id">
                 <ChoicesSelect
                   id="kegiatan-id"
@@ -26,7 +26,7 @@
                   {{ v$.kegiatan_id.$errors[0].$message }}
                 </div>
               </b-form-group>
-            </b-col>
+            </b-col> -->
 
             <!-- Items -->
             <b-col md="6">
@@ -75,7 +75,7 @@
                   placeholder="Nomor nota atau keterangan..."
                   maxlength="255"
                 />
-                <small class="text-muted">Opsional</small>
+                <!-- <small class="text-muted">Opsional</small> -->
               </b-form-group>
             </b-col>
 
@@ -205,12 +205,16 @@ const kegiatanList = computed(() => {
 const { mutate, isPending } = useMutation({
   mutationFn: () =>
     createKeuangan({
-      kegiatan_id: formState.kegiatan_id,
-      project_id: formState.project_id,
-      mitra_id: formState.mitra_id,
-      items: formState.items,
-      nominal: formState.nominal,
+      items: [
+        {
+          items: formState.items,
+          nominal: Number(formState.nominal),
+        },
+      ],
+      kegiatan_id: formState.kegiatan_id ? Number(formState.kegiatan_id) : null,
+      mitra_id: Number(formState.mitra_id),
       nota: formState.nota,
+      project_id: Number(formState.project_id),
     }),
   onSuccess: () => {
     queryClient.invalidateQueries({ queryKey: ["project-keuangans"] });
@@ -218,7 +222,7 @@ const { mutate, isPending } = useMutation({
       type: "success",
       position: "top-center",
     });
-    setTimeout(() => router.push("/keuangan"), 1500);
+    setTimeout(() => router.push(`/keuangan?project_id=${formState.project_id}`), 1500);
   },
   onError: (err: any) => {
     const msg = err?.response?.data?.message ?? "Gagal menyimpan data keuangan";
@@ -236,7 +240,7 @@ const handleSubmit = async () => {
     });
     return;
   }
-  // console.log(formState);
+
   mutate();
 };
 </script>

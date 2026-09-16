@@ -168,7 +168,7 @@ const {
 
 // 7
 onMounted(() => {
-  selectedRoleId.value = "7";
+  selectedRoleId.value = "3";
 });
 
 const hasActiveFilters = computed(

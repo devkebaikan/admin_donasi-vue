@@ -37,30 +37,13 @@
 
     <!-- Table -->
     <b-row>
-      <!-- breadcrumb -->
-      <!-- <nav aria-label="breadcrumb" class="d-flex justify-content-end">
-        <ol class="breadcrumb mb-0 py-0">
-          <li class="breadcrumb-item">
-            <a href="javascript:void(0);">Home</a>
-          </li>
-          <li class="breadcrumb-item">
-            <a href="javascript:void(0);">Settings</a>
-          </li>
-          <li class="breadcrumb-item active" aria-current="page">
-            Program Shows
-          </li>
-        </ol>
-      </nav> -->
       <b-col>
         <UIComponentCard id="basic" title="Daftar Program Shows">
-          <!-- <div class="d-flex justify-content-end mb-3">
-            <b-button
-              variant="primary"
-              @click="router.push('/programs/show/create')"
-            >
-              <i class="bx bx-plus fs-16 me-1"></i>Create New Show
+          <div v-if="isCanCreate" class="d-flex justify-content-end mb-3">
+            <b-button variant="primary" @click="router.push('/program-show/create')">
+              <i class="bx bx-plus fs-16 me-1"></i>Tambah Program Show
             </b-button>
-          </div> -->
+          </div>
 
           <!-- Type Tabs -->
           <b-tabs
@@ -159,11 +142,19 @@ import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
 import { useProgramShowsTable } from "./components/data";
+import { hasPermission } from "@/helpers/permission";
+import { PROGRAM_SHOW_TYPES } from "@/services/programShowService";
 import router from "@/router";
+
+// NOTE: sesuaikan key permission ini dengan yang terdaftar di sistem permission-mu
+// (contoh di halaman Image pakai "setting:image")
+const isCanCreate = hasPermission("setting:showing");
 
 const activeTab = ref(0);
 
+// Mengikuti AllProgramShowTypes di internal/module/setting/dto/program_show.go
 const tabs = [
+<<<<<<< HEAD
   { id: "tab-all", label: "All", type: "" },
   { id: "tab-rutin", label: "Rutin", type: "rutin" },
   { id: "tab-featured", label: "Featured", type: "featured" },
@@ -174,6 +165,13 @@ const tabs = [
   { id: "tab-special", label: "Special", type: "special" },
   { id: "tab-darurat", label: "Darurat", type: "darurat" },
   { id: "tab-home", label: "Home", type: "home" },
+=======
+  ...PROGRAM_SHOW_TYPES.map((t) => ({
+    id: `tab-${t.value}`,
+    label: t.label,
+    type: t.value,
+  })),
+>>>>>>> c68813ccb1f069f2293bcdf26be2a47fc55fc304
 ];
 
 const {
@@ -202,6 +200,10 @@ const resetTypeTab = () => {
   onTabChange(0);
 };
 
+// Set filter ke tab pertama saat halaman pertama kali dibuka,
+// supaya data yang tampil konsisten dengan pill yang aktif.
+onTabChange(activeTab.value);
+
 const hasActiveFilters = computed(
   () => !!(selectedType.value || searchQuery.value),
 );
@@ -216,10 +218,18 @@ const clearFilters = () => {
 const handleGlobalClick = (event: Event) => {
   const target = event.target as HTMLElement;
 
+  const editBtn = target.closest<HTMLElement>(
+    '#table-gridjs .edit-btn[data-action="edit"]',
+  );
   const deleteBtn = target.closest<HTMLElement>(
     '#table-gridjs .delete-btn[data-action="delete"]',
   );
 
+  if (editBtn) {
+    event.preventDefault();
+    const id = editBtn.getAttribute("data-id");
+    if (id) router.push(`/program-show/${id}/edit`);
+  }
   if (deleteBtn) {
     event.preventDefault();
     const id = deleteBtn.getAttribute("data-id");
