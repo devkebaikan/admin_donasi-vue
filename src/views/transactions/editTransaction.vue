@@ -12,6 +12,11 @@
         </div>
 
         <form v-else @submit.prevent="handleSubmit">
+          <div v-if="isLocked" class="alert alert-warning mb-3">
+            <i class="bx bx-lock-alt me-1"></i>
+            Transaksi ini sudah <strong>Paid</strong> dan tidak dapat diubah
+            lagi.
+          </div>
           <!-- Informasi Detail -->
           <UIComponentCard title="Informasi Detail" class="mb-3">
             <b-row class="g-3">
@@ -22,6 +27,7 @@
                   v-model="formState.date"
                   placeholder="Pilih tanggal"
                   :options="{ dateFormat: 'Y-m-d' }"
+                  :disabled="isLocked"
                 />
                 <div v-if="v$.date.$error" class="invalid-feedback d-block">
                   {{ v$.date.$errors[0]?.$message }}
@@ -40,6 +46,7 @@
                     dateFormat: 'H:i:S',
                     time_24hr: true,
                   }"
+                  :disabled="isLocked"
                 />
                 <div v-if="v$.time.$error" class="invalid-feedback d-block">
                   {{ v$.time.$errors[0]?.$message }}
@@ -51,6 +58,7 @@
                 <b-form-select
                   v-model="formState.status"
                   :state="v$.status.$dirty ? !v$.status.$error : null"
+                  :disabled="isLocked"
                 >
                   <b-form-select-option value="Paid">Paid</b-form-select-option>
                   <b-form-select-option value="Pending"
@@ -70,6 +78,7 @@
                 <b-form-input
                   v-model="formState.source"
                   placeholder="CRM, direct, ..."
+                  :disabled="isLocked"
                 />
               </b-col>
 
@@ -92,7 +101,11 @@
           </UIComponentCard>
 
           <!-- Item Detail Transaksi -->
-          <UIComponentCard v-if="txData?.transaction_type.id !== 2" title="Item Detail Transaksi" class="mb-3">
+          <UIComponentCard
+            v-if="txData?.transaction_type.id !== 2"
+            title="Item Detail Transaksi"
+            class="mb-3"
+          >
             <div
               v-for="(item, idx) in items"
               :key="idx"
@@ -127,6 +140,7 @@
                     "
                     :options="programList"
                     :isLoading="isProgramLoading"
+                    :disabled="isLocked"
                     :key="programList.length"
                   />
                 </b-col>
@@ -138,6 +152,7 @@
                   <CurrencyInput
                     v-model.number="item.gross_nominal"
                     placeholder="0"
+                    :disabled="isLocked"
                     :state="undefined"
                   />
                 </b-col>
@@ -147,6 +162,7 @@
                   <CurrencyInput
                     v-model.number="item.discount"
                     placeholder="0"
+                    :disabled="isLocked"
                     :state="undefined"
                   />
                 </b-col>
@@ -164,6 +180,7 @@
                       }
                     "
                     :options="eventList"
+                    :disabled="isLocked"
                     :isLoading="isEventLoading"
                     :key="eventList.length"
                   />
@@ -174,6 +191,7 @@
                   <CurrencyInput
                     v-model.number="item.quantity"
                     placeholder="1"
+                    :disabled="isLocked"
                     :state="undefined"
                   />
                 </b-col>
@@ -196,6 +214,7 @@
                   <ChoicesSelect
                     :id="`zakat-program-id-${idx}`"
                     :modelValue="String(item.program_id || 0)"
+                    :disabled="isLocked"
                     @update:modelValue="
                       (val: string) => {
                         item.program_id = val === '0' ? null : Number(val);
@@ -214,6 +233,7 @@
                   <ChoicesSelect
                     :id="`zakat-id-${idx}`"
                     :modelValue="String(item.zakat_id || 0)"
+                    :disabled="isLocked"
                     @update:modelValue="
                       (val: string) => {
                         item.zakat_id = val === '0' ? null : Number(val);
@@ -227,6 +247,7 @@
                   <label class="form-label fw-semibold required">Qty</label>
                   <CurrencyInput
                     v-model.number="item.quantity"
+                    :disabled="isLocked"
                     placeholder="1"
                     :state="undefined"
                   />
@@ -239,6 +260,7 @@
                   <CurrencyInput
                     v-model.number="item.gross_nominal"
                     placeholder="0"
+                    :disabled="isLocked"
                     :state="undefined"
                   />
                 </b-col>
@@ -259,6 +281,7 @@
                   <ChoicesSelect
                     :id="`qurban-program-id-${idx}`"
                     :modelValue="String(item.program_id || 0)"
+                    :disabled="isLocked"
                     @update:modelValue="
                       (val: string) => {
                         item.program_id = val === '0' ? null : Number(val);
@@ -274,6 +297,7 @@
                   <label class="form-label fw-semibold required">Qty</label>
                   <CurrencyInput
                     v-model.number="item.quantity"
+                    :disabled="isLocked"
                     placeholder="1"
                     :state="undefined"
                   />
@@ -285,6 +309,7 @@
                   >
                   <CurrencyInput
                     v-model.number="item.gross_nominal"
+                    :disabled="isLocked"
                     placeholder="0"
                     :state="undefined"
                   />
@@ -320,6 +345,7 @@
                 <ChoicesSelect
                   id="payment-method-id"
                   :modelValue="String(formState.payment_method_id || 0)"
+                  :disabled="isLocked"
                   @update:modelValue="
                     (val: string) => {
                       formState.payment_method_id =
@@ -359,7 +385,7 @@
                 <b-button
                   variant="outline-primary"
                   class="w-100"
-                  :disabled="isDataUnclaimed"
+                  :disabled="isDataUnclaimed || isLocked"
                   @click="checkMutation"
                 >
                   <b-spinner v-if="isDataUnclaimed" small class="me-1" />
@@ -372,6 +398,7 @@
                 <ChoicesSelect
                   id="jurnal-id"
                   :modelValue="String(formState.jurnal_id || 0)"
+                  :disabled="isLocked"
                   @update:modelValue="
                     (val: string) => {
                       formState.jurnal_id = val === '0' ? null : Number(val);
@@ -433,7 +460,7 @@ const txId = computed(() => Number(route.params.id));
 
 const DEDICATED_TYPES = ["donation", "event", "zakat", "qurban"] as const;
 type DedicatedType = (typeof DEDICATED_TYPES)[number];
-
+const isLocked = computed(() => txData.value?.status === "Paid");
 const activeType = ref<DedicatedType>("donation");
 
 const ZAKAT_TYPE_LIST = [
@@ -561,7 +588,7 @@ watch(
     formState.source = data.source ?? "CRM";
     formState.doa = data.doa ?? data.notes ?? "";
     formState.payment_method_id = data.payment_method_id ?? null;
-    formState.jurnal_id = data.jurnal_id ?? (data.jurnal?.id ?? null);
+    formState.jurnal_id = data.jurnal_id ?? data.jurnal?.id ?? null;
 
     if (data.jurnal) {
       selectedJurnal.value = {
@@ -573,7 +600,7 @@ watch(
       };
     }
 
-    userId.value = data.user_id ?? (data.user?.id ?? null);
+    userId.value = data.user_id ?? data.user?.id ?? null;
     if (data.user) {
       userDisplay.value = `${data.user.name || "User"} - ${data.user.phone || ""}`;
     } else if (userId.value) {
@@ -593,10 +620,10 @@ watch(
     ) {
       items.value = data.transaction_details.map((d: any) => ({
         id: d.id,
-        program_id: d.program_id ?? (d.program?.id ?? null),
+        program_id: d.program_id ?? d.program?.id ?? null,
         gross_nominal: Number(d.gross_nominal ?? d.nominal ?? 0),
         discount: Number(d.discount ?? 0),
-        event_id: d.event_id ?? (d.event?.id ?? null),
+        event_id: d.event_id ?? d.event?.id ?? null,
         quantity: Number(d.quantity ?? 1),
         zakat_id: d.zakat_id ?? null,
       }));
@@ -632,7 +659,7 @@ const jurnalOptions = computed(() => {
 
   const options = list.map((t: any) => ({
     value: t.id,
-    text: t.nota_number,
+    text: t.outside_description,
   }));
 
   if (
@@ -645,7 +672,9 @@ const jurnalOptions = computed(() => {
   return [
     {
       value: 0,
-      text: options.length ? "Pilih jurnal..." : "Klik Cek Mutasi untuk mencari",
+      text: options.length
+        ? "Pilih jurnal..."
+        : "Klik Cek Mutasi untuk mencari",
     },
     ...options,
   ];
@@ -704,10 +733,12 @@ const donationProgramType = computed(() => {
 });
 
 // Payment method list
-const { data: paymentMethodData, isLoading: isPaymentMethodLoading } = useQuery({
-  queryKey: ["payment-method-list"],
-  queryFn: getAllPaymentMethods,
-});
+const { data: paymentMethodData, isLoading: isPaymentMethodLoading } = useQuery(
+  {
+    queryKey: ["payment-method-list"],
+    queryFn: getAllPaymentMethods,
+  },
+);
 
 const paymentMethodList = computed(() => {
   const list = Array.isArray(paymentMethodData.value)
@@ -794,9 +825,7 @@ const buildDetails = () => {
     if (
       !items.value.every(
         (item) =>
-          item.program_id &&
-          item.quantity >= 1 &&
-          item.gross_nominal > 0,
+          item.program_id && item.quantity >= 1 && item.gross_nominal > 0,
       )
     )
       return null;

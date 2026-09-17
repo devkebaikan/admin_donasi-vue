@@ -2,7 +2,14 @@
   <label v-if="label" :for="id" class="form-label text-muted">{{
     label
   }}</label>
-  <select :id="id" :value="modelValue" @change="updateValue" v-bind="$attrs" :multiple="multiple">
+  <select
+    :id="id"
+    :value="modelValue"
+    @change="updateValue"
+    v-bind="$attrs"
+    :multiple="multiple"
+    :disabled="disabled"
+  >
     <slot />
     <template v-if="options">
       <option v-for="(option, idx) in options" :key="idx" :value="option.value">
@@ -14,7 +21,7 @@
 
 <script setup lang="ts">
 import Choices from "choices.js";
-import { onMounted } from "vue";
+import { onMounted, onBeforeUnmount, watch } from "vue";
 
 type ChoicesSelectPropsType = {
   id: string;
@@ -23,6 +30,7 @@ type ChoicesSelectPropsType = {
   options?: { value: string | number; text: string }[];
   choiceOptions?: object;
   multiple?: boolean;
+  disabled?: boolean;
 };
 
 const props = defineProps<ChoicesSelectPropsType>();
@@ -56,5 +64,27 @@ onMounted(() => {
     choicesInstance.setChoiceByValue(props.modelValue);
     isSyncing = false;
   }
+
+  // Sync initial disabled state (Choices.js wraps the select, so the
+  // native `disabled` attribute alone won't visually/interactively disable it)
+  if (props.disabled) {
+    choicesInstance.disable();
+  }
+});
+
+watch(
+  () => props.disabled,
+  (isDisabled) => {
+    if (!choicesInstance) return;
+    if (isDisabled) {
+      choicesInstance.disable();
+    } else {
+      choicesInstance.enable();
+    }
+  },
+);
+
+onBeforeUnmount(() => {
+  choicesInstance?.destroy();
 });
 </script>

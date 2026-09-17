@@ -359,7 +359,7 @@
                 <b-button
                   variant="outline-primary"
                   class="w-100"
-                  :disabled="isDataUnclaimed"
+                  :disabled="isDataUnclaimed || formState.status !== 'Paid'"
                   @click="checkMutation"
                 >
                   <b-spinner v-if="isDataUnclaimed" small class="me-1" />
@@ -379,6 +379,7 @@
                   "
                   :options="jurnalOptions"
                   :isLoading="isDataUnclaimed"
+                  :disabled="formState.status !== 'Paid'"
                   :key="jurnalOptions.length"
                 />
               </b-col>
@@ -402,7 +403,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useMutation, useQuery } from "@tanstack/vue-query";
 import { useRoute } from "vue-router";
 import { useVuelidate } from "@vuelidate/core";
@@ -532,7 +533,7 @@ const jurnalOptions = computed(() => {
     },
     ...list.map((t: any) => ({
       value: t.id,
-      text: t.nota_number,
+      text: t.outside_description,
     })),
   ];
 });
@@ -692,9 +693,7 @@ const buildDetails = () => {
     if (
       !items.value.every(
         (item) =>
-          item.program_id &&
-          item.quantity >= 1 &&
-          item.gross_nominal > 0,
+          item.program_id && item.quantity >= 1 && item.gross_nominal > 0,
       )
     )
       return null;
@@ -763,4 +762,14 @@ const handleSubmit = async () => {
 
   mutate(payload);
 };
+
+
+watch(
+  () => formState.status,
+  (newStatus) => {
+    if (newStatus !== "Paid") {
+      formState.jurnal_id = null;
+    }
+  },
+);
 </script>

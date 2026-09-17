@@ -334,7 +334,7 @@
     <b-modal
       v-model="showVerifikasiModal"
       title="Verifikasi Transaksi"
-      size="lg"
+      size="xl"
       centered
       @hidden="resetVerificationModal"
     >
@@ -541,7 +541,7 @@ const checkMutation = async (
       },
       ...list.map((item: any) => ({
         value: item.id,
-        text: item.akun_name || `Jurnal #${item.id}`,
+        text: item.outside_description || `Jurnal #${item.id}`,
       })),
     ];
 
