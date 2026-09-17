@@ -34,7 +34,7 @@ jobs:
 
           # Tentukan direktori tujuan berdasarkan branch yang di-push
           if [ "$BRANCH_NAME" = "admin_beramal" ]; then
-            TARGET_DIR="/var/www/akber-new/beramal-new/admin"
+            TARGET_DIR="/var/www/beramal-new/admin"
           else
             TARGET_DIR="/var/www/akber-new/admin"
           fi
