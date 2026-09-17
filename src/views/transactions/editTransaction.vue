@@ -92,7 +92,7 @@
           </UIComponentCard>
 
           <!-- Item Detail Transaksi -->
-          <UIComponentCard title="Item Detail Transaksi" class="mb-3">
+          <UIComponentCard v-if="txData?.transaction_type.id !== 2" title="Item Detail Transaksi" class="mb-3">
             <div
               v-for="(item, idx) in items"
               :key="idx"
@@ -252,6 +252,53 @@
                   </div>
                 </b-col>
               </b-row>
+
+              <b-row class="g-3" v-else-if="activeType === 'qurban'">
+                <b-col cols="12" md="5">
+                  <label class="form-label fw-semibold required">Program</label>
+                  <ChoicesSelect
+                    :id="`qurban-program-id-${idx}`"
+                    :modelValue="String(item.program_id || 0)"
+                    @update:modelValue="
+                      (val: string) => {
+                        item.program_id = val === '0' ? null : Number(val);
+                      }
+                    "
+                    :options="programList"
+                    :isLoading="isProgramLoading"
+                    :key="programList.length"
+                  />
+                </b-col>
+
+                <b-col cols="12" md="3">
+                  <label class="form-label fw-semibold required">Qty</label>
+                  <CurrencyInput
+                    v-model.number="item.quantity"
+                    placeholder="1"
+                    :state="undefined"
+                  />
+                </b-col>
+
+                <b-col cols="12" md="4">
+                  <label class="form-label fw-semibold required"
+                    >Gross Nominal</label
+                  >
+                  <CurrencyInput
+                    v-model.number="item.gross_nominal"
+                    placeholder="0"
+                    :state="undefined"
+                  />
+                </b-col>
+
+                <b-col cols="12">
+                  <div class="bg-light rounded p-2 d-inline-block">
+                    <small class="text-muted d-block">Total</small>
+                    <span class="fw-semibold">{{
+                      formatCurrency(qurbanItemTotal(item))
+                    }}</span>
+                  </div>
+                </b-col>
+              </b-row>
             </div>
 
             <b-button variant="outline-primary" size="sm" @click="addItem">
@@ -321,7 +368,7 @@
               </b-col>
 
               <b-col cols="12" md="5">
-                <label class="form-label fw-semibold">Jurnal ID</label>
+                <label class="form-label fw-semibold">Matching Mutation</label>
                 <ChoicesSelect
                   id="jurnal-id"
                   :modelValue="String(formState.jurnal_id || 0)"
@@ -384,7 +431,7 @@ import { formatCurrency } from "@/helpers/format";
 const route = useRoute();
 const txId = computed(() => Number(route.params.id));
 
-const DEDICATED_TYPES = ["donation", "event", "zakat"] as const;
+const DEDICATED_TYPES = ["donation", "event", "zakat", "qurban"] as const;
 type DedicatedType = (typeof DEDICATED_TYPES)[number];
 
 const activeType = ref<DedicatedType>("donation");
@@ -438,6 +485,8 @@ const donationItemTotal = (item: TransactionItem) =>
   (item.gross_nominal || 0) - (item.discount || 0);
 const zakatItemTotal = (item: TransactionItem) =>
   (item.gross_nominal || 0) * (item.quantity || 0);
+const qurbanItemTotal = (item: TransactionItem) =>
+  (item.gross_nominal || 0) * (item.quantity || 1);
 
 const donationGrandTotal = computed(() =>
   items.value.reduce((sum, item) => sum + donationItemTotal(item), 0),
@@ -495,6 +544,7 @@ const getDetectedType = (data: any): DedicatedType => {
 
   if (rawType.includes("event")) return "event";
   if (rawType.includes("zakat")) return "zakat";
+  if (rawType.includes("qurban") || rawType.includes("kurban")) return "qurban";
   return "donation";
 };
 
@@ -517,7 +567,7 @@ watch(
       selectedJurnal.value = {
         value: data.jurnal.id,
         text:
-          data.jurnal.akun_name ||
+          data.jurnal.nota_number ||
           data.jurnal.name ||
           `Jurnal #${data.jurnal.id}`,
       };
@@ -582,7 +632,7 @@ const jurnalOptions = computed(() => {
 
   const options = list.map((t: any) => ({
     value: t.id,
-    text: t.akun_name || `Jurnal #${t.id}`,
+    text: t.nota_number,
   }));
 
   if (
@@ -667,7 +717,7 @@ const paymentMethodList = computed(() => {
     { value: 0, text: "Pilih metode pembayaran" },
     ...list.map((p: any) => ({
       value: p.id,
-      text: `${p.bank_reference?.name || p.name || "Bank"} | ${p.code || p.account_number || ""}`,
+      text: `${p.bank_reference?.name} | ${p.account_number}`,
     })),
   ];
 });
@@ -740,6 +790,25 @@ const buildDetails = () => {
     }));
   }
 
+  if (activeType.value === "qurban") {
+    if (
+      !items.value.every(
+        (item) =>
+          item.program_id &&
+          item.quantity >= 1 &&
+          item.gross_nominal > 0,
+      )
+    )
+      return null;
+    return items.value.map((item) => ({
+      ...(item.id ? { id: item.id } : {}),
+      detail_type: "qurban",
+      program_id: item.program_id,
+      quantity: item.quantity,
+      gross_nominal: item.gross_nominal || 0,
+    }));
+  }
+
   return null;
 };
 
@@ -784,6 +853,13 @@ const handleSubmit = async () => {
   if (activeType.value === "zakat") {
     payload.total = items.value.reduce(
       (sum, item) => sum + zakatItemTotal(item),
+      0,
+    );
+  }
+
+  if (activeType.value === "qurban") {
+    payload.total = items.value.reduce(
+      (sum, item) => sum + qurbanItemTotal(item),
       0,
     );
   }
