@@ -154,7 +154,7 @@ const activeTab = ref(0);
 
 // Mengikuti AllProgramShowTypes di internal/module/setting/dto/program_show.go
 const tabs = [
-<<<<<<< HEAD
+
   { id: "tab-all", label: "All", type: "" },
   { id: "tab-rutin", label: "Rutin", type: "rutin" },
   { id: "tab-featured", label: "Featured", type: "featured" },
@@ -165,13 +165,13 @@ const tabs = [
   { id: "tab-special", label: "Special", type: "special" },
   { id: "tab-darurat", label: "Darurat", type: "darurat" },
   { id: "tab-home", label: "Home", type: "home" },
-=======
+
   ...PROGRAM_SHOW_TYPES.map((t) => ({
     id: `tab-${t.value}`,
     label: t.label,
     type: t.value,
   })),
->>>>>>> c68813ccb1f069f2293bcdf26be2a47fc55fc304
+
 ];
 
 const {
