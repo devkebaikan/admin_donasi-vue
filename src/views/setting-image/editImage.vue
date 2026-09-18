@@ -227,7 +227,8 @@ watch(
 
     formState.name = data.name ?? "";
     formState.link = data.link && data.link !== "No Link" ? data.link : "";
-    existingImageUrl.value = data.image ? `${STORAGE_BASE}${data.image}` : null;
+    existingImageUrl.value =
+      data.image_url && data.image_url !== "No Image" ? data.image_url : null;
 
     formReady.value = true;
   },
