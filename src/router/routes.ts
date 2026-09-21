@@ -1184,7 +1184,7 @@ const paymentMethodRoutes = [
     meta: {
       title: setTitle("Edit Payment Methods"),
       authRequired: true,
-      middleware: [auth, menuAccess, permission("payment:update")],
+      middleware: [auth, menuAccess, permission("payment:edit")],
     },
     component: () => import("@/views/payment-methods/editPaymentMethod.vue"),
   },
@@ -1350,6 +1350,25 @@ const crmRoutes = [
     component: () => import("@/views/crm-benefit/editBenefit.vue"),
   },
 ];
+
+
+
+// Tema Routes
+const utilityRoutes = [
+  {
+    path: "/utility/third-party-logs",
+    name: "third-party-logs",
+    meta: { title: "Third Party Logs", permission: "utility:read" },
+    component: () => import("@/views/utility/third-party-logs/list.vue"),
+  },
+  {
+    path: "/webhook/logs",
+    name: "webhook-logs",
+    meta: { title: "Webhook Logs", permission: "utility:read" },
+    component: () => import("@/views/utility/webhook-logs/list.vue"),
+  },
+];
+
 
 // ========================================================================== All Routes not use ==========================================================================
 const pagesRoutes = [
@@ -2096,4 +2115,5 @@ export const allRoutes = [
   ...crmRoutes,
   ...temaRoutes,
   ...eventSalurRoutes,
+  ...utilityRoutes,
 ];

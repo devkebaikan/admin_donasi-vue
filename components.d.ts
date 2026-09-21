@@ -76,6 +76,7 @@ declare module 'vue' {
     ImageUpload: typeof import('./src/components/ImageUpload.vue')['default']
     InputMask: typeof import('./src/components/InputMask.vue')['default']
     JsVectorMap: typeof import('./src/components/JsVectorMap.vue')['default']
+    LogDetailModal: typeof import('./src/components/LogDetailModal.vue')['default']
     LogoBox: typeof import('./src/components/LogoBox.vue')['default']
     MapLocationPicker: typeof import('./src/components/MapLocationPicker.vue')['default']
     MenuItem: typeof import('./src/components/AppMenu/MenuItem.vue')['default']

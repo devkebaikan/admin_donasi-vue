@@ -277,4 +277,5 @@ export const MENU_ITEMS: MenuItemType[] = [
     label: "Settings",
     route: { name: "setting.list" },
   },
+  
 ];
