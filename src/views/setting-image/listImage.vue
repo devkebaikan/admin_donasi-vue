@@ -112,7 +112,8 @@ import { useSettingImageTable } from "./components/data";
 import { hasPermission } from "@/helpers/permission";
 import router from "@/router";
 
-const isCanCreate = hasPermission("setting:image");
+const isCanCreate = false;
+// const isCanCreate = hasPermission("setting:image");
 
 const {
   tableOptions,

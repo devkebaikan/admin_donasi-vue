@@ -4,7 +4,8 @@ import { getAllImages, deleteImage } from "@/services/imageService";
 import { hasPermission } from "@/helpers/permission";
 
 const isCanEdit = hasPermission("setting:image");
-const isCanDelete = hasPermission("setting:image");
+// const isCanDelete = hasPermission("setting:image");
+const isCanDelete = false;
 
 export function useSettingImageTable() {
   const table = useDataTable({
