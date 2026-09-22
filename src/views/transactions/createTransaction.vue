@@ -317,18 +317,22 @@
                 <label class="form-label fw-semibold required"
                   >Payment Method</label
                 >
-                <ChoicesSelect
+                <SearchSelect
                   id="payment-method-id"
                   :modelValue="String(formState.payment_method_id || 0)"
                   @update:modelValue="
-                    (val: string) => {
+                    (val: any) => {
                       formState.payment_method_id =
-                        val === '0' ? null : Number(val);
+                        val === '0' || !val ? null : Number(val);
                     }
                   "
-                  :options="paymentMethodList"
+                  @search="
+                    (query: string) => {
+                      paymentMethodSearchQuery = query;
+                    }
+                  "
+                  :options="paymentMethodOptions"
                   :isLoading="isPaymentMethodLoading"
-                  :key="paymentMethodList.length"
                 />
                 <div
                   v-if="v$.payment_method_id.$error"
@@ -414,6 +418,8 @@ import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import FlatPicker from "@/components/FlatPicker.vue";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
+import SearchSelect from "@/components/SearchSelect.vue";
+import { useSearchSelect } from "@/composables/useSearchSelect";
 import GenericCreateTransaction from "./components/GenericCreateTransaction.vue";
 import { createTransaction } from "@/services/transactionService";
 import router from "@/router";
@@ -588,25 +594,20 @@ const donationProgramType = computed(() => {
   return (selected?.tipe?.nama ?? "infaq").toLowerCase();
 });
 
-// payment method list
-const { data: paymentMethodData, isLoading: isPaymentMethodLoading } = useQuery(
-  {
-    queryKey: ["payment-method-list"],
-    queryFn: getAllPaymentMethods,
-  },
-);
-
-const paymentMethodList = computed(() => {
-  const list = Array.isArray(paymentMethodData.value)
-    ? paymentMethodData.value
-    : [];
-  return [
-    { value: 0, text: "Pilih metode pembayaran" },
-    ...list.map((p: any) => ({
-      value: p.id,
-      text: `${p.bank_reference.name} | ${p.account_number}`,
-    })),
-  ];
+// payment method search select
+const {
+  searchQuery: paymentMethodSearchQuery,
+  options: paymentMethodOptions,
+  isLoading: isPaymentMethodLoading,
+} = useSearchSelect({
+  queryKey: "payment-methods-search",
+  fetchFn: getAllPaymentMethods,
+  optionsMapper: (p: any) => ({
+    value: p.id,
+    text: `${p.bank_reference?.name ?? p.bank_reference_name ?? "-"} | ${p.account_number ?? "-"}`,
+  }),
+  placeholder: "Pilih metode pembayaran...",
+  limit: 10,
 });
 
 const itemError = ref("");
