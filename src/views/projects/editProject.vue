@@ -26,452 +26,462 @@
           </div>
 
           <!-- Form -->
-          <form-wizard
-            v-else-if="formReady"
-            shape="tab"
-            color="#1e84c4"
-            back-button-text="Sebelumnya"
-            next-button-text="Selanjutnya"
-            finish-button-text="Simpan Perubahan"
-            @on-complete="handleSubmit"
-          >
-            <!-- ══ STEP 1 — Identitas ══ -->
-            <tab-content
-              custom-icon='<a class="nav-link fs-5">Identitas</a>'
-              :before-change="validateStep1"
+          <div v-else-if="formReady" :class="{ 'pe-none opacity-75': isBusy }">
+            <form-wizard
+              shape="tab"
+              color="#1e84c4"
+              back-button-text="Sebelumnya"
+              next-button-text="Selanjutnya"
+              finish-button-text="Simpan Perubahan"
+              @on-complete="handleSubmit"
             >
-              <h4 class="fs-16 fw-semibold mb-1">Identitas Project</h4>
+              <!-- ══ STEP 1 — Identitas ══ -->
+              <tab-content
+                custom-icon='<a class="nav-link fs-5">Identitas</a>'
+                :before-change="validateStep1"
+              >
+                <h4 class="fs-16 fw-semibold mb-1">Identitas Project</h4>
 
-              <p class="text-muted mb-4">Informasi dasar tentang project</p>
+                <p class="text-muted mb-4">Informasi dasar tentang project</p>
 
-              <b-row class="g-3">
-                <!-- Judul -->
-                <b-col md="12">
-                  <b-form-group label="Judul Project" label-for="judul">
-                    <b-form-input
-                      id="judul"
-                      v-model="v$.judul.$model"
-                      type="text"
-                      placeholder="e.g., Salur Program Bangun Kelas..."
-                      :state="v$.judul.$error ? false : null"
-                      maxlength="255"
-                    />
-                    <b-form-invalid-feedback v-if="v$.judul.$error">
-                      Judul wajib diisi.
-                    </b-form-invalid-feedback>
-
-                    <small> Mitra: {{ formState.mitra_name }} </small>
-                  </b-form-group>
-                </b-col>
-
-                <!-- Status -->
-                <b-col md="6">
-                  <b-form-group label="Status" label-for="status">
-                    <b-form-select
-                      id="status"
-                      v-model="v$.status.$model"
-                      :state="v$.status.$error ? false : null"
-                    >
-                      <option value="" disabled>Pilih status...</option>
-                      <option value="draft">Draft</option>
-                      <option value="diajukan">Diajukan</option>
-                      <option value="diterima">Diterima</option>
-                      <option value="ditolak">Ditolak</option>
-                    </b-form-select>
-                    <b-form-invalid-feedback v-if="v$.status.$error">
-                      Status wajib dipilih.
-                    </b-form-invalid-feedback>
-                  </b-form-group>
-                </b-col>
-
-                <!-- Activity -->
-                <b-col md="6">
-                  <b-form-group label="Activity" label-for="activity">
-                    <b-form-select id="activity" v-model="formState.activity">
-                      <option value="">Pilih activity...</option>
-                      <option value="inactive">Inactive</option>
-                      <option value="active open">Active Open</option>
-                      <option value="active close">Active Close</option>
-                      <option value="selesai">Selesai</option>
-                    </b-form-select>
-                  </b-form-group>
-                </b-col>
-
-                <!-- Request -->
-                <b-col md="6">
-                  <b-form-group label="Request" label-for="request">
-                    <b-form-select id="request" v-model="formState.request">
-                      <option value="nothing">Nothing</option>
-                      <option value="nominal">Nominal</option>
-                    </b-form-select>
-                  </b-form-group>
-                </b-col>
-
-                <!-- Programs (M:N) -->
-                <b-col md="12">
-                  <b-form-group label="Program Terkait" label-for="program-ids">
-                    <small class="text-muted d-block mb-2">
-                      Pilih satu atau lebih program yang terkait
-                    </small>
-                    <div v-if="isProgramLoading" class="text-muted small">
-                      <b-spinner small class="me-1" />Loading programs...
-                    </div>
-                    <div v-else>
-                      <ChoicesSelect
-                        :key="`programs-${programSelectKey}`"
-                        id="program-ids"
-                        :modelValue="formState.program_ids.map(String)"
-                        @update:modelValue="
-                          (val: string[]) => {
-                            formState.program_ids = val.map(Number);
-                          }
-                        "
-                        :options="programOptions"
-                        :choice-options="{ removeItemButton: true }"
-                        multiple
+                <b-row class="g-3">
+                  <!-- Judul -->
+                  <b-col md="12">
+                    <b-form-group label="Judul Project" label-for="judul">
+                      <b-form-input
+                        id="judul"
+                        v-model="v$.judul.$model"
+                        type="text"
+                        placeholder="e.g., Salur Program Bangun Kelas..."
+                        :state="v$.judul.$error ? false : null"
+                        maxlength="255"
                       />
-                      <p
-                        v-if="allPrograms.length === 0"
-                        class="text-muted small mb-0 mt-1"
+                      <b-form-invalid-feedback v-if="v$.judul.$error">
+                        Judul wajib diisi.
+                      </b-form-invalid-feedback>
+
+                      <small> Mitra: {{ formState.mitra_name }} </small>
+                    </b-form-group>
+                  </b-col>
+
+                  <!-- Status -->
+                  <b-col md="6">
+                    <b-form-group label="Status" label-for="status">
+                      <b-form-select
+                        id="status"
+                        v-model="v$.status.$model"
+                        :state="v$.status.$error ? false : null"
                       >
-                        Tidak ada program tersedia.
-                      </p>
-                    </div>
-                  </b-form-group>
-                </b-col>
-              </b-row>
-            </tab-content>
+                        <option value="" disabled>Pilih status...</option>
+                        <option value="draft">Draft</option>
+                        <option value="diajukan">Diajukan</option>
+                        <option value="diterima">Diterima</option>
+                        <option value="ditolak">Ditolak</option>
+                      </b-form-select>
+                      <b-form-invalid-feedback v-if="v$.status.$error">
+                        Status wajib dipilih.
+                      </b-form-invalid-feedback>
+                    </b-form-group>
+                  </b-col>
 
-            <!-- ══ STEP 2 — Detail ══ -->
-            <tab-content
-              custom-icon='<a class="nav-link fs-5">Detail</a>'
-              :before-change="validateStep2"
-            >
-              <h4 class="fs-16 fw-semibold mb-1">Detail Project</h4>
-              <p class="text-muted mb-4">
-                Nominal, waktu, dan keterangan project
-              </p>
+                  <!-- Activity -->
+                  <b-col md="6">
+                    <b-form-group label="Activity" label-for="activity">
+                      <b-form-select id="activity" v-model="formState.activity">
+                        <option value="">Pilih activity...</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="active open">Active Open</option>
+                        <option value="active close">Active Close</option>
+                        <option value="selesai">Selesai</option>
+                      </b-form-select>
+                    </b-form-group>
+                  </b-col>
 
-              <b-row class="g-3">
-                <!-- Nominal Ajuan -->
-                <b-col md="6">
-                  <b-form-group label="Nominal Ajuan" label-for="nominal-ajuan">
-                    <CurrencyInput
-                      id="nominal-ajuan"
-                      placeholder="0"
-                      v-model="v$.nominal_ajuan.$model"
-                      :state="null"
-                    />
-                    <b-form-invalid-feedback
-                      v-if="v$.nominal_ajuan.$error"
-                      class="d-block"
+                  <!-- Request -->
+                  <b-col md="6">
+                    <b-form-group label="Request" label-for="request">
+                      <b-form-select id="request" v-model="formState.request">
+                        <option value="nothing">Nothing</option>
+                        <option value="nominal">Nominal</option>
+                      </b-form-select>
+                    </b-form-group>
+                  </b-col>
+
+                  <!-- Programs (M:N) -->
+                  <b-col md="12">
+                    <b-form-group
+                      label="Program Terkait"
+                      label-for="program-ids"
                     >
-                      Nominal ajuan wajib diisi.
-                    </b-form-invalid-feedback>
-                  </b-form-group>
-                </b-col>
+                      <small class="text-muted d-block mb-2">
+                        Pilih satu atau lebih program yang terkait
+                      </small>
+                      <div v-if="isProgramLoading" class="text-muted small">
+                        <b-spinner small class="me-1" />Loading programs...
+                      </div>
+                      <div v-else>
+                        <ChoicesSelect
+                          :key="`programs-${programSelectKey}`"
+                          id="program-ids"
+                          :modelValue="formState.program_ids.map(String)"
+                          @update:modelValue="
+                            (val: string[]) => {
+                              formState.program_ids = val.map(Number);
+                            }
+                          "
+                          :options="programOptions"
+                          :choice-options="{ removeItemButton: true }"
+                          multiple
+                        />
+                        <p
+                          v-if="allPrograms.length === 0"
+                          class="text-muted small mb-0 mt-1"
+                        >
+                          Tidak ada program tersedia.
+                        </p>
+                      </div>
+                    </b-form-group>
+                  </b-col>
+                </b-row>
+              </tab-content>
 
-                <!-- Nominal Acc -->
-                <b-col md="6">
-                  <b-form-group label="Nominal Acc" label-for="nominal-acc">
-                    <CurrencyInput
-                      id="nominal-acc"
-                      placeholder="0"
-                      v-model="formState.nominal_acc"
-                      :state="null"
-                    />
-                    <small class="text-muted">Opsional</small>
-                  </b-form-group>
-                </b-col>
+              <!-- ══ STEP 2 — Detail ══ -->
+              <tab-content
+                custom-icon='<a class="nav-link fs-5">Detail</a>'
+                :before-change="validateStep2"
+              >
+                <h4 class="fs-16 fw-semibold mb-1">Detail Project</h4>
+                <p class="text-muted mb-4">
+                  Nominal, waktu, dan keterangan project
+                </p>
 
-                <!-- Waktu Pelaksanaan -->
-                <b-col md="6">
-                  <b-form-group
-                    label="Waktu Pelaksanaan"
-                    label-for="waktu-pelaksanaan"
-                  >
-                    <FlatPicker
-                      id="waktu-pelaksanaan"
-                      :options="{ enableTime: false, dateFormat: 'Y-m-d' }"
-                      v-model="v$.waktu_pelaksanaan.$model"
-                    />
-                    <b-form-invalid-feedback
-                      v-if="v$.waktu_pelaksanaan.$error"
-                      class="d-block"
+                <b-row class="g-3">
+                  <!-- Nominal Ajuan -->
+                  <b-col md="6">
+                    <b-form-group
+                      label="Nominal Ajuan"
+                      label-for="nominal-ajuan"
                     >
-                      Waktu pelaksanaan wajib diisi.
-                    </b-form-invalid-feedback>
-                  </b-form-group>
-                </b-col>
+                      <CurrencyInput
+                        id="nominal-ajuan"
+                        placeholder="0"
+                        v-model="v$.nominal_ajuan.$model"
+                        :state="null"
+                      />
+                      <b-form-invalid-feedback
+                        v-if="v$.nominal_ajuan.$error"
+                        class="d-block"
+                      >
+                        Nominal ajuan wajib diisi.
+                      </b-form-invalid-feedback>
+                    </b-form-group>
+                  </b-col>
 
-                <!-- Jumlah PM -->
-                <b-col md="6">
-                  <b-form-group label="Jumlah PM" label-for="jumlah-pm">
-                    <b-form-input
-                      id="jumlah-pm"
-                      v-model="formState.jumlah_pm"
-                      type="number"
-                      min="0"
-                      placeholder="e.g., 100"
-                    />
+                  <!-- Nominal Acc -->
+                  <b-col md="6">
+                    <b-form-group label="Nominal Acc" label-for="nominal-acc">
+                      <CurrencyInput
+                        id="nominal-acc"
+                        placeholder="0"
+                        v-model="formState.nominal_acc"
+                        :state="null"
+                      />
+                      <small class="text-muted">Opsional</small>
+                    </b-form-group>
+                  </b-col>
+
+                  <!-- Waktu Pelaksanaan -->
+                  <b-col md="6">
+                    <b-form-group
+                      label="Waktu Pelaksanaan"
+                      label-for="waktu-pelaksanaan"
+                    >
+                      <FlatPicker
+                        id="waktu-pelaksanaan"
+                        :options="{ enableTime: false, dateFormat: 'Y-m-d' }"
+                        v-model="v$.waktu_pelaksanaan.$model"
+                      />
+                      <b-form-invalid-feedback
+                        v-if="v$.waktu_pelaksanaan.$error"
+                        class="d-block"
+                      >
+                        Waktu pelaksanaan wajib diisi.
+                      </b-form-invalid-feedback>
+                    </b-form-group>
+                  </b-col>
+
+                  <!-- Jumlah PM -->
+                  <b-col md="6">
+                    <b-form-group label="Jumlah PM" label-for="jumlah-pm">
+                      <b-form-input
+                        id="jumlah-pm"
+                        v-model="formState.jumlah_pm"
+                        type="number"
+                        min="0"
+                        placeholder="e.g., 100"
+                      />
+                      <small class="text-muted">Opsional</small>
+                    </b-form-group>
+                  </b-col>
+
+                  <!-- Reason -->
+                  <b-col md="6">
+                    <b-form-group label="Reason" label-for="reason">
+                      <b-form-input
+                        id="reason"
+                        v-model="formState.reason"
+                        type="text"
+                        placeholder="e.g., Segera Salur"
+                        maxlength="255"
+                      />
+                      <small class="text-muted">Opsional</small>
+                    </b-form-group>
+                  </b-col>
+
+                  <!-- Kesiapan -->
+                  <b-col md="6">
+                    <b-form-group label="Kesiapan" label-for="kesiapan">
+                      <b-form-input
+                        id="kesiapan"
+                        v-model="formState.kesiapan"
+                        type="text"
+                        placeholder="Kesiapan project..."
+                        maxlength="255"
+                      />
+                      <small class="text-muted">Opsional</small>
+                    </b-form-group>
+                  </b-col>
+
+                  <!-- Notes -->
+                  <b-col cols="12">
+                    <b-form-group label="Notes" label-for="notes">
+                      <b-form-textarea
+                        id="notes"
+                        v-model="formState.notes"
+                        placeholder="Catatan tambahan..."
+                        rows="3"
+                      />
+                      <small class="text-muted">Opsional</small>
+                    </b-form-group>
+                  </b-col>
+
+                  <!-- Deskripsi -->
+                  <b-col cols="12">
+                    <b-form-group label="Deskripsi" label-for="deskripsi">
+                      <CustomQuillEditor
+                        storage="project-content"
+                        :style="{ height: '260px' }"
+                        placeholder="Deskripsi project..."
+                        v-model:content="formState.deskripsi"
+                      />
+                    </b-form-group>
                     <small class="text-muted">Opsional</small>
-                  </b-form-group>
-                </b-col>
+                  </b-col>
 
-                <!-- Reason -->
-                <b-col md="6">
-                  <b-form-group label="Reason" label-for="reason">
-                    <b-form-input
-                      id="reason"
-                      v-model="formState.reason"
-                      type="text"
-                      placeholder="e.g., Segera Salur"
-                      maxlength="255"
+                  <!-- Lokasi -->
+                  <b-col cols="12">
+                    <hr class="my-1" />
+                    <h6 class="text-muted fw-semibold mb-3">
+                      <i class="bx bx-map-pin me-1"></i>Lokasi
+                    </h6>
+                    <MapLocationPicker
+                      :lat="formState.lat"
+                      :lng="formState.lng"
+                      @update:lat="(val) => (formState.lat = val)"
+                      @update:lng="(val) => (formState.lng = val)"
                     />
-                    <small class="text-muted">Opsional</small>
-                  </b-form-group>
-                </b-col>
+                  </b-col>
 
-                <!-- Kesiapan -->
-                <b-col md="6">
-                  <b-form-group label="Kesiapan" label-for="kesiapan">
-                    <b-form-input
-                      id="kesiapan"
-                      v-model="formState.kesiapan"
-                      type="text"
-                      placeholder="Kesiapan project..."
-                      maxlength="255"
-                    />
-                    <small class="text-muted">Opsional</small>
-                  </b-form-group>
-                </b-col>
+                  <b-col md="6">
+                    <b-form-group label="Kode Wilayah" label-for="kode-wilayah">
+                      <b-form-input
+                        id="kode-wilayah"
+                        v-model="formState.kode_wilayah"
+                        type="text"
+                        placeholder="Kode wilayah..."
+                        maxlength="50"
+                      />
+                      <small class="text-muted">Opsional</small>
+                    </b-form-group>
+                  </b-col>
+                </b-row>
+              </tab-content>
 
-                <!-- Notes -->
-                <b-col cols="12">
-                  <b-form-group label="Notes" label-for="notes">
-                    <b-form-textarea
-                      id="notes"
-                      v-model="formState.notes"
-                      placeholder="Catatan tambahan..."
-                      rows="3"
-                    />
-                    <small class="text-muted">Opsional</small>
-                  </b-form-group>
-                </b-col>
+              <!-- ══ STEP 3 — Kontak & Media ══ -->
+              <tab-content
+                custom-icon='<a class="nav-link fs-5">Kontak & Media</a>'
+                :before-change="validateStep3"
+              >
+                <h4 class="fs-16 fw-semibold mb-1">Kontak & Media</h4>
+                <p class="text-muted mb-4">
+                  Informasi kontak dan upload gambar project
+                </p>
 
-                <!-- Deskripsi -->
-                <b-col cols="12">
-                  <b-form-group label="Deskripsi" label-for="deskripsi">
-                    <CustomQuillEditor
-                      storage="project-content"
-                      :style="{ height: '260px' }"
-                      placeholder="Deskripsi project..."
-                      v-model:content="formState.deskripsi"
-                    />
-                  </b-form-group>
-                  <small class="text-muted">Opsional</small>
-                </b-col>
+                <b-row class="g-3">
+                  <!-- Pengaju -->
+                  <b-col md="6">
+                    <b-form-group label="Pengaju" label-for="pengaju">
+                      <b-form-input
+                        id="pengaju"
+                        v-model="formState.pengaju"
+                        type="text"
+                        placeholder="Nama pengaju..."
+                        maxlength="255"
+                      />
+                      <small class="text-muted">Opsional</small>
+                    </b-form-group>
+                  </b-col>
 
-                <!-- Lokasi -->
-                <b-col cols="12">
-                  <hr class="my-1" />
-                  <h6 class="text-muted fw-semibold mb-3">
-                    <i class="bx bx-map-pin me-1"></i>Lokasi
-                  </h6>
-                  <MapLocationPicker
-                    :lat="formState.lat"
-                    :lng="formState.lng"
-                    @update:lat="(val) => (formState.lat = val)"
-                    @update:lng="(val) => (formState.lng = val)"
-                  />
-                </b-col>
+                  <!-- Email -->
+                  <b-col md="6">
+                    <b-form-group label="Email" label-for="email">
+                      <b-form-input
+                        id="email"
+                        v-model="formState.email"
+                        type="email"
+                        placeholder="email@example.com"
+                      />
+                      <small class="text-muted">Opsional</small>
+                    </b-form-group>
+                  </b-col>
 
-                <b-col md="6">
-                  <b-form-group label="Kode Wilayah" label-for="kode-wilayah">
-                    <b-form-input
-                      id="kode-wilayah"
-                      v-model="formState.kode_wilayah"
-                      type="text"
-                      placeholder="Kode wilayah..."
-                      maxlength="50"
-                    />
-                    <small class="text-muted">Opsional</small>
-                  </b-form-group>
-                </b-col>
-              </b-row>
-            </tab-content>
+                  <!-- WhatsApp -->
+                  <b-col md="6">
+                    <b-form-group label="WhatsApp" label-for="wa">
+                      <b-form-input
+                        id="wa"
+                        v-model="formState.wa"
+                        type="text"
+                        placeholder="e.g., 081234567890"
+                        maxlength="30"
+                      />
+                      <small class="text-muted">Opsional</small>
+                    </b-form-group>
+                  </b-col>
 
-            <!-- ══ STEP 3 — Kontak & Media ══ -->
-            <tab-content
-              custom-icon='<a class="nav-link fs-5">Kontak & Media</a>'
-              :before-change="validateStep3"
-            >
-              <h4 class="fs-16 fw-semibold mb-1">Kontak & Media</h4>
-              <p class="text-muted mb-4">
-                Informasi kontak dan upload gambar project
-              </p>
+                  <!-- Marketing -->
+                  <b-col md="6">
+                    <b-form-group label="Marketing" label-for="marketing">
+                      <b-form-input
+                        id="marketing"
+                        v-model="formState.marketing"
+                        type="text"
+                        placeholder="Nama marketing..."
+                        maxlength="255"
+                      />
+                      <small class="text-muted">Opsional</small>
+                    </b-form-group>
+                  </b-col>
 
-              <b-row class="g-3">
-                <!-- Pengaju -->
-                <b-col md="6">
-                  <b-form-group label="Pengaju" label-for="pengaju">
-                    <b-form-input
-                      id="pengaju"
-                      v-model="formState.pengaju"
-                      type="text"
-                      placeholder="Nama pengaju..."
-                      maxlength="255"
-                    />
-                    <small class="text-muted">Opsional</small>
-                  </b-form-group>
-                </b-col>
-
-                <!-- Email -->
-                <b-col md="6">
-                  <b-form-group label="Email" label-for="email">
-                    <b-form-input
-                      id="email"
-                      v-model="formState.email"
-                      type="email"
-                      placeholder="email@example.com"
-                    />
-                    <small class="text-muted">Opsional</small>
-                  </b-form-group>
-                </b-col>
-
-                <!-- WhatsApp -->
-                <b-col md="6">
-                  <b-form-group label="WhatsApp" label-for="wa">
-                    <b-form-input
-                      id="wa"
-                      v-model="formState.wa"
-                      type="text"
-                      placeholder="e.g., 081234567890"
-                      maxlength="30"
-                    />
-                    <small class="text-muted">Opsional</small>
-                  </b-form-group>
-                </b-col>
-
-                <!-- Marketing -->
-                <b-col md="6">
-                  <b-form-group label="Marketing" label-for="marketing">
-                    <b-form-input
-                      id="marketing"
-                      v-model="formState.marketing"
-                      type="text"
-                      placeholder="Nama marketing..."
-                      maxlength="255"
-                    />
-                    <small class="text-muted">Opsional</small>
-                  </b-form-group>
-                </b-col>
-
-                <!-- Gambar Utama -->
-                <b-col md="6">
-                  <b-form-group label="Gambar Utama" label-for="image">
-                    <div v-if="existingImageUrl && !imagePreview" class="mb-2">
-                      <p class="text-muted small mb-1">Gambar saat ini:</p>
+                  <!-- Gambar Utama -->
+                  <b-col md="6">
+                    <b-form-group label="Gambar Utama" label-for="image">
+                      <div
+                        v-if="existingImageUrl && !imagePreview"
+                        class="mb-2"
+                      >
+                        <p class="text-muted small mb-1">Gambar saat ini:</p>
+                        <img
+                          :src="existingImageUrl"
+                          alt="Gambar Saat Ini"
+                          class="img-thumbnail w-100"
+                          style="max-height: 220px; object-fit: cover"
+                        />
+                      </div>
+                      <b-form-file
+                        id="image"
+                        accept="image/jpeg,image/png,image/webp"
+                        @change="handleImageChange"
+                        :placeholder="
+                          existingImageUrl
+                            ? 'Ganti gambar (opsional)...'
+                            : 'Pilih gambar utama (opsional)...'
+                        "
+                      />
+                      <small class="text-muted">
+                        {{
+                          existingImageUrl
+                            ? "Kosongkan jika tidak ingin mengganti gambar."
+                            : "Opsional — JPEG/PNG/WebP"
+                        }}
+                      </small>
+                    </b-form-group>
+                    <div v-if="imagePreview" class="mt-2">
+                      <p class="text-muted small mb-1">Preview gambar baru:</p>
                       <img
-                        :src="existingImageUrl"
-                        alt="Gambar Saat Ini"
+                        :src="imagePreview"
+                        alt="Preview"
                         class="img-thumbnail w-100"
                         style="max-height: 220px; object-fit: cover"
                       />
+                      <b-button
+                        variant="outline-secondary"
+                        size="sm"
+                        class="mt-1"
+                        @click="clearNewImage"
+                      >
+                        <i class="bx bx-x me-1"></i>Batalkan ganti gambar
+                      </b-button>
                     </div>
-                    <b-form-file
-                      id="image"
-                      accept="image/jpeg,image/png,image/webp"
-                      @change="handleImageChange"
-                      :placeholder="
-                        existingImageUrl
-                          ? 'Ganti gambar (opsional)...'
-                          : 'Pilih gambar utama (opsional)...'
-                      "
-                    />
-                    <small class="text-muted">
-                      {{
-                        existingImageUrl
-                          ? "Kosongkan jika tidak ingin mengganti gambar."
-                          : "Opsional — JPEG/PNG/WebP"
-                      }}
-                    </small>
-                  </b-form-group>
-                  <div v-if="imagePreview" class="mt-2">
-                    <p class="text-muted small mb-1">Preview gambar baru:</p>
-                    <img
-                      :src="imagePreview"
-                      alt="Preview"
-                      class="img-thumbnail w-100"
-                      style="max-height: 220px; object-fit: cover"
-                    />
-                    <b-button
-                      variant="outline-secondary"
-                      size="sm"
-                      class="mt-1"
-                      @click="clearNewImage"
-                    >
-                      <i class="bx bx-x me-1"></i>Batalkan ganti gambar
-                    </b-button>
-                  </div>
-                </b-col>
+                  </b-col>
 
-                <!-- Gambar Tambahan -->
-                <b-col md="6">
-                  <b-form-group label="Gambar Tambahan" label-for="images">
-                    <div
-                      v-if="existingImagesUrl && !imagesPreview"
-                      class="mb-2"
-                    >
-                      <p class="text-muted small mb-1">
-                        Gambar tambahan saat ini:
-                      </p>
+                  <!-- Gambar Tambahan -->
+                  <b-col md="6">
+                    <b-form-group label="Gambar Tambahan" label-for="images">
+                      <div
+                        v-if="existingImagesUrl && !imagesPreview"
+                        class="mb-2"
+                      >
+                        <p class="text-muted small mb-1">
+                          Gambar tambahan saat ini:
+                        </p>
+                        <img
+                          :src="existingImagesUrl"
+                          alt="Gambar Tambahan Saat Ini"
+                          class="img-thumbnail w-100"
+                          style="max-height: 220px; object-fit: cover"
+                        />
+                      </div>
+                      <b-form-file
+                        id="images"
+                        accept="image/jpeg,image/png,image/webp"
+                        @change="handleImagesChange"
+                        :placeholder="
+                          existingImagesUrl
+                            ? 'Ganti gambar tambahan (opsional)...'
+                            : 'Pilih gambar tambahan (opsional)...'
+                        "
+                      />
+                      <small class="text-muted">Opsional — JPEG/PNG/WebP</small>
+                    </b-form-group>
+                    <div v-if="imagesPreview" class="mt-2">
+                      <p class="text-muted small mb-1">Preview gambar baru:</p>
                       <img
-                        :src="existingImagesUrl"
-                        alt="Gambar Tambahan Saat Ini"
+                        :src="imagesPreview"
+                        alt="Preview Tambahan"
                         class="img-thumbnail w-100"
                         style="max-height: 220px; object-fit: cover"
                       />
+                      <b-button
+                        variant="outline-secondary"
+                        size="sm"
+                        class="mt-1"
+                        @click="clearNewImages"
+                      >
+                        <i class="bx bx-x me-1"></i>Batalkan ganti gambar
+                      </b-button>
                     </div>
-                    <b-form-file
-                      id="images"
-                      accept="image/jpeg,image/png,image/webp"
-                      @change="handleImagesChange"
-                      :placeholder="
-                        existingImagesUrl
-                          ? 'Ganti gambar tambahan (opsional)...'
-                          : 'Pilih gambar tambahan (opsional)...'
-                      "
-                    />
-                    <small class="text-muted">Opsional — JPEG/PNG/WebP</small>
-                  </b-form-group>
-                  <div v-if="imagesPreview" class="mt-2">
-                    <p class="text-muted small mb-1">Preview gambar baru:</p>
-                    <img
-                      :src="imagesPreview"
-                      alt="Preview Tambahan"
-                      class="img-thumbnail w-100"
-                      style="max-height: 220px; object-fit: cover"
-                    />
-                    <b-button
-                      variant="outline-secondary"
-                      size="sm"
-                      class="mt-1"
-                      @click="clearNewImages"
-                    >
-                      <i class="bx bx-x me-1"></i>Batalkan ganti gambar
-                    </b-button>
-                  </div>
-                </b-col>
+                  </b-col>
 
-                <!-- Spinner saat submit -->
-                <b-col cols="12" v-if="isPending" class="text-center">
-                  <b-spinner variant="primary" class="me-2" />
-                  <span class="text-muted">Menyimpan perubahan...</span>
-                </b-col>
-              </b-row>
-            </tab-content>
-          </form-wizard>
+                  <!-- Spinner saat submit -->
+                  <b-col cols="12" v-if="isPending" class="text-center">
+                    <b-spinner variant="primary" class="me-2" />
+                    <span class="text-muted">Menyimpan perubahan...</span>
+                  </b-col>
+                </b-row>
+              </tab-content>
+            </form-wizard>
+          </div>
         </UIComponentCard>
       </b-col>
     </b-row>
@@ -699,12 +709,17 @@ const { mutate: submitUpdate, isPending } = useMutation({
   onError: (err: any) => {
     const msg = err?.response?.data?.message ?? "Gagal memperbarui project";
     showToast(msg, { type: "error", position: "top-center" });
+    isSubmitting.value = false;
   },
 });
 
+const isSubmitting = ref(false);
+const isBusy = computed(() => isPending.value || isSubmitting.value);
+
 // ── Submit ────────────────────────────────────────────────────────────────────
 const handleSubmit = async () => {
-  if (isPending.value) return;
+  if (isBusy.value) return;
+  isSubmitting.value = true;
 
   const isValid = await v$.value.$validate();
   if (!isValid) {
@@ -712,6 +727,7 @@ const handleSubmit = async () => {
       type: "warning",
       position: "top-center",
     });
+    isSubmitting.value = false;
     return;
   }
 
