@@ -212,8 +212,8 @@ const categoryOptions = computed(() => {
   return [
     { value: null, text: "Pilih kategori..." },
     ...categories.value.map((item: any) => ({
-      value: item.value,
-      text: item.label,
+      value: item.id,
+      text: item.nama,
     })),
   ];
 });

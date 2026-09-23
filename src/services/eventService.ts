@@ -34,7 +34,7 @@ export const createEvent = async (data: FormData) => {
 
 export const updateEvent = async (id: number, data: FormData) => {
   try {
-    const res = await HttpClient.post(`/events/${id}`, data, {
+    const res = await HttpClient.put(`/events/${id}`, data, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return res.data.data;

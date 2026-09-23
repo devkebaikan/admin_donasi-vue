@@ -45,29 +45,19 @@
             </b-col>
 
             <!-- Kategori -->
-            <b-col md="4">
+              <b-col md="4">
               <b-form-group label="Kategori" label-for="category">
-                <b-form-select
+                <ChoicesSelect
                   id="category"
-                  v-model="v$.category_id.$model"
-                  :state="v$.category_id.$error ? false : null"
-                >
-                  <template #first>
-                    <b-form-select-option :value="null" disabled>
-                      Pilih kategori...
-                    </b-form-select-option>
-                  </template>
-                  <b-form-select-option
-                    v-for="cat in categories"
-                    :key="cat.id"
-                    :value="cat.id"
-                  >
-                    {{ cat.name }}
-                  </b-form-select-option>
-                </b-form-select>
-                <b-form-invalid-feedback v-if="v$.category_id.$error">
+                  :modelValue="v$.category_id.$model !== null ? String(v$.category_id.$model) : undefined"
+                  @update:modelValue="(val: string | undefined) => (v$.category_id.$model = val !== undefined ? Number(val) : null)"
+                  :options="categoryOptions"
+                  :isLoading="categoryLoading"
+                  :key="categoryOptions.length"
+                />
+                <div v-if="v$.category_id.$error" class="invalid-feedback d-block">
                   Kategori wajib dipilih.
-                </b-form-invalid-feedback>
+                </div>
               </b-form-group>
             </b-col>
 
@@ -241,7 +231,6 @@ const queryClient = useQueryClient();
 
 const blogId = computed(() => Number(route.params.id));
 
-const categories = ref<{ id: number; name: string }[]>([]);
 const imageFile = ref<File | null>(null);
 const imagePreview = ref<string | null>(null);
 const existingImageUrl = ref<string | null>(null);
@@ -264,10 +253,6 @@ const rules = {
 };
 
 const v$ = useVuelidate(rules, formState);
-
-onMounted(async () => {
-  categories.value = await getBlogCategories();
-});
 
 const {
   data: blogData,
@@ -297,6 +282,24 @@ watch(
   },
   { immediate: true },
 );
+
+const { data: categories, isLoading: categoryLoading } = useQuery({
+  queryKey: ["blog-categories"],
+  queryFn: getBlogCategories,
+});
+
+const categoryOptions = computed(() => {
+  if (!categories.value) return [];
+
+  return [
+    { value: null, text: "Pilih kategori..." },
+    ...categories.value.map((item: any) => ({
+      value: item.id,
+      text: item.nama,
+    })),
+  ];
+});
+
 
 const handleImageChange = (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0] ?? null;
