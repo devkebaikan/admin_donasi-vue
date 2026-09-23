@@ -293,6 +293,17 @@
     <b-row>
       <b-col>
         <UIComponentCard id="basic" title="Daftar Jurnal Keuangan">
+          <div class="d-flex justify-content-end mb-3 gap-2">
+            <b-button
+              variant="success"
+              type="button"
+              @click="showImportModal = true"
+            >
+              <i class="bx bx-arrow-to-bottom me-1"></i>
+              Import
+            </b-button>
+          </div>
+
           <div v-if="isLoading" class="text-center p-4">
             <b-spinner variant="primary" />
             <p class="mt-2">Memuat data...</p>
@@ -333,21 +344,102 @@
         </UIComponentCard>
       </b-col>
     </b-row>
+
+    <!-- Import Modal -->
+    <b-modal
+      v-model="showImportModal"
+      title="Import Jurnal Keuangan"
+      size="lg"
+      @hidden="resetImportForm"
+    >
+      <div class="mb-4">
+        <h6 class="mb-3">Langkah 1: Unduh Template</h6>
+        <p class="text-muted">
+          Unduh template Excel untuk memastikan data Anda dalam format yang benar.
+        </p>
+        <b-button variant="info" @click="downloadTemplate">
+          <i class="bx bx-download me-1"></i>
+          Unduh Template
+        </b-button>
+      </div>
+
+      <hr />
+
+      <div>
+        <h6 class="mb-3">Langkah 2: Unggah File</h6>
+        <p class="text-muted">
+          Unggah file Excel yang telah diisi (.xlsx atau .xls)
+        </p>
+
+        <b-form-file
+          v-model="importFile"
+          plain
+          accept=".xlsx,.xls"
+          @change="handleFileChange"
+        />
+
+        <div v-if="importFile" class="mt-3">
+          <div class="alert alert-info d-flex align-items-center">
+            <i class="bx bx-file fs-20 me-2"></i>
+            <div>
+              <strong>File yang dipilih:</strong> {{ importFile.name }}
+              <br />
+              <small>Ukuran: {{ formatFileSize(importFile.size) }}</small>
+            </div>
+          </div>
+        </div>
+
+        <div
+          v-if="importError"
+          class="alert alert-danger mt-3"
+          style="white-space: pre-line;"
+        >
+          <i class="bx bx-error-circle me-1"></i>
+          {{ importError }}
+        </div>
+      </div>
+
+      <template #footer>
+        <div class="d-flex justify-content-end gap-2">
+          <b-button
+            variant="light"
+            :disabled="isPending"
+            @click="showImportModal = false"
+          >
+            Batal
+          </b-button>
+          <b-button
+            variant="primary"
+            :disabled="!importFile || isPending"
+            @click="handleImport"
+          >
+            <b-spinner v-if="isPending" small class="me-1" />
+            <i v-else class="bx bx-upload me-1"></i>
+            {{ isPending ? 'Mengimpor...' : 'Import' }}
+          </b-button>
+        </div>
+      </template>
+    </b-modal>
   </VerticalLayout>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, onMounted, onBeforeUnmount } from "vue";
-import { useQuery } from "@tanstack/vue-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
 import { useFinanceJournalTable } from "./components/data";
-import { getFinanceJournalById } from "@/services/financeJournalService";
+import {
+  getFinanceJournalById,
+  importFinanceJournal,
+  getTemplateImportJournal,
+} from "@/services/financeJournalService";
 import { getFinanceAccounts } from "@/services/financeAccountService";
 import { getAllPrograms } from "@/services/programService";
 import { getProjects } from "@/services/projectService";
 import { formatCurrency, formatDate, formatDateTime } from "@/helpers/format";
+import { toast, type ToastOptions } from "vue3-toastify";
 
 const {
   tableOptions,
@@ -370,6 +462,158 @@ const {
   totalPages,
   resetPage,
 } = useFinanceJournalTable();
+
+const showImportModal = ref(false);
+const importFile = ref<File | null>(null);
+const importError = ref("");
+
+const showToast = (message: string, options?: ToastOptions) => {
+  toast(message, options);
+};
+
+const queryClient = useQueryClient();
+
+// get template
+const { data: templateData } = useQuery({
+  queryKey: ["templateImportFinanceJournal"],
+  queryFn: getTemplateImportJournal,
+});
+
+const templateFile = computed(() => {
+  return templateData.value;
+});
+
+// Import mutation
+const { mutate: importMutation, isPending } = useMutation({
+  mutationFn: (payload: FormData) => importFinanceJournal(payload),
+  onSuccess: (data: any) => {
+    queryClient.invalidateQueries({ queryKey: ["finance-journals"] });
+    showImportModal.value = false;
+    resetImportForm();
+
+    const insertedJournals = data?.insertedJournals ?? data?.inserted ?? 0;
+    const insertedDetails = data?.insertedDetails ?? 0;
+    const skippedJournals = data?.skippedJournals ?? data?.skipped ?? 0;
+    const errors = data?.errors || [];
+
+    let msg = `Import Journal Selesai:
+- Inserted Journal: ${insertedJournals}
+- Insert Details : ${insertedDetails}
+- Skipped: ${skippedJournals}`;
+
+    if (errors.length > 0) {
+      msg += `\n\nError Details:\n${errors
+        .map((e: any) => `• Row ${e.row ?? "-"} [${e.code ?? ""}] → ${e.message ?? e}`)
+        .join("\n")}`;
+    }
+
+    showToast(msg, {
+      type: "success",
+      position: "top-center",
+    });
+  },
+  onError: (err: any) => {
+    console.error("Import failed:", err);
+    const errData = err?.data || err;
+    const insertedJournals = errData?.insertedJournals ?? 0;
+    const insertedDetails = errData?.insertedDetails ?? 0;
+    const skippedJournals = errData?.skippedJournals ?? 0;
+    const errors = errData?.errors || [];
+
+    if (errors.length > 0 || errData?.insertedJournals !== undefined) {
+      importError.value = `${err?.message || "Import failed"}
+- Inserted Journal: ${insertedJournals}
+- Insert Details : ${insertedDetails}
+- Skipped: ${skippedJournals}
+
+Error Details:
+${errors
+  .map((e: any) => `• Row ${e.row ?? "-"} [${e.code ?? ""}] → ${e.message ?? e}`)
+  .join("\n")}`;
+    } else {
+      importError.value =
+        err?.message || "Import failed. Please check your file and try again.";
+    }
+
+    showToast(err?.message || "Import journal failed", {
+      type: "error",
+      position: "top-center",
+    });
+  },
+});
+
+const handleFileChange = (event: Event) => {
+  importError.value = "";
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
+
+  if (file) {
+    const validTypes = [
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.ms-excel",
+    ];
+
+    if (
+      !validTypes.includes(file.type) &&
+      !file.name.endsWith(".xlsx") &&
+      !file.name.endsWith(".xls")
+    ) {
+      importError.value = "Please upload a valid Excel file (.xlsx or .xls)";
+      importFile.value = null;
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      importError.value = "File size must be less than 5MB";
+      importFile.value = null;
+      return;
+    }
+  }
+};
+
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
+};
+
+const downloadTemplate = () => {
+  if (!templateFile.value) {
+    showToast("Template not available", { type: "error" });
+    return;
+  }
+
+  const blob = new Blob([templateFile.value], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "finance_journals_import_template.xlsx";
+  link.click();
+
+  URL.revokeObjectURL(url);
+};
+
+const handleImport = () => {
+  if (!importFile.value) {
+    importError.value = "Please select a file to import";
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", importFile.value);
+
+  importMutation(formData);
+};
+
+const resetImportForm = () => {
+  importFile.value = null;
+  importError.value = "";
+};
 
 const hasActiveFilters = computed(
   () =>
@@ -483,7 +727,6 @@ const handleGlobalClick = (event: Event) => {
     return;
   }
 };
-
 onMounted(() => document.addEventListener("click", handleGlobalClick));
 onBeforeUnmount(() => document.removeEventListener("click", handleGlobalClick));
 </script>
