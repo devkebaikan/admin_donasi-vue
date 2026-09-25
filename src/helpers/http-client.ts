@@ -10,7 +10,15 @@ interface ErrorResponse {
   errors?: Record<string, string[]>;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.DEV
+  ? "/api"
+  : import.meta.env.VITE_API_BASE_URL || "/api";
+
+const CLIENT_KEY =
+  (import.meta.env.VITE_PUBLIC_CLIENT_KEY as string) ||
+  (import.meta.env.VITE_CLIENT_KEY as string) ||
+  "";
+
 const DEFAULT_TIMEOUT = 30000; // 30 detik
 
 class HttpClient {
@@ -21,8 +29,8 @@ class HttpClient {
       baseURL: API_BASE_URL,
       timeout: DEFAULT_TIMEOUT,
       headers: {
-        // "Content-Type": "application/json",
         Accept: "application/json",
+        ...(CLIENT_KEY ? { "X-Client-Key": CLIENT_KEY } : {}),
       },
     });
 
@@ -32,16 +40,34 @@ class HttpClient {
   private setupInterceptors() {
     // Interceptor Request
     this.instance.interceptors.request.use((config) => {
+      // Pastikan X-Client-Key selalu disertakan pada setiap request
+      if (CLIENT_KEY) {
+        config.headers["X-Client-Key"] = CLIENT_KEY;
+      }
+
       const auth = useAuthStore();
       let token = null;
 
       // Parse token dari session storage
-      if (auth.user && typeof auth.user === "string") {
-        try {
-          const parsed = JSON.parse(auth.user);
-          token = parsed?.token || parsed?.data?.access_token || null;
-        } catch (e) {
-          console.warn("Invalid auth data in storage", e);
+      if (auth.user) {
+        if (typeof auth.user === "string") {
+          try {
+            const parsed = JSON.parse(auth.user);
+            token =
+              parsed?.token ||
+              parsed?.data?.access_token ||
+              parsed?.access_token ||
+              null;
+          } catch (e) {
+            console.warn("Invalid auth data in storage", e);
+          }
+        } else if (typeof auth.user === "object") {
+          const userData = auth.user as any;
+          token =
+            userData?.token ||
+            userData?.data?.access_token ||
+            userData?.access_token ||
+            null;
         }
       }
 
