@@ -10,17 +10,9 @@ interface ErrorResponse {
   errors?: Record<string, string[]>;
 }
 
-const API_BASE_URL = "/api"
-// const API_BASE_URL = import.meta.env.DEV
-//   ? "/api"
-//   : import.meta.env.VITE_API_BASE_URL || "/api";
-
-const CLIENT_KEY =
-  (import.meta.env.VITE_PUBLIC_CLIENT_KEY as string) ||
-  (import.meta.env.VITE_CLIENT_KEY as string) ||
-  "";
-
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const DEFAULT_TIMEOUT = 30000; // 30 detik
+const CLIENT_KEY = import.meta.env.VITE_CLIENT_KEY; // 30 detik
 
 class HttpClient {
   private instance: AxiosInstance;
@@ -30,8 +22,9 @@ class HttpClient {
       baseURL: API_BASE_URL,
       timeout: DEFAULT_TIMEOUT,
       headers: {
+        // "Content-Type": "application/json",
         Accept: "application/json",
-        ...(CLIENT_KEY ? { "X-Client-Key": CLIENT_KEY } : {}),
+        "X-Client-Key": CLIENT_KEY, // 👈 Ditambahkan di header default
       },
     });
 
@@ -41,7 +34,7 @@ class HttpClient {
   private setupInterceptors() {
     // Interceptor Request
     this.instance.interceptors.request.use((config) => {
-      // Pastikan X-Client-Key selalu disertakan pada setiap request
+      // 💡 Injeksi X-Client-Key di setiap request
       if (CLIENT_KEY) {
         config.headers["X-Client-Key"] = CLIENT_KEY;
       }
@@ -50,25 +43,12 @@ class HttpClient {
       let token = null;
 
       // Parse token dari session storage
-      if (auth.user) {
-        if (typeof auth.user === "string") {
-          try {
-            const parsed = JSON.parse(auth.user);
-            token =
-              parsed?.token ||
-              parsed?.data?.access_token ||
-              parsed?.access_token ||
-              null;
-          } catch (e) {
-            console.warn("Invalid auth data in storage", e);
-          }
-        } else if (typeof auth.user === "object") {
-          const userData = auth.user as any;
-          token =
-            userData?.token ||
-            userData?.data?.access_token ||
-            userData?.access_token ||
-            null;
+      if (auth.user && typeof auth.user === "string") {
+        try {
+          const parsed = JSON.parse(auth.user);
+          token = parsed?.token || parsed?.data?.access_token || null;
+        } catch (e) {
+          console.warn("Invalid auth data in storage", e);
         }
       }
 
@@ -78,7 +58,6 @@ class HttpClient {
 
       return config;
     });
-
     // Interceptor Response
     this.instance.interceptors.response.use(
       (response) => response,

@@ -9,7 +9,7 @@ import { BootstrapVueNextResolver } from "unplugin-vue-components/resolvers";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), ["VITE_", "PUBLIC_"]);
   const targetApi =
-    env.VITE_API_BASE_URL || "https://fapi.beramalbersama.com/api/v1";
+    env.VITE_API_BASE_URL || "https://aapi.beramalbersama.com/api/v1";
 
   return {
     base: "/",
