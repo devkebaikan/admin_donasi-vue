@@ -10,7 +10,9 @@ interface ErrorResponse {
   errors?: Record<string, string[]>;
 }
 
-const API_BASE_URL = "/api";
+const API_BASE_URL = import.meta.env.DEV
+  ? "/api"
+  : import.meta.env.VITE_API_BASE_URL || "/api";
 
 const CLIENT_KEY =
   (import.meta.env.VITE_PUBLIC_CLIENT_KEY as string) ||
