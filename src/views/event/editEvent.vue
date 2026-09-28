@@ -592,12 +592,42 @@ const eventTypeList = computed(() => {
 const toDatetimeLocal = (iso: string): string => {
   if (!iso) return "";
   try {
+    if (iso.includes(" ")) {
+      const parts = iso.trim().split(" ");
+      const datePart = parts[0];
+      const timePart = parts[1].substring(0, 5);
+      return `${datePart}T${timePart}`;
+    }
     const d = new Date(iso);
+    if (isNaN(d.getTime())) {
+      return iso.substring(0, 16).replace(" ", "T");
+    }
     const pad = (n: number) => String(n).padStart(2, "0");
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   } catch {
     return "";
   }
+};
+
+const formatToApiDatetime = (val: string): string => {
+  if (!val) return "";
+  const formatted = val.replace("T", " ").trim();
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(formatted)) {
+    return `${formatted}:00`;
+  }
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(formatted)) {
+    return formatted;
+  }
+  try {
+    const d = new Date(val);
+    if (!isNaN(d.getTime())) {
+      const pad = (n: number) => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+  } catch {
+    // fallback
+  }
+  return formatted;
 };
 
 watch(
@@ -619,7 +649,7 @@ watch(
     formState.summary = data.summary ?? "";
     formState.description = data.description ?? "";
     regOnlyBool.value = !!data.reg_only;
-    existingImageUrl.value = data.image ? `${STORAGE_BASE}${data.image}` : null;
+    existingImageUrl.value = data.image_url ? `${data.image_url}` : null;
     formState.event_attributes = (data.attributes ?? []).map((attr: any) => ({
       title: attr.title ?? "",
       type: attr.type ?? "text",
@@ -677,9 +707,13 @@ const { mutate: submitUpdate, isPending } = useMutation({
     formData.append("reg_only", regOnlyBool.value ? "1" : "0");
     if (formState.slug) formData.append("slug", formState.slug);
     if (formState.mode) formData.append("mode", formState.mode);
-    if (formState.datetime) formData.append("datetime", formState.datetime);
+    if (formState.datetime)
+      formData.append("datetime", formatToApiDatetime(formState.datetime));
     if (formState.due_datetime)
-      formData.append("due_datetime", formState.due_datetime);
+      formData.append(
+        "due_datetime",
+        formatToApiDatetime(formState.due_datetime),
+      );
     formData.append("price", String(formState.price ?? 0));
     if (formState.quota) formData.append("quota", String(formState.quota));
     if (formState.location) formData.append("location", formState.location);

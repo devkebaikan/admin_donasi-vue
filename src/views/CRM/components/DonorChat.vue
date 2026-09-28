@@ -23,7 +23,7 @@
       />
     </div> -->
 
-    <div v-if="templates.length" class="p-3 border-bottom">
+    <div v-if="allTemplates.length" class="p-3 border-bottom">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <p class="text-muted fs-12 mb-0 d-flex align-items-center">
           <i class="bx bx-message-square-dots fs-15 me-1"></i>Template Pesan
@@ -35,13 +35,13 @@
 
       <div class="d-flex flex-wrap gap-2">
         <b-button
-          v-for="tpl in templates"
+          v-for="tpl in allTemplates"
           :key="tpl.id"
           size="sm"
           :variant="selectedTemplateId === tpl.id ? 'primary' : 'light'"
           class="rounded-pill fs-11 border d-inline-flex align-items-center"
           :disabled="isRendering"
-          @click="selectedTemplateId = tpl.id"
+          @click="selectTemplate(tpl.id)"
         >
           <i
             :class="selectedTemplateId === tpl.id ? 'bx bx-check' : ''"
@@ -187,9 +187,15 @@ import type { CrmChatCard, CrmChatTemplate } from "@/types/crm";
 const showToast = (message: string, options: ToastOptions) =>
   toast(message, options);
 
-const props = defineProps<{
-  card: CrmChatCard;
-}>();
+const props = withDefaults(
+  defineProps<{
+    card: CrmChatCard;
+    presetTemplateId?: number | null;
+  }>(),
+  {
+    presetTemplateId: null,
+  },
+);
 
 const emit = defineEmits<{
   send: [text: string, templateId: number | null];
@@ -218,28 +224,87 @@ const templates = computed<CrmChatTemplate[]>(() =>
   Array.isArray(templatesRaw.value) ? templatesRaw.value : [],
 );
 
+const extraTemplate = ref<CrmChatTemplate | null>(null);
+
+const allTemplates = computed<CrmChatTemplate[]>(() => {
+  const list = [...templates.value];
+  if (
+    extraTemplate.value &&
+    !list.some((t) => t.id === extraTemplate.value?.id)
+  ) {
+    list.unshift(extraTemplate.value);
+  }
+  return list;
+});
+
 const selectedTemplateId = ref<number | null>(null);
 const isRendering = ref(false);
 
-watch(selectedTemplateId, async (templateId) => {
-  if (!templateId) return;
+const applyTemplate = async (templateId: number) => {
   isRendering.value = true;
   try {
     const rendered = await getCrmChatTemplateById(templateId, {
       transaction_id: props.card.transactionId,
     });
-    if (rendered?.rendered_content) {
-      message.value = rendered.rendered_content;
+    if (rendered) {
+      if (rendered.rendered_content) {
+        message.value = rendered.rendered_content;
+      } else if (rendered.isi || rendered.content) {
+        message.value = rendered.isi || rendered.content;
+      }
+      if (
+        !templates.value.some((t) => t.id === templateId) &&
+        (rendered.name || rendered.judul)
+      ) {
+        extraTemplate.value = {
+          id: templateId,
+          name: rendered.name || rendered.judul || `Template #${templateId}`,
+          isi: rendered.isi || rendered.content || "",
+          ...rendered,
+        };
+      }
     } else {
       showToast("Gagal memuat template pesan", {
         type: "error",
         position: "top-center",
       });
     }
+  } catch {
+    showToast("Gagal memuat template pesan", {
+      type: "error",
+      position: "top-center",
+    });
   } finally {
     isRendering.value = false;
   }
+};
+
+const selectTemplate = (templateId: number) => {
+  if (selectedTemplateId.value === templateId) {
+    applyTemplate(templateId);
+  } else {
+    selectedTemplateId.value = templateId;
+  }
+};
+
+watch(selectedTemplateId, (templateId) => {
+  if (!templateId) return;
+  applyTemplate(templateId);
 });
+
+watch(
+  () => props.presetTemplateId,
+  (newId) => {
+    if (newId) {
+      if (selectedTemplateId.value === newId) {
+        applyTemplate(newId);
+      } else {
+        selectedTemplateId.value = newId;
+      }
+    }
+  },
+  { immediate: true },
+);
 
 watch(
   () => props.card.id,
@@ -247,6 +312,7 @@ watch(
     waAccount.value = props.card.waAccount || "Official WA";
     message.value = "";
     selectedTemplateId.value = null;
+    extraTemplate.value = null;
     isModalOpen.value = false;
   },
 );

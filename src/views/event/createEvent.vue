@@ -525,6 +525,27 @@ const removeAttribute = (index: number) => {
   formState.event_attributes.splice(index, 1);
 };
 
+const formatToApiDatetime = (val: string): string => {
+  if (!val) return "";
+  const formatted = val.replace("T", " ").trim();
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(formatted)) {
+    return `${formatted}:00`;
+  }
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(formatted)) {
+    return formatted;
+  }
+  try {
+    const d = new Date(val);
+    if (!isNaN(d.getTime())) {
+      const pad = (n: number) => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+  } catch {
+    // fallback
+  }
+  return formatted;
+};
+
 // ── Submit ─────────────────────────────────────────────────────────────────
 const { mutate: submitCreate, isPending } = useMutation({
   mutationFn: () => {
@@ -536,9 +557,13 @@ const { mutate: submitCreate, isPending } = useMutation({
     formData.append("reg_only", regOnlyBool.value ? "1" : "0");
     if (formState.slug) formData.append("slug", formState.slug);
     if (formState.mode) formData.append("mode", formState.mode);
-    if (formState.datetime) formData.append("datetime", formState.datetime);
+    if (formState.datetime)
+      formData.append("datetime", formatToApiDatetime(formState.datetime));
     if (formState.due_datetime)
-      formData.append("due_datetime", formState.due_datetime);
+      formData.append(
+        "due_datetime",
+        formatToApiDatetime(formState.due_datetime),
+      );
     formData.append("price", String(formState.price ?? 0));
     if (formState.quota) formData.append("quota", String(formState.quota));
     if (formState.location) formData.append("location", formState.location);

@@ -170,6 +170,7 @@
       <DonorChat
         v-else-if="chatCard"
         :card="chatCard"
+        :preset-template-id="selectedChatTemplateId"
         class="flex-grow-1"
         style="min-height: 0"
         @send="handleSend"
@@ -190,21 +191,20 @@
         label-class="fw-semibold"
         class="mb-3"
       >
-        <b-form-input
+        <b-form-select
           v-model="fuForm.jenis"
-          maxlength="150"
-          placeholder="Contoh: Tindak lanjut donasi"
+          :options="fuTypes"
           required
         />
       </b-form-group>
 
-      <b-form-group label="Channel" label-class="fw-semibold" class="mb-3">
+      <!-- <b-form-group label="Channel" label-class="fw-semibold" class="mb-3">
         <b-form-select
           v-model="fuForm.channel"
           :options="channelOptions"
           required
         />
-      </b-form-group>
+      </b-form-group> -->
 
       <b-form-group
         label="Template WA (Opsional)"
@@ -233,7 +233,7 @@
         />
       </b-form-group>
 
-      <b-form-group
+      <!-- <b-form-group
         label="Penanggungjawab"
         label-class="fw-semibold"
         class="mb-3"
@@ -242,7 +242,7 @@
           v-model="fuForm.assigned_user_id"
           :options="assignedUserOptions"
         />
-      </b-form-group>
+      </b-form-group> -->
 
       <b-form-group label="Catatan" label-class="fw-semibold" class="mb-0">
         <b-form-textarea
@@ -367,11 +367,32 @@ const props = defineProps<{
 }>();
 
 const activeTab = ref<"detail" | "chat">("detail");
-const localMessages = ref<ChatMessageItem[]>([]);
+const selectedChatTemplateId = ref<number | null>(null);
+const pendingFuId = ref<number | null>(null);
 const showFuModal = ref(false);
 const isSendingFu = ref(false);
 const isSubmittingFu = ref(false);
 const queryClient = useQueryClient();
+
+const fuTypes = [
+  {
+    value: "",
+    text: "Pilih Jenis FU"
+  },
+  {
+    value: "BENEFIT",
+    text: "Benefit"
+  },
+  {
+    value: "FU",
+    text: "FU"
+  },
+  {
+    value: "PROGRAM_BARU",
+    text: "Program Baru"
+  }
+]
+
 
 const fuForm = ref({
   jenis: "",
@@ -379,8 +400,7 @@ const fuForm = ref({
   template_id: null as number | null,
   scheduled_date: "",
   waktu_slot: "Pagi",
-  // assigned_user_id: null as number | null,
-  assigned_user_id: 459561500707, // siti aminah (default) — sementara belum ada API untuk ambil list user
+  assigned_user_id: null as number | null,
   note: "",
 });
 
@@ -404,7 +424,7 @@ const resetFuForm = () => {
     template_id: null,
     scheduled_date: "",
     waktu_slot: "Pagi",
-    assigned_user_id: 459561500707,
+    assigned_user_id: null,
     note: "",
   };
 };
@@ -413,7 +433,8 @@ watch(
   () => props.donorId,
   () => {
     activeTab.value = "detail";
-    localMessages.value = [];
+    selectedChatTemplateId.value = null;
+    pendingFuId.value = null;
   },
 );
 
@@ -523,7 +544,7 @@ const currentProgramId = computed(
 
 const { data: projectsRaw, isLoading: isProjectsLoading } = useQuery({
   queryKey: computed(() => ["crm-projects-by-program", currentProgramId.value]),
-  queryFn: () => getProjects({ program_id: currentProgramId.value }),
+  queryFn: () => getProjects({ program_id: currentProgramId.value, activity : 'active open' }),
   enabled: computed(() => currentProgramId.value > 0 && showProjectModal.value),
 });
 
@@ -655,36 +676,38 @@ const chatCard = computed<CrmChatCard | null>(() => {
     transactionId: transactionId.value,
     phone: detail.value.phone,
     pipelineStageId: pipelineCase.value?.pipeline_stage?.id,
-    chatMessages: [
-      ...(detail.value.chat_messages ?? []),
-      ...localMessages.value,
-    ],
+    chatMessages: detail.value.chat_messages ?? [],
   };
 });
 
-// Kirim pesan WA ke donatur — optimis tampil dulu, rollback jika API gagal.
+// Kirim pesan WA ke donatur
 const handleSend = async (text: string, templateId: number | null) => {
-  const optimisticMessage: ChatMessageItem = {
-    message: text,
-    from_role: "cs" as ChatMessageItem["from_role"],
-    text,
-    isSender: true,
-    timeStamp: new Date().toLocaleTimeString("id-ID", {
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
-  };
-  localMessages.value.push(optimisticMessage);
-
   try {
     await sendCrmChatToDonor(donorProfileId.value, {
       message: text,
       template_id: templateId,
     });
+
+    // Jika pesan dikirim dari follow up yang pending, update statusnya menjadi selesai
+    if (pendingFuId.value) {
+      try {
+        await updateStatusFuMutation.mutateAsync({
+          id: pendingFuId.value,
+          status: "selesai",
+        });
+      } catch (e) {
+        console.error("Gagal memperbarui status follow up:", e);
+      }
+      pendingFuId.value = null;
+    }
+
+    selectedChatTemplateId.value = null;
+
+    // Invalidate donor detail agar chat messages terbaru ter-refresh langsung dari server
+    await queryClient.invalidateQueries({
+      queryKey: ["crm-donor-detail", donorProfileId.value],
+    });
   } catch (err: any) {
-    localMessages.value = localMessages.value.filter(
-      (m) => m !== optimisticMessage,
-    );
     showToast(err?.response?.data?.message ?? "Gagal mengirim pesan", {
       type: "error",
       position: "top-center",
@@ -791,9 +814,10 @@ const handleSetFollowUpStatus = async (payload: {
   await updateFollowUpStatus(payload.id, payload.status);
 };
 
-// Handle send follow-up message
-const handleSendFollowUp = async (fu: any) => {
-  if (!fu.template_id) {
+// Handle send follow-up: alihkan ke menu chat WA dengan template terpilih agar bisa diedit manual
+const handleSendFollowUp = (fu: any) => {
+  const templateId = fu.template?.id ?? fu.template_id;
+  if (!templateId) {
     showToast("Pilih template WA terlebih dahulu", {
       type: "warning",
       position: "top-center",
@@ -801,32 +825,9 @@ const handleSendFollowUp = async (fu: any) => {
     return;
   }
 
-  isSendingFu.value = true;
-  try {
-    // Send message via template
-    const templateText = fu.jenis; // Fallback ke jenis jika tidak ada template content
-    activeTab.value = "chat";
-
-    await handleSend(templateText, fu.template_id);
-
-    // Update status to selesai after sending
-    await updateStatusFuMutation.mutateAsync({
-      id: fu.id,
-      status: "selesai",
-    });
-
-    showToast("Pesan berhasil dikirim", {
-      type: "success",
-      position: "top-center",
-    });
-  } catch (err: any) {
-    showToast(err?.response?.data?.message ?? "Gagal mengirim pesan", {
-      type: "error",
-      position: "top-center",
-    });
-  } finally {
-    isSendingFu.value = false;
-  }
+  pendingFuId.value = fu.id ?? null;
+  selectedChatTemplateId.value = templateId;
+  activeTab.value = "chat";
 };
 
 const FOLLOW_UP_STATUS_VARIANT: Record<string, string> = {
