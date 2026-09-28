@@ -17,7 +17,7 @@ export function useUsersTable() {
     ...(selectedHasDonatur.value !== ""
       ? { has_donatur: selectedHasDonatur.value }
       : {}),
-    ...{ exclude_role_id: 7 },
+    ...{ exclude_role_id: 3 },
   }));
 
   const table = useDataTable({
