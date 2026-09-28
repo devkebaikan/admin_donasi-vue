@@ -44,6 +44,7 @@ export function useDonorsBoard() {
     delete query.page;
     router.push({ query });
     currentPage.value = 1;
+    selectedId.value = 0;
   };
 
   const queryParams = computed(() => ({
@@ -130,6 +131,7 @@ export function useDonorsBoard() {
 
   const resetPage = () => {
     currentPage.value = 1;
+    selectedId.value = 0;
   };
 
   watch(

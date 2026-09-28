@@ -5,7 +5,7 @@
     style="margin-bottom: 0; max-height: 91vh; position: relative"
   >
     <div
-      v-if="!donorId"
+      v-if="!donorId || !props.case"
       class="text-center p-5 text-muted flex-grow-1 d-flex flex-column align-items-center justify-content-center"
     >
       <i class="bx bx-user-circle fs-1 mb-2 d-block opacity-50"></i>
