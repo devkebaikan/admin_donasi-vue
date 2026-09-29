@@ -501,7 +501,7 @@ const transactions = computed<Trx[]>(() => {
   const donations: any[] = claimableData.value?.programs?.[0]?.donations ?? [];
   return donations.map((d) => ({
     id: d.id,
-    owner: d.user?.name ?? d.owner_name ?? d.donor_name ?? "Hamba Allah",
+    owner: d.owner ?? "Hamba Allah",
     phone: d.user?.phone ?? d.phone ?? d.donor_phone ?? "",
     nominal: Number(d.nominal ?? d.amount ?? d.total ?? 0),
     date: d.date ?? d.created_at ?? "",

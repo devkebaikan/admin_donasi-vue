@@ -349,7 +349,7 @@ const bankRefOptionsWithSelected = computed(() => {
     rawMitra?.bank_reference?.name ??
     rawMitra?.bank_references?.name ??
     rawMitra?.bank_reference_name ??
-    `Bank #${selectedId}`;
+    formState.bank_name;
 
   return [...options, { value: selectedId, text: bankName }];
 });
@@ -369,6 +369,7 @@ const formState = reactive({
   account_behalf: "",
   account_number: "",
   bank_refferences_id: null as number | null,
+  bank_name: null as string | null,
 });
 
 // ── Validation ─────────────────────────────────────────────────────────────
@@ -408,6 +409,7 @@ watch(
     formState.account_behalf = data.account_behalf ?? "";
     formState.account_number = data.account_number ?? "";
     formState.bank_refferences_id = data.bank_refferences_id ?? null;
+    formState.bank_name = data.bank_refference.name ?? ""
 
     existingLogoUrl.value = data.logo_url ?? null;
 
