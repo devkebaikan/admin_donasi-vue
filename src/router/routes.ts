@@ -292,7 +292,7 @@ const programTypeRoutes = [
 // Setting Image Routes
 const settingImageRoutes = [
   {
-    path: "/image",
+    path: "/iniaja",
     name: "image.list",
     meta: {
       title: setTitle("Image"),
@@ -301,7 +301,7 @@ const settingImageRoutes = [
     component: () => import("@/views/setting-image/listImage.vue"),
   },
   {
-    path: "/image/create",
+    path: "/iniaja/create",
     name: "image.create",
     meta: {
       title: setTitle("Create Image"),
@@ -311,7 +311,7 @@ const settingImageRoutes = [
     component: () => import("@/views/setting-image/createImage.vue"),
   },
   {
-    path: "/image/:id/edit",
+    path: "/iniaja/:id/edit",
     name: "image.edit",
     meta: {
       title: setTitle("Edit Image"),
