@@ -117,3 +117,21 @@ export const proposeRefund = async (data: ProposeRefundPayload) => {
   }
 };
 
+
+
+// Tambahan: Get Notifications by Transaction ID
+export const getNotifsByTransactionId = async (transactionId: number) => {
+  try {
+    const res = await HttpClient.get("/crm/notifications", {
+      params: { 
+        transaction_id: transactionId,
+        mode: "list",
+        limit: 50 // batasi agar tidak terlalu banyak
+      },
+    });
+    return res.data.data;
+  } catch (error) {
+    console.error(`Error fetching notifications for transaction ${transactionId}:`, error);
+    return [];
+  }
+};

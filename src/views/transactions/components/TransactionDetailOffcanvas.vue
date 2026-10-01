@@ -60,6 +60,16 @@
             <i class="bx bx-history me-1"></i>Riwayat Transaksi
           </button>
         </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            :class="{ active: activeTab === 'notification' }"
+            @click="activeTab = 'notification'"
+            type="button"
+          >
+            <i class="bx bx-bell me-1"></i>Notifikasi
+          </button>
+        </li>
       </ul>
 
       <div v-if="activeTab === 'detail'" class="tab-content">
@@ -550,6 +560,61 @@
           Tidak ada riwayat transaksi.
         </p>
       </div>
+
+      <!--  Tab Content Notifikasi -->
+      <div v-if="activeTab === 'notification'" class="tab-content">
+        <div v-if="isNotifLoading" class="text-center py-4">
+          <b-spinner small variant="primary" class="me-2" />
+          <span class="text-muted small">Memuat notifikasi...</span>
+        </div>
+        <div v-else-if="isNotifError" class="alert alert-warning mb-0">
+          Gagal memuat data notifikasi.
+        </div>
+        <div v-else-if="notifList && notifList.length">
+          <div class="d-flex flex-column gap-3">
+            <div
+              v-for="notif in notifList"
+              :key="notif.id"
+              class="border rounded p-3 shadow-sm"
+            >
+              <div
+                class="d-flex justify-content-between align-items-center mb-2"
+              >
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bx bx-bell text-primary"></i>
+                  <span class="fw-semibold small text-uppercase">
+                    {{ notif.type || "Notification" }}
+                  </span>
+                </div>
+                <span
+                  :class="['badge', notifBadgeClass(notif.status)]"
+                  style="font-size: 10px"
+                >
+                  {{ notif.status }}
+                </span>
+              </div>
+
+              <p class="mb-1 small">{{ notif.message }}</p>
+
+              <div v-if="notif.notes" class="mt-2 pt-2 border-top">
+                <small class="text-muted d-block">Catatan:</small>
+                <small class="text-muted fst-italic">{{ notif.notes }}</small>
+              </div>
+
+              <div class="mt-2 text-end text-muted" style="font-size: 11px">
+                <i class="bx bx-time me-1"></i
+                >{{ formatDateTime(notif.created_at) }}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-else class="text-center py-4">
+          <i class="bx bx-bell-off fs-2 text-muted"></i>
+          <p class="mt-2 text-muted small fst-italic">
+            Tidak ada notifikasi untuk transaksi ini.
+          </p>
+        </div>
+      </div>
     </div>
   </b-offcanvas>
 </template>
@@ -560,6 +625,7 @@ import { useQuery } from "@tanstack/vue-query";
 import {
   getAllTransactions,
   getTransactionById,
+  getNotifsByTransactionId,
 } from "@/services/transactionService";
 import { formatCurrency, formatDateTime, formatDate } from "@/helpers/format";
 import { getUserById } from "@/services/userService";
@@ -621,12 +687,36 @@ const {
   enabled: computed(() => !!txDetail.value?.user?.id),
 });
 
+const {
+  data: notifList,
+  isLoading: isNotifLoading,
+  isError: isNotifError,
+} = useQuery({
+  queryKey: computed(() => [
+    "transaction-notifications",
+    txDetail.value?.id,
+  ]),
+  queryFn: () => getNotifsByTransactionId(txDetail.value?.id || 0),
+  // Hanya fetch ketika tab notifikasi aktif dan txDetail.id tersedia
+  enabled: computed(() => !!txDetail.value?.id && activeTab.value === 'notification'),
+});
+
 const STATUS_BADGE: Record<string, string> = {
   Paid: "bg-success",
   Pending: "bg-warning text-dark",
   Canceled: "bg-danger",
 };
 const statusBadgeClass = (s: string) => STATUS_BADGE[s] ?? "bg-secondary";
+
+const NOTIF_BADGE: Record<string, string> = {
+  success: "bg-success",
+  pending: "bg-warning text-dark",
+  failed: "bg-danger",
+  scheduled: "bg-info",
+  sent: "bg-primary",
+};
+const notifBadgeClass = (s: string) => NOTIF_BADGE[s?.toLowerCase()] ?? "bg-secondary";
+
 
 const ACTIVITY_BADGE: Record<string, string> = {
   "Waiting for payment": "bg-warning text-dark",
