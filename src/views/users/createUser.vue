@@ -54,14 +54,23 @@
             <!-- Password -->
             <b-col md="6">
               <b-form-group label="Password" label-for="password">
-                <b-form-input
-                  id="password"
-                  v-model="v$.password.$model"
-                  type="password"
-                  placeholder="Minimal 6 karakter"
-                  :state="v$.password.$error ? false : null"
-                />
-                <b-form-invalid-feedback v-if="v$.password.$error">
+                <b-input-group>
+                  <b-form-input
+                    id="password"
+                    v-model="v$.password.$model"
+                    :type="showPassword ? 'text' : 'password'"
+                    placeholder="Minimal 6 karakter"
+                    :state="v$.password.$error ? false : null"
+                  />
+                  <b-button
+                    variant="outline-secondary"
+                    type="button"
+                    @click="showPassword = !showPassword"
+                  >
+                    <i :class="showPassword ? 'bx bx-hide' : 'bx bx-show'"></i>
+                  </b-button>
+                </b-input-group>
+                <b-form-invalid-feedback v-if="v$.password.$error" class="d-block">
                   {{ v$.password.$errors[0].$message }}
                 </b-form-invalid-feedback>
               </b-form-group>
@@ -285,7 +294,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from "vue";
+import { ref, reactive } from "vue";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { useVuelidate } from "@vuelidate/core";
 import { required, minLength, maxLength, helpers } from "@vuelidate/validators";
@@ -300,6 +309,8 @@ import { getAllRoles } from "@/services/roleService";
 
 const router = useRouter();
 const queryClient = useQueryClient();
+
+const showPassword = ref(false);
 
 const formState = reactive({
   name: "",

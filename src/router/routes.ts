@@ -301,7 +301,7 @@ const settingImageRoutes = [
     component: () => import("@/views/setting-image/listImage.vue"),
   },
   {
-    path: "/iniaja/create",
+    path: "/image/create",
     name: "image.create",
     meta: {
       title: setTitle("Create Image"),
@@ -311,7 +311,7 @@ const settingImageRoutes = [
     component: () => import("@/views/setting-image/createImage.vue"),
   },
   {
-    path: "/iniaja/:id/edit",
+    path: "/image/:id/edit",
     name: "image.edit",
     meta: {
       title: setTitle("Edit Image"),

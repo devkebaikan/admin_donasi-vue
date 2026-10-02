@@ -63,12 +63,12 @@
       <b-col>
         <UIComponentCard id="basic" title="Daftar Permission">
           <div v-if="isCanCreate" class="d-flex justify-content-end mb-3">
-            <b-button
+            <!-- <b-button
               variant="primary"
               @click="router.push('/permissions/create')"
             >
               <i class="bx bx-plus fs-16 me-1"></i>Tambah Permission
-            </b-button>
+            </b-button> -->
           </div>
 
           <div v-if="isLoading" class="text-center p-4">

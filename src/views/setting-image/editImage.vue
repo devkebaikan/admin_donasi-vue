@@ -34,7 +34,7 @@
                       :src="existingImageUrl"
                       alt="current"
                       style="
-                        max-height: 160px;
+                        max-height: 300px;
                         max-width: 100%;
                         border-radius: 4px;
                         border: 1px solid #dee2e6;

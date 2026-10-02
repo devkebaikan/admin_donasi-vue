@@ -129,6 +129,23 @@ export function useDonorsBoard() {
     filteredCasesRaw.value.map(toCaseCard),
   );
 
+  // Otomatis pilih donatur pertama jika donatur saat ini sudah tidak ada di list
+  // (misalnya setelah donatur dimasukkan ke project dan berpindah stage).
+  watch(
+    filteredCasesRaw,
+    (newList) => {
+      if (!newList.length) {
+        selectedId.value = 0;
+        return;
+      }
+      const isStillExist = newList.some((item) => item.id === selectedId.value);
+      if (!isStillExist || !selectedId.value) {
+        selectedId.value = newList[0].id;
+      }
+    },
+    { immediate: true },
+  );
+
   const resetPage = () => {
     currentPage.value = 1;
     selectedId.value = 0;

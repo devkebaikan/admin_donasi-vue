@@ -69,30 +69,30 @@ export function usePermissionTable() {
             ? html(`<span class="badge bg-primary">Utama</span>`)
             : html(`<span class="badge bg-light text-muted">Tambahan</span>`),
       },
-      {
-        name: "Actions",
-        width: "110px",
-        sort: false,
-        formatter: (item: { id: number }) =>
-          html(`
-            <div class="d-flex gap-2 justify-content-center">
-              <button
-                class="btn btn-sm btn-soft-warning edit-btn"
-                data-action="edit"
-                data-id="${item.id}"
-                title="Edit Permission">
-                <i class="bx bx-edit fs-16"></i>
-              </button>
-              <button
-                class="btn btn-sm btn-soft-danger delete-btn"
-                data-action="delete"
-                data-id="${item.id}"
-                title="Hapus Permission">
-                <i class="bx bx-trash fs-16"></i>
-              </button>
-            </div>
-          `),
-      },
+      // {
+      //   name: "Actions",
+      //   width: "110px",
+      //   sort: false,
+      //   formatter: (item: { id: number }) =>
+      //     html(`
+      //       <div class="d-flex gap-2 justify-content-center">
+      //         <button
+      //           class="btn btn-sm btn-soft-warning edit-btn"
+      //           data-action="edit"
+      //           data-id="${item.id}"
+      //           title="Edit Permission">
+      //           <i class="bx bx-edit fs-16"></i>
+      //         </button>
+      //         <button
+      //           class="btn btn-sm btn-soft-danger delete-btn"
+      //           data-action="delete"
+      //           data-id="${item.id}"
+      //           title="Hapus Permission">
+      //           <i class="bx bx-trash fs-16"></i>
+      //         </button>
+      //       </div>
+      //     `),
+      // },
     ],
 
     rowMapper: (item: any, index: number) => [

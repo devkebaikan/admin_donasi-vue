@@ -608,12 +608,36 @@ const handleAssignProject = async () => {
       project_id: selectedProjectId.value,
     });
 
-    await queryClient.invalidateQueries({
-      queryKey: ["crm-transaction-detail", transactionId.value],
-    });
-    await queryClient.invalidateQueries({
-      queryKey: ["crm-kegiatan", currentProjectId.value],
-    });
+    await Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: ["crm-donors"],
+        refetchType: "all",
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ["crm-pipeline-stages"],
+        refetchType: "all",
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ["crm-transaction-detail", transactionId.value],
+        refetchType: "all",
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ["crm-transaction-history"],
+        refetchType: "all",
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ["crm-donor-detail"],
+        refetchType: "all",
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ["crm-kegiatan"],
+        refetchType: "all",
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ["transactions"],
+        refetchType: "all",
+      }),
+    ]);
 
     showProjectModal.value = false;
     showToast("Project berhasil di-assign ke detail transaksi", {

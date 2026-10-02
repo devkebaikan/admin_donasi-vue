@@ -159,9 +159,7 @@
           </div>
           <div>
             <h5 class="mb-1 fw-bold">{{ userDetail.name ?? "-" }}</h5>
-            <span class="badge bg-primary"
-              >Role ID: {{ userDetail.role_id }}</span
-            >
+            <span class="badge bg-primary">{{ userDetail.role?.name }}</span>
           </div>
         </div>
 
@@ -226,10 +224,8 @@
           </b-col>
           <b-col cols="6">
             <div class="bg-light rounded p-2">
-              <small class="text-muted d-block">Role ID</small>
-              <span class="fw-semibold small font-monospace"
-                >#{{ userDetail.role_id }}</span
-              >
+              <small class="text-muted d-block">Role</small>
+              <span class="fw-semibold small font-monospace">{{ userDetail.role?.name }}</span>
             </div>
           </b-col>
         </b-row>

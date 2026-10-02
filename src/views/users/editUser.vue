@@ -63,12 +63,21 @@
             <!-- Password -->
             <b-col md="6">
               <b-form-group label="Password Baru" label-for="password">
-                <b-form-input
-                  id="password"
-                  v-model="formState.password"
-                  type="password"
-                  placeholder="Kosongkan jika tidak ingin mengubah"
-                />
+                <b-input-group>
+                  <b-form-input
+                    id="password"
+                    v-model="formState.password"
+                    :type="showPassword ? 'text' : 'password'"
+                    placeholder="Kosongkan jika tidak ingin mengubah"
+                  />
+                  <b-button
+                    variant="outline-secondary"
+                    type="button"
+                    @click="showPassword = !showPassword"
+                  >
+                    <i :class="showPassword ? 'bx bx-hide' : 'bx bx-show'"></i>
+                  </b-button>
+                </b-input-group>
                 <small class="text-muted">Opsional — minimal 6 karakter</small>
               </b-form-group>
             </b-col>
@@ -291,7 +300,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watch, computed } from "vue";
+import { ref, reactive, watch, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/vue-query";
 import { useVuelidate } from "@vuelidate/core";
@@ -309,12 +318,15 @@ const router = useRouter();
 const queryClient = useQueryClient();
 const userId = Number(route.params.id);
 
+const showPassword = ref(false);
+
 const formState = reactive({
   name: "",
   phone: "",
   email: "",
   password: "",
   role_id: null as number | null,
+  roleName : "",
   verified: "",
   referral_code: "",
   public_code: "",
@@ -342,6 +354,7 @@ watch(userData, (user) => {
   formState.email = user.email ?? "";
   formState.password = "";
   formState.role_id = user.role_id ?? null;
+  formState.roleName = user.role?.name ?? "";
   formState.verified = user.verified ?? "";
   formState.referral_code = user.referral_code ?? "";
   formState.public_code = user.public_code ?? "";
@@ -400,7 +413,7 @@ const roleOptionsWithSelected = computed(() => {
   );
   if (alreadyExists) return options;
 
-  return [...options, { value: selectedId, text: `Role #${selectedId}` }];
+  return [...options, { value: selectedId, text: `${formState.roleName}` }];
 });
 
 const v$ = useVuelidate(rules, formState);
