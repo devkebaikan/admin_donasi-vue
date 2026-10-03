@@ -108,25 +108,25 @@ export function useProgramShowsTable(programId?: number) {
         formatter: (id: number) =>
           html(`
             <div class="d-flex gap-1 justify-content-center">
-              <button
-                class="btn btn-sm btn-soft-primary edit-btn"
-                data-action="edit"
-                data-id="${id}"
-                title="Edit">
-                <i class="bx bx-edit fs-16"></i>
-              </button>
-              <button
-                class="btn btn-sm btn-soft-danger delete-btn"
-                data-action="delete"
-                data-id="${id}"
-                title="Delete">
-                <i class="bx bx-trash fs-16"></i>
-              </button>
+            <button
+            class="btn btn-sm btn-soft-danger delete-btn"
+            data-action="delete"
+            data-id="${id}"
+            title="Delete">
+            <i class="bx bx-trash fs-16"></i>
+            </button>
             </div>
-          `),
-      },
-    ],
-
+            `),
+          },
+        ],
+        
+        // <button
+        //   class="btn btn-sm btn-soft-primary edit-btn"
+        //   data-action="edit"
+        //   data-id="${id}"
+        //   title="Edit">
+        //   <i class="bx bx-edit fs-16"></i>
+        // </button>
     rowMapper: (item: any, index: number) => [
       index,
       item.program?.image,
