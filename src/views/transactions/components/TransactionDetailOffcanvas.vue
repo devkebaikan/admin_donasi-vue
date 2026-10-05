@@ -563,6 +563,30 @@
 
       <!--  Tab Content Notifikasi -->
       <div v-if="activeTab === 'notification'" class="tab-content">
+        <!-- Tombol Kirim Notifikasi -->
+        <div class="d-flex gap-2 mb-3">
+          <b-button
+            size="sm"
+            variant="outline-warning"
+            :disabled="isSendingNotif"
+            @click="handleSendNotif('tagihan')"
+          >
+            <b-spinner v-if="isSendingNotif && sendingNotifType === 'tagihan'" small class="me-1" />
+            <i v-else class="bx bxl-whatsapp me-1"></i>
+            Kirim Notif Tagihan
+          </b-button>
+          <b-button
+            size="sm"
+            variant="outline-success"
+            :disabled="isSendingNotif"
+            @click="handleSendNotif('sukses')"
+          >
+            <b-spinner v-if="isSendingNotif && sendingNotifType === 'sukses'" small class="me-1" />
+            <i v-else class="bx bxl-whatsapp me-1"></i>
+            Kirim Notif Sukses
+          </b-button>
+        </div>
+
         <div v-if="isNotifLoading" class="text-center py-4">
           <b-spinner small variant="primary" class="me-2" />
           <span class="text-muted small">Memuat notifikasi...</span>
@@ -621,14 +645,16 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { useQuery } from "@tanstack/vue-query";
+import { useQuery, useQueryClient } from "@tanstack/vue-query";
 import {
   getAllTransactions,
   getTransactionById,
   getNotifsByTransactionId,
+  sendTransactionNotification,
 } from "@/services/transactionService";
 import { formatCurrency, formatDateTime, formatDate } from "@/helpers/format";
 import { getUserById } from "@/services/userService";
+import Swal from "sweetalert2";
 
 const props = defineProps({
   modelValue: {
@@ -732,4 +758,54 @@ watch(
     activeTab.value = "detail";
   },
 );
+
+// === Kirim Notifikasi ===
+const queryClient = useQueryClient();
+const isSendingNotif = ref(false);
+const sendingNotifType = ref<"tagihan" | "sukses" | null>(null);
+
+const handleSendNotif = async (type: "tagihan" | "sukses") => {
+  const txId = txDetail.value?.id;
+  if (!txId) return;
+
+  const label = type === "tagihan" ? "Tagihan" : "Sukses";
+
+  const confirm = await Swal.fire({
+    title: `Kirim Notifikasi ${label}?`,
+    text: `Notifikasi ${label} akan dikirim via WhatsApp ke donatur.`,
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Ya, Kirim",
+    cancelButtonText: "Batal",
+  });
+
+  if (!confirm.isConfirmed) return;
+
+  isSendingNotif.value = true;
+  sendingNotifType.value = type;
+
+  try {
+    await sendTransactionNotification(txId, type);
+    Swal.fire({
+      icon: "success",
+      title: "Berhasil",
+      text: `Notifikasi ${label} berhasil dikirim.`,
+      timer: 2000,
+      showConfirmButton: false,
+    });
+    // Refresh daftar notifikasi
+    queryClient.invalidateQueries({
+      queryKey: ["transaction-notifications", txId],
+    });
+  } catch (error: any) {
+    Swal.fire({
+      icon: "error",
+      title: "Gagal",
+      text: error?.response?.data?.message || `Gagal mengirim notifikasi ${label}.`,
+    });
+  } finally {
+    isSendingNotif.value = false;
+    sendingNotifType.value = null;
+  }
+};
 </script>

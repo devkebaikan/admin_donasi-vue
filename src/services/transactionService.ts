@@ -135,3 +135,20 @@ export const getNotifsByTransactionId = async (transactionId: number) => {
     return [];
   }
 };
+
+// Kirim Notifikasi Transaksi (tagihan / sukses)
+export const sendTransactionNotification = async (
+  id: number,
+  type: "tagihan" | "sukses",
+) => {
+  try {
+    const res = await HttpClient.post(`/admin/transactions/${id}/notify`, {
+      channels: ["wa"],
+      type,
+    });
+    return res.data;
+  } catch (error) {
+    console.error(`Error sending ${type} notification for transaction ${id}:`, error);
+    throw error;
+  }
+};
