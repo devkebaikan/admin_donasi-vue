@@ -2,7 +2,7 @@
   <VerticalLayout>
     <b-row>
       <b-col>
-        <UIComponentCard title="Tambah User">
+        <UIComponentCard :title="isDonatur ? 'Tambah Donatur' : 'Tambah User'">
           <b-row class="g-3">
             <!-- Nama -->
             <b-col md="6">
@@ -59,7 +59,11 @@
                     id="password"
                     v-model="v$.password.$model"
                     :type="showPassword ? 'text' : 'password'"
-                    placeholder="Minimal 6 karakter"
+                    :placeholder="
+                      isDonatur
+                        ? 'Kosongkan jika tidak ada / min 6 karakter'
+                        : 'Minimal 6 karakter'
+                    "
                     :state="v$.password.$error ? false : null"
                   />
                   <b-button
@@ -70,15 +74,21 @@
                     <i :class="showPassword ? 'bx bx-hide' : 'bx bx-show'"></i>
                   </b-button>
                 </b-input-group>
-                <b-form-invalid-feedback v-if="v$.password.$error" class="d-block">
+                <small v-if="isDonatur" class="text-muted">
+                  Opsional — minimal 6 karakter
+                </small>
+                <b-form-invalid-feedback
+                  v-if="v$.password.$error"
+                  class="d-block"
+                >
                   {{ v$.password.$errors[0].$message }}
                 </b-form-invalid-feedback>
               </b-form-group>
             </b-col>
 
             <!-- Role -->
-            <b-col md="4">
-              <b-form-group label="Role" label-for="role-id">
+            <b-col md="4" v-if="!isDonatur">
+              <b-form-group label="Role" label-for="role-id" v-if="!isDonatur">
                 <SearchSelect
                   id="role-id"
                   :modelValue="String(formState.role_id || 0)"
@@ -93,7 +103,7 @@
                       roleSearchQuery = query;
                     }
                   "
-                  :options="roleOptions"
+                  :options="roleOptionsWithSelected"
                   :isLoading="isRoleLoading"
                 />
                 <b-form-invalid-feedback v-if="v$.role_id.$error">
@@ -194,7 +204,7 @@
             </b-col>
 
             <b-col md="4">
-              <b-form-group label="CS ID" label-for="cs-id">
+              <b-form-group label="CS ID" label-for="cs-id" v-if="!isDonatur">
                 <b-form-input
                   id="cs-id"
                   v-model.number="formState.cs_id"
@@ -271,7 +281,7 @@
               <div class="d-flex gap-2 justify-content-end">
                 <b-button
                   variant="outline-secondary"
-                  @click="router.push('/users')"
+                  @click="router.push(isDonatur ? '/users/donatur' : '/users')"
                   :disabled="isPending"
                 >
                   Batal
@@ -294,11 +304,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { ref, reactive, computed, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { useVuelidate } from "@vuelidate/core";
 import { required, minLength, maxLength, helpers } from "@vuelidate/validators";
-import { useRouter } from "vue-router";
 import { toast as showToast } from "vue3-toastify";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
@@ -307,8 +317,16 @@ import { useSearchSelect } from "@/composables/useSearchSelect";
 import { createUser } from "@/services/userService";
 import { getAllRoles } from "@/services/roleService";
 
+const route = useRoute();
 const router = useRouter();
 const queryClient = useQueryClient();
+
+const isDonatur = computed(
+  () =>
+    route.query.role === "donatur" ||
+    route.query.role === "3" ||
+    formState.role_id === 3,
+);
 
 const showPassword = ref(false);
 
@@ -316,14 +334,14 @@ const formState = reactive({
   name: "",
   phone: "",
   email: "",
-  password: "",
+  password: "" as string | null,
   role_id: null as number | null,
   verified: "",
   referral_code: "",
   public_code: "",
   note: "",
   // donatur fields
-  panggilan: "",
+  panggilan: "Kak",
   real_name: "",
   cs_id: null as number | null,
   soft: "",
@@ -333,25 +351,44 @@ const formState = reactive({
   exis: "",
 });
 
-const rules = {
-  name: {
-    required: helpers.withMessage("Nama wajib diisi", required),
-    minLength: helpers.withMessage("Minimal 2 karakter", minLength(2)),
-    maxLength: helpers.withMessage("Maksimal 255 karakter", maxLength(255)),
-  },
-  phone: {
-    required: helpers.withMessage("Telepon wajib diisi", required),
-    minLength: helpers.withMessage("Minimal 10 karakter", minLength(10)),
-    maxLength: helpers.withMessage("Maksimal 30 karakter", maxLength(30)),
-  },
-  password: {
-    required: helpers.withMessage("Password wajib diisi", required),
-    minLength: helpers.withMessage("Minimal 6 karakter", minLength(6)),
-  },
-  role_id: {
-    required: helpers.withMessage("Role ID wajib diisi", required),
-  },
-};
+// Set default values jika role=donatur
+onMounted(() => {
+  if (route.query.role === "donatur" || route.query.role === "3") {
+    formState.role_id = 3;
+    formState.cs_id = 2;
+  }
+});
+
+const rules = computed(() => {
+  const isDonaturRole = isDonatur.value;
+
+  return {
+    name: {
+      required: helpers.withMessage("Nama wajib diisi", required),
+      minLength: helpers.withMessage("Minimal 2 karakter", minLength(2)),
+      maxLength: helpers.withMessage("Maksimal 255 karakter", maxLength(255)),
+    },
+    phone: {
+      required: helpers.withMessage("Telepon wajib diisi", required),
+      minLength: helpers.withMessage("Minimal 10 karakter", minLength(10)),
+      maxLength: helpers.withMessage("Maksimal 30 karakter", maxLength(30)),
+    },
+    password: isDonaturRole
+      ? {
+          minLength: helpers.withMessage(
+            "Minimal 6 karakter",
+            (val: string) => !val || val.length >= 6,
+          ),
+        }
+      : {
+          required: helpers.withMessage("Password wajib diisi", required),
+          minLength: helpers.withMessage("Minimal 6 karakter", minLength(6)),
+        },
+    role_id: {
+      required: helpers.withMessage("Role ID wajib diisi", required),
+    },
+  };
+});
 
 const {
   searchQuery: roleSearchQuery,
@@ -368,6 +405,20 @@ const {
   limit: 10,
 });
 
+const roleOptionsWithSelected = computed(() => {
+  const options = roleOptions.value ?? [];
+  if (!formState.role_id) return options;
+
+  const selectedId = Number(formState.role_id);
+  const alreadyExists = options.some(
+    (opt: any) => Number(opt.value) === selectedId,
+  );
+  if (alreadyExists) return options;
+
+  const defaultLabel = selectedId === 3 ? "Donatur" : `Role #${selectedId}`;
+  return [...options, { value: selectedId, text: defaultLabel }];
+});
+
 const v$ = useVuelidate(rules, formState);
 
 const { mutate, isPending } = useMutation({
@@ -375,9 +426,9 @@ const { mutate, isPending } = useMutation({
     const payload: Record<string, any> = {
       name: formState.name,
       phone: formState.phone,
-      password: formState.password,
       role_id: formState.role_id,
     };
+    if (formState.password) payload.password = formState.password;
     if (formState.email) payload.email = formState.email;
     if (formState.verified) payload.verified = formState.verified;
     if (formState.referral_code)
@@ -405,11 +456,18 @@ const { mutate, isPending } = useMutation({
   },
   onSuccess: () => {
     queryClient.invalidateQueries({ queryKey: ["users"] });
-    showToast("User berhasil ditambahkan", {
-      type: "success",
-      position: "top-center",
-    });
-    setTimeout(() => router.push("/users"), 1500);
+    showToast(
+      isDonatur.value
+        ? "Donatur berhasil ditambahkan"
+        : "User berhasil ditambahkan",
+      {
+        type: "success",
+        position: "top-center",
+      },
+    );
+    setTimeout(() => {
+      router.push(isDonatur.value ? "/users/donatur" : "/users");
+    }, 1500);
   },
   onError: (err: any) => {
     const msg = err?.response?.data?.message ?? "Gagal menyimpan user";

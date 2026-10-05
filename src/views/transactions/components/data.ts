@@ -6,12 +6,18 @@ import {
   deleteTransaction,
 } from "@/services/transactionService";
 import { formatCurrency, formatDateTime } from "@/helpers/format";
+import { hasPermission } from "@/helpers/permission";
 
 const STATUS_MAP: Record<string, { cls: string; label: string }> = {
   Paid: { cls: "bg-success", label: "Paid" },
   Pending: { cls: "bg-warning text-dark", label: "Pending" },
   Canceled: { cls: "bg-danger", label: "Canceled" },
 };
+
+
+const isCanEdit = hasPermission('transaction:update')
+const isCanDelete = hasPermission('transaction:create')
+
 
 export function useTransactionTable() {
   const selectedStatus = ref<string>("");
@@ -170,16 +176,19 @@ export function useTransactionTable() {
                 data-action="detail" data-id="${item.id}" title="Detail">
                 <i class="bx bx-show fs-16"></i>
               </button>
-              
+              ${isCanEdit ? `
               <button class="btn btn-sm btn-soft-warning edit-btn"
                 data-action="edit" data-id="${item.id}" title="Edit">
                 <i class="bx bx-edit fs-16"></i>
               </button>
+              `: ""}
               
-              <button class="btn btn-sm btn-soft-danger delete-btn"
+              ${isCanDelete ? `<button class="btn btn-sm btn-soft-danger delete-btn"
                 data-action="delete" data-id="${item.id}" title="Hapus">
                 <i class="bx bx-trash fs-16"></i>
-              </button>
+              </button>`: ""}
+
+
               ${item.status === "Pending"
                   ? `<button class="btn btn-sm btn-soft-success verifikasi-btn"
                 data-action="verifikasi" data-id="${item.id}" title="verifikasi">

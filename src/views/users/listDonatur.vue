@@ -85,10 +85,10 @@
     <!-- Tabel -->
     <b-row>
       <b-col>
-        <UIComponentCard id="basic" title="Daftar User">
+        <UIComponentCard id="basic" title="Daftar Donatur">
           <div class="d-flex justify-content-end mb-3">
-            <b-button variant="primary" :to="{ name: 'user.create' }">
-              <i class="bx bx-plus fs-16 me-1"></i>Tambah User
+            <b-button variant="primary" :to="'/users/create?role=donatur'">
+              <i class="bx bx-plus fs-16 me-1"></i>Tambah Donatur
             </b-button>
           </div>
 
