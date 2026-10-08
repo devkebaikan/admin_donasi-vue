@@ -216,7 +216,7 @@ export function useTransactionTable() {
         type: item.transaction_type.name,
         source : item.source
       },
-      item.date,
+      item.created_at,
       item.total,
       {
         name: item.user.name,
