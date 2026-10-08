@@ -17,6 +17,29 @@ import type { CrmCaseCard, CrmPipelineCase } from "@/types/crm";
  * Dipakai oleh donors.vue — reusable untuk page CRM lain yang perlu
  * menampilkan daftar donatur per stage (mis. halaman Dorman).
  */
+export const formatDateToYMD = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+export const getTodayDateString = (): string => {
+  return formatDateToYMD(new Date());
+};
+
+export const getYesterdayDateString = (): string => {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return formatDateToYMD(d);
+};
+
+export const getDayBeforeYesterdayDateString = (): string => {
+  const d = new Date();
+  d.setDate(d.getDate() - 2);
+  return formatDateToYMD(d);
+};
+
 export function useDonorsBoard() {
   const route = useRoute();
   const router = useRouter();
@@ -24,9 +47,7 @@ export function useDonorsBoard() {
   const selectedLevel = ref("");
   const selectedCycleStatus = ref("");
   const assignedCs = ref<number | null>(null);
-  const dateFilter = ref<"all" | "today" | "yesterday" | "dayBeforeYesterday">(
-    "all",
-  );
+  const dateFilter = ref<string>("");
   const searchQuery = ref("");
   const currentPage = ref(1);
   const perPageItem = ref(5);
@@ -58,41 +79,8 @@ export function useDonorsBoard() {
       : {}),
     ...(searchQuery.value ? { search: searchQuery.value } : {}),
     ...(assignedCs.value ? { assigned_cs: assignedCs.value } : {}),
+    ...(dateFilter.value ? { date: dateFilter.value } : {}),
   }));
-
-  const normalizeDate = (dateString?: string) => {
-    if (!dateString) return null;
-    const date = new Date(dateString);
-    if (Number.isNaN(date.getTime())) return null;
-    date.setHours(0, 0, 0, 0);
-    return date;
-  };
-
-  const today = () => {
-    const date = new Date();
-    date.setHours(0, 0, 0, 0);
-    return date;
-  };
-
-  const dateDiffDays = (dateA: Date, dateB: Date) => {
-    const diff = dateA.getTime() - dateB.getTime();
-    return Math.round(diff / (1000 * 60 * 60 * 24));
-  };
-
-  const filteredCasesRaw = computed(() => {
-    if (dateFilter.value === "all") return loadedCases.value;
-
-    const baseDate = today();
-    return loadedCases.value.filter((item) => {
-      const itemDate = normalizeDate(item.created_at);
-      if (!itemDate) return false;
-      const diff = dateDiffDays(baseDate, itemDate);
-      if (dateFilter.value === "today") return diff === 0;
-      if (dateFilter.value === "yesterday") return diff === 1;
-      if (dateFilter.value === "dayBeforeYesterday") return diff === 2;
-      return false;
-    });
-  });
 
   const { data, isLoading, isFetching, isError, error, refetch } = useQuery({
     queryKey: computed(() => ["crm-donors", queryParams.value]),
@@ -126,13 +114,13 @@ export function useDonorsBoard() {
   );
 
   const cases = computed<CrmCaseCard[]>(() =>
-    filteredCasesRaw.value.map(toCaseCard),
+    loadedCases.value.map(toCaseCard),
   );
 
   // Otomatis pilih donatur pertama jika donatur saat ini sudah tidak ada di list
   // (misalnya setelah donatur dimasukkan ke project dan berpindah stage).
   watch(
-    filteredCasesRaw,
+    loadedCases,
     (newList) => {
       if (!newList.length) {
         selectedId.value = 0;
@@ -179,6 +167,20 @@ export function useDonorsBoard() {
       loadedCases.value.find((item) => item.id === selectedId.value) ?? null,
   );
 
+  const setDate = (
+    preset: "today" | "yesterday" | "dayBeforeYesterday" | string,
+  ) => {
+    if (preset === "today") {
+      dateFilter.value = getTodayDateString();
+    } else if (preset === "yesterday") {
+      dateFilter.value = getYesterdayDateString();
+    } else if (preset === "dayBeforeYesterday") {
+      dateFilter.value = getDayBeforeYesterdayDateString();
+    } else {
+      dateFilter.value = preset;
+    }
+  };
+
   const selectCase = (id: number) => {
     selectedId.value = id;
   };
@@ -188,6 +190,10 @@ export function useDonorsBoard() {
     selectedCycleStatus,
     assignedCs,
     dateFilter,
+    setDate,
+    todayDateStr: getTodayDateString(),
+    yesterdayDateStr: getYesterdayDateString(),
+    dayBeforeYesterdayDateStr: getDayBeforeYesterdayDateString(),
     searchQuery,
     currentPage,
     perPageItem,

@@ -20,14 +20,14 @@
 
             <!-- Filter -->
             <b-col cols="12" lg="8">
-              <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+              <div class="d-flex flex-wrap gap-2 justify-content-lg-end align-items-center">
                 <b-button
                   size="sm"
                   class="rounded-pill px-2 fs-11 d-flex align-items-center"
                   :variant="
-                    dateFilter === 'today' ? 'secondary' : 'outline-secondary'
+                    dateFilter === todayDateStr || !dateFilter ? 'secondary' : 'outline-secondary'
                   "
-                  @click="dateFilter = 'today'"
+                  @click="setDate('today')"
                 >
                   <i class="bx bx-calendar me-1"></i>
                   Hari ini
@@ -37,11 +37,11 @@
                   size="sm"
                   class="rounded-pill px-2 fs-11 d-flex align-items-center"
                   :variant="
-                    dateFilter === 'yesterday'
+                    dateFilter === yesterdayDateStr
                       ? 'secondary'
                       : 'outline-secondary'
                   "
-                  @click="dateFilter = 'yesterday'"
+                  @click="setDate('yesterday')"
                 >
                   <i class="bx bx-calendar me-1"></i>
                   Kemarin
@@ -51,11 +51,11 @@
                   size="sm"
                   class="rounded-pill px-2 fs-11 d-flex align-items-center"
                   :variant="
-                    dateFilter === 'dayBeforeYesterday'
+                    dateFilter === dayBeforeYesterdayDateStr
                       ? 'secondary'
                       : 'outline-secondary'
                   "
-                  @click="dateFilter = 'dayBeforeYesterday'"
+                  @click="setDate('dayBeforeYesterday')"
                 >
                   <i class="bx bx-calendar me-1"></i>
                   Kemarin lusa
@@ -63,14 +63,24 @@
 
                 <b-button
                   size="sm"
-                  class="rounded-pill px-2 fs-11 d-flex align-items-center"
+                  class="rounded-pill px-2 fs-11 d-flex align-items-center d-none"
                   :variant="
-                    dateFilter === 'all' ? 'secondary' : 'outline-secondary'
+                    !dateFilter ? 'secondary' : 'outline-secondary'
                   "
-                  @click="dateFilter = 'all'"
+                  @click="setDate('all')"
                 >
                   Semua
                 </b-button>
+
+                <div class="d-flex align-items-center d-none" style="max-width: 150px">
+                  <b-form-input
+                    v-model="dateFilter"
+                    type="date"
+                    size="sm"
+                    class="fs-11 py-1"
+                    placeholder="YYYY-MM-DD"
+                  />
+                </div>
               </div>
             </b-col>
           </b-row>
@@ -92,7 +102,7 @@
               :selected-id="selectedId"
                :title="`Daftar ${boardTitle}`"
               :subtitle="
-                dateFilter === 'all'
+                totalRows === cases.length
                   ? `${totalRows} donatur ditemukan`
                   : `${cases.length} donatur ditampilkan dari ${totalRows}`
               "
@@ -153,6 +163,10 @@ const {
   selectedCycleStatus,
   assignedCs,
   dateFilter,
+  setDate,
+  todayDateStr,
+  yesterdayDateStr,
+  dayBeforeYesterdayDateStr,
   searchQuery,
   selectedStage,
   setStage,
