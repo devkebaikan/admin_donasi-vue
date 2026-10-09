@@ -34,7 +34,7 @@ export const createBlog = async (blogData: FormData) => {
 
 export const updateBlog = async (id: number, blogData: FormData) => {
   try {
-    const res = await HttpClient.post(`/blogs/${id}`, blogData, {
+    const res = await HttpClient.put(`/blogs/${id}`, blogData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return res.data.data;

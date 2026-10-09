@@ -104,7 +104,7 @@
             </b-col>
 
             <!-- Status Aktif -->
-            <b-col md="3">
+            <b-col md="6">
               <b-form-group label="Status Aktif" label-for="is-active">
                 <b-form-select id="is-active" v-model="formState.is_active">
                   <option value="1">Aktif</option>
@@ -113,16 +113,23 @@
               </b-form-group>
             </b-col>
 
-            <!-- Tag IDs -->
-            <b-col md="3">
-              <b-form-group label="Tag IDs" label-for="tag-ids">
-                <b-form-input
-                  id="tag-ids"
-                  v-model="formState.tagIdsRaw"
-                  type="text"
-                  placeholder="e.g., 1,2,3"
+            <!-- Tag Blog -->
+            <b-col md="6">
+              <b-form-group label="Tag Blog" label-for="blog-tags">
+                <ChoicesSelect
+                  id="blog-tags"
+                  :modelValue="formState.tag_ids"
+                  @update:modelValue="
+                    (val: string[]) => {
+                      formState.tag_ids = val;
+                    }
+                  "
+                  :options="tagOptions"
+                  :choice-options="{ removeItemButton: true }"
+                  multiple
+                  :key="tagOptions.length"
                 />
-                <small class="text-muted">Opsional, pisahkan dengan koma</small>
+                <small class="text-muted">Opsional, pilih satu atau lebih tag blog</small>
               </b-form-group>
             </b-col>
 
@@ -160,7 +167,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, onMounted, computed } from "vue";
+import { reactive, ref, computed } from "vue";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { useVuelidate } from "@vuelidate/core";
 import { required, minLength, maxLength } from "@vuelidate/validators";
@@ -169,6 +176,7 @@ import CustomQuillEditor from "@/components/CustomQuillEditor.vue";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import { createBlog, getBlogCategories } from "@/services/blogService";
+import { getAllBlogTag } from "@/services/blogTagService";
 import { toast, type ToastOptions } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
@@ -188,7 +196,7 @@ const formState = reactive({
   category_id: null as number | null,
   is_active: "1",
   image: null as File | null,
-  tagIdsRaw: "",
+  tag_ids: [] as string[],
 });
 
 const rules = {
@@ -216,6 +224,24 @@ const categoryOptions = computed(() => {
       text: item.nama,
     })),
   ];
+});
+
+const { data: tagsData } = useQuery({
+  queryKey: ["blog-tags-list"],
+  queryFn: () => getAllBlogTag({ mode: "list", per_page: 100 }),
+});
+
+const tagOptions = computed(() => {
+  if (!tagsData.value) return [];
+  const list = Array.isArray(tagsData.value)
+    ? tagsData.value
+    : Array.isArray(tagsData.value?.data)
+      ? tagsData.value.data
+      : [];
+  return list.map((item: any) => ({
+    value: String(item.id),
+    text: item.nama || item.name || item.title || String(item.id),
+  }));
 });
 
 const handleImageChange = (event: Event) => {
@@ -268,13 +294,11 @@ const handleSubmit = async () => {
   formData.append("content", formState.content);
   formData.append("category_id", String(formState.category_id));
   formData.append("is_active", formState.is_active);
-  formData.append("image_url", imageFile.value as File);
+  formData.append("image", imageFile.value as File);
 
-  const tagIds = formState.tagIdsRaw
-    .split(",")
-    .map((s) => s.trim())
-    .filter((s) => s !== "" && !isNaN(Number(s)));
-  tagIds.forEach((id) => formData.append("tag_ids[]", id));
+  formState.tag_ids.forEach((id) => {
+    if (id) formData.append("tag_ids[]", String(id));
+  });
 
   submitBlog(formData);
 };

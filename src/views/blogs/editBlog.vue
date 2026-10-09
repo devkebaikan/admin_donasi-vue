@@ -155,7 +155,7 @@
             </b-col>
 
             <!-- Status Aktif -->
-            <b-col md="3">
+            <b-col md="6">
               <b-form-group label="Status Aktif" label-for="is-active">
                 <b-form-select id="is-active" v-model="formState.is_active">
                   <option value="1">Aktif</option>
@@ -164,16 +164,23 @@
               </b-form-group>
             </b-col>
 
-            <!-- Tag IDs -->
-            <b-col md="3">
-              <b-form-group label="Tag IDs" label-for="tag-ids">
-                <b-form-input
-                  id="tag-ids"
-                  v-model="formState.tagIdsRaw"
-                  type="text"
-                  placeholder="e.g., 1,2,3"
+            <!-- Tag Blog -->
+            <b-col md="6">
+              <b-form-group label="Tag Blog" label-for="blog-tags">
+                <ChoicesSelect
+                  id="blog-tags"
+                  :modelValue="formState.tag_ids"
+                  @update:modelValue="
+                    (val: string[]) => {
+                      formState.tag_ids = val;
+                    }
+                  "
+                  :options="tagOptions"
+                  :choice-options="{ removeItemButton: true }"
+                  multiple
+                  :key="`${tagOptions.length}-${formState.tag_ids.join(',')}`"
                 />
-                <small class="text-muted">Opsional, pisahkan dengan koma</small>
+                <small class="text-muted">Opsional, pilih satu atau lebih tag blog</small>
               </b-form-group>
             </b-col>
 
@@ -211,7 +218,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed, watch, onMounted } from "vue";
+import { reactive, ref, computed, watch } from "vue";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { useVuelidate } from "@vuelidate/core";
 import { required, minLength, maxLength } from "@vuelidate/validators";
@@ -220,6 +227,8 @@ import CustomQuillEditor from "@/components/CustomQuillEditor.vue";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import { getBlogById, updateBlog, getBlogCategories } from "@/services/blogService";
+import { getAllBlogTag } from "@/services/blogTagService";
+import ChoicesSelect from "@/components/ChoicesSelect.vue";
 import { toast, type ToastOptions } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 
@@ -242,7 +251,7 @@ const formState = reactive({
   content: "",
   category_id: null as number | null,
   is_active: "1",
-  tagIdsRaw: "",
+  tag_ids: [] as string[],
 });
 
 const rules = {
@@ -275,7 +284,14 @@ watch(
     formState.content = data.content ?? "";
     formState.category_id = data.category?.id ?? null;
     formState.is_active = data.is_active ? "1" : "0";
-    formState.tagIdsRaw = (data.tag_ids ?? []).join(", ");
+
+    if (Array.isArray(data.tag_ids)) {
+      formState.tag_ids = data.tag_ids.map((id: any) => String(id));
+    } else if (Array.isArray(data.tags)) {
+      formState.tag_ids = data.tags.map((t: any) => String(t.id ?? t));
+    } else {
+      formState.tag_ids = [];
+    }
 
     existingImageUrl.value = data.image_url ?? null;
     formReady.value = true;
@@ -300,6 +316,23 @@ const categoryOptions = computed(() => {
   ];
 });
 
+const { data: tagsData } = useQuery({
+  queryKey: ["blog-tags-list"],
+  queryFn: () => getAllBlogTag({ mode: "list", per_page: 100 }),
+});
+
+const tagOptions = computed(() => {
+  if (!tagsData.value) return [];
+  const list = Array.isArray(tagsData.value)
+    ? tagsData.value
+    : Array.isArray(tagsData.value?.data)
+      ? tagsData.value.data
+      : [];
+  return list.map((item: any) => ({
+    value: String(item.id),
+    text: item.nama || item.name || item.title || String(item.id),
+  }));
+});
 
 const handleImageChange = (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0] ?? null;
@@ -358,14 +391,12 @@ const handleSubmit = async () => {
   formData.append("is_active", formState.is_active);
 
   if (imageFile.value) {
-    formData.append("image_url", imageFile.value);
+    formData.append("image", imageFile.value);
   }
 
-  const tagIds = formState.tagIdsRaw
-    .split(",")
-    .map((s) => s.trim())
-    .filter((s) => s !== "" && !isNaN(Number(s)));
-  tagIds.forEach((id) => formData.append("tag_ids[]", id));
+  formState.tag_ids.forEach((id) => {
+    if (id) formData.append("tag_ids[]", String(id));
+  });
 
   submitBlog(formData);
 };

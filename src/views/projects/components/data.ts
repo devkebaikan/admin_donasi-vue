@@ -190,6 +190,7 @@ export function useProjectsTable() {
         name: "Keuangan",
         width: "280px",
         formatter: (item: {
+          ajuan: number;
           acc: number;
           claimed: number;
           alokasi: number;
@@ -201,36 +202,40 @@ export function useProjectsTable() {
           html(`
       <div class="small lh-sm">
         <div class="d-flex justify-content-between">
-          <span class="text-muted">Disetujui</span>
+          <span class="text-muted">Diajukan</span>
+          <span class="fw-semibold">${formatCurrency(item.ajuan)}</span>
+        </div>
+        <div class="d-flex justify-content-between">
+          <span class="text-muted">Disetujui CEO</span>
           <span class="fw-semibold text-success">${formatCurrency(item.acc)}</span>
         </div>
         <div class="d-flex justify-content-between mt-1">
-          <span class="text-muted">Terklaim</span>
+          <span class="text-muted">Terklaim Masuk Proyek</span>
           <span class="fw-semibold">${formatCurrency(item.claimed)}</span>
         </div>
         <div class="d-flex justify-content-between mt-1">
-          <span class="text-muted">Kurang Funding</span>
+          <span class="text-muted">Kekurangan Funding</span>
           <span class="fw-semibold text-warning">${formatCurrency(item.acc - item.claimed)}</span>
         </div>
         <div class="d-flex justify-content-between mt-1">
-          <span class="text-muted">TF Mitra</span>
+          <span class="text-muted">Sudah Transfer ke Mitra</span>
           <span class="fw-semibold">${formatCurrency(item.tfMitra)}</span>
         </div>
         <div class="d-flex justify-content-between mt-1">
-          <span class="text-muted">Saldo belum cair</span>
+          <span class="text-muted">Belum Tertransfer</span>
           <span class="fw-semibold">${formatCurrency(item.claimed - item.tfMitra)}</span>
         </div>
         <div class="d-flex justify-content-between mt-1">
-          <span class="text-muted">Pakai Mitra</span>
+          <span class="text-muted">Sudah Terpakai-Terlapor oleh Mitra</span>
           <span class="fw-semibold">${formatCurrency(item.pakaiMitra)}</span>
         </div>
         <div class="d-flex justify-content-between mt-1">
-          <span class="text-muted">Refund</span>
+          <span class="text-muted">Refund Sisa</span>
           <span class="fw-semibold text-danger">${formatCurrency(item.refundMitra)}</span>
         </div>
         <hr class="my-2"/>
         <div class="d-flex justify-content-between">
-          <span class="fw-semibold">Sisa Dana</span>
+          <span class="fw-semibold">Saldo Sisa Proyek</span>
           <span class="fw-bold text-primary">${formatCurrency(item.sisaDana)}</span>
         </div>
       </div>
@@ -257,6 +262,7 @@ export function useProjectsTable() {
         pelaksanaan: project.waktu_pelaksanaan,
       },
       {
+        ajuan : project.nominal_ajuan,
         acc: project.nominal_acc,
         claimed: project.total_allocated,
         alokasi: project.total_alokasi,

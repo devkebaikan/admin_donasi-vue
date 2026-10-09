@@ -330,12 +330,12 @@
       <div class="mb-3">
         <small class="text-muted d-block mb-1">URL detail project</small>
         <a
-          :href="`https://beramalbersama.com/project/detail/${projectDetail.link}`"
+          :href="`https://beramalbersama.com/project/${projectDetail.id}`"
           target="_blank"
           rel="noopener noreferrer"
           class="small text-break"
         >
-          beramalbersama.com/project/detail/{{ projectDetail.link }}
+          beramalbersama.com/project/{{ projectDetail.id }}
           <i class="bx bx-link-external ms-1"></i>
         </a>
       </div>

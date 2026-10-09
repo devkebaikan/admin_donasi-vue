@@ -5,12 +5,20 @@
     style="margin-bottom: 0; max-height: 100vh"
   >
     <b-card-header class="main-nav">
-      <LogoBox
+      <!-- <LogoBox
         customClass="mx-auto text-center auth-logo"
         :smLogoHeight="20"
         :logoHeight="18"
         smLogoClass="me-1"
-      />
+        logoUrl="@/assets/images/logo-dasb-crm.png"
+      /> -->
+      <a href="/">
+        <img
+        src="@/assets/images/logo-dasb-crm.png"
+        class="mx-auto text-center auth-logo"
+        style="max-height: 30px"
+        />
+      </a>
     </b-card-header>
     <!-- <b-card-title class="mb-0 fs-14">
       <i class="bx bx-git-branch me-1 text-primary"></i>CRM
