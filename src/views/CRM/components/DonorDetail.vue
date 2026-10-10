@@ -85,8 +85,9 @@
       >
         <b-card-body class="pb-2">
           <DonorDetailProfileSection
-            :detail="detail"
-            :userId="transaction?.user_id"
+          :detail="detail"
+          :transactionDetail="transaction"
+          :userId="transaction?.user_id"
           />
 
           <DonorDetailTransactionSection

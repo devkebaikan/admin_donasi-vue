@@ -136,7 +136,7 @@ export const deleteCrmChatTemplate = async (id: number) => {
 export const getCrmChatTemplatesByStage = async (stageId: number) => {
   try {
     const res = await HttpClient.get(
-      `/crm/whatsapp-templates/by-pipeline/${stageId}`,
+      `/crm/  /${stageId}`,
     );
     return res.data.data;
   } catch (error) {

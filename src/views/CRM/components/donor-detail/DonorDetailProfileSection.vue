@@ -1,7 +1,7 @@
 <template>
   <div class="rounded-3 p-3 mb-3" style="background-color: #eef1fd">
     <div class="d-flex align-items-start gap-3">
-      <div
+      <!-- <div
         class="avatar-title rounded-circle flex-shrink-0 fs-14 fw-semibold text-white"
         :style="`
           width: 42px;
@@ -11,11 +11,11 @@
         `"
       >
         {{ initialsOf(detail.name) }}
-      </div>
+      </div> -->
 
       <div class="flex-grow-1">
         <div class="d-flex justify-content-between align-items-start">
-          <div>
+          <!-- <div>
             <h6 class="mb-1 fw-semibold">
               {{ detail.name }}
               <span v-if="detail.nick" class="text-muted fw-normal fs-12">
@@ -27,9 +27,9 @@
               <i class="bx bx-phone"></i>
               {{ detail.phone }}
             </div>
-          </div>
+          </div> -->
 
-          <div class="d-flex gap-1">
+          <!-- <div class="d-flex gap-1">
             <span
               class="badge"
               :class="`badge-soft-${cycleStatusVariant(detail.cycle_status)}`"
@@ -46,10 +46,26 @@
             >
               {{ detail.color_tag }}
             </span>
-          </div>
+          </div> -->
         </div>
 
-        <div class="d-flex flex-wrap gap-1 mt-2">
+        <div class="d-flex flex-wrap gap-1 mt-2" style="font-size: 14px">
+           <span
+              class="badge"
+              :class="`badge-soft-${cycleStatusVariant(detail.cycle_status)}`"
+            >
+              {{ detail.cycle_status }}
+            </span>
+            <span
+              v-if="detail.color_tag"
+              class="badge"
+              :style="`
+                background-color: ${detail.color_tag === 'amber' ? '#f59e0b' : detail.color_tag};
+                opacity: 0.5;
+              `"
+            >
+              {{ detail.color_tag }}
+            </span>
           <b-badge :variant="null" class="fw-medium fs-10 badge-soft-secondary">
             {{ detail.level }}
           </b-badge>
@@ -66,7 +82,7 @@
 
           <b-badge :variant="null" class="badge-soft-warning">
             <i class="bx bx-task me-1"></i>
-            Donasi ke - {{ donorProfileDummy.donationCount }}
+            Donasi ke - {{ transactionDetail.donation_number }}
           </b-badge>
 
           <b-badge :variant="null" class="badge-soft-primary">
@@ -317,6 +333,7 @@ import type { CrmDonorDetail } from "@/types/crm";
 
 const props = defineProps<{
   detail: CrmDonorDetail;
+  transactionDetail : any;
   userId?: number;
 }>();
 

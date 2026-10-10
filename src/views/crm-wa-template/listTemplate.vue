@@ -45,6 +45,26 @@
           }}</span>
         </div>
 
+
+         <div v-if="templateDetail.image" class="mb-3">
+          <h6
+            class="fw-semibold text-muted mb-2 text-uppercase"
+            style="font-size: 11px; letter-spacing: 0.5px"
+          >
+            <i class="bx bx-image me-1"></i>Gambar
+          </h6>
+          <img
+            :src="templateDetail.image_url"
+            alt="template"
+            style="
+              max-height: 240px;
+              max-width: 100%;
+              border-radius: 4px;
+              border: 1px solid #dee2e6;
+            "
+          />
+        </div>
+
         <hr class="my-3" />
 
         <h6
@@ -106,25 +126,6 @@
             </span>
           </div>
         </template>
-
-        <div v-if="templateDetail.image" class="mb-3">
-          <h6
-            class="fw-semibold text-muted mb-2 text-uppercase"
-            style="font-size: 11px; letter-spacing: 0.5px"
-          >
-            <i class="bx bx-image me-1"></i>Gambar
-          </h6>
-          <img
-            :src="`${STORAGE_BASE}${templateDetail.image}`"
-            alt="template"
-            style="
-              max-height: 160px;
-              max-width: 100%;
-              border-radius: 4px;
-              border: 1px solid #dee2e6;
-            "
-          />
-        </div>
 
         <hr class="my-3" />
         <div class="d-flex gap-3">

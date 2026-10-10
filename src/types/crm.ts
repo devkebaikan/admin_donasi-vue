@@ -92,6 +92,9 @@ export type PipelineStage = {
   color: string;
   is_active: boolean;
   icon: string;
+  summary: {
+    count: number;
+  }
 };
 
 export type CrmDonorSummary = {

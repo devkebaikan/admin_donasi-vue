@@ -96,7 +96,7 @@
             <span
               class="badge fs-10 rounded-pill bg-soft-primary text-primary fw-semibold"
             >
-              {{ stage.id }}
+              {{ stage.summary?.count }}
             </span>
           </span>
         </a>
@@ -136,11 +136,20 @@
       </router-link>
     </simplebar>
     <b-card-footer class="py-2 flex-shrink-0">
-      <b-card-title class="mb-0 fs-12">
+      <b-card-title class="mb-0 fs-12 d-flex justify-content-between">
         <div>
-          <h6>Nama CS</h6>
-          <div class="fs-10 text-muted">CS 1 | online</div>
+          <h6>{{userName}}</h6>
+          <div class="fs-10 text-muted">{{userRole}} | online</div>
         </div>
+
+        <b-button
+          variant="soft-danger"
+          size="sm"
+          @click="logout()"
+        >
+          <i class="bx bx-log-out fs-16 me-1"></i>Logout
+        </b-button>
+        
       </b-card-title>
     </b-card-footer>
   </b-card>
@@ -152,7 +161,22 @@ import { useQuery } from "@tanstack/vue-query";
 import { useRoute } from "vue-router";
 import simplebar from "simplebar-vue";
 import { getPipeline } from "@/services/crmService";
+import { useAuthStore } from "@/stores/auth";
 import type { PipelineStage } from "@/types/crm";
+
+const authStore = useAuthStore();
+const logout = async () => {
+  await authStore.logout();
+};
+const user = localStorage.getItem('VUE_USER');
+
+const userName = computed(() => {
+  return user ? JSON.parse(user).user : '';
+});
+
+const userRole = computed(() => {
+  return user ? JSON.parse(user).role : '';
+});
 
 const props = defineProps<{
   activeCode?: string;
@@ -175,8 +199,8 @@ const modules = [
 ];
 
 const { data, isLoading } = useQuery({
-  queryKey: ["crm-pipeline-stages"],
-  queryFn: () => getPipeline(),
+  queryKey: ["crm-pipeline-stages", { is_summary: true }],
+  queryFn: () => getPipeline({ is_summary: true }),
 });
 
 // Hanya stage dinamis dari API

@@ -47,8 +47,7 @@
             <div class="d-flex justify-content-between gap-2 mb-1">
               <span class="text-muted small">Nama program</span>
               <span
-                class="fw-semibold small text-end text-truncate"
-                style="max-width: 60%"
+                class="fw-semibold small text-end"
                 :title="
                   currentTransactionDetails
                     ?.map((td) => td.program?.name)
@@ -165,6 +164,7 @@
         <i class="bx bx-plus me-1"></i>Masukan ke Project
       </b-button>
     </div>
+
     <div v-if="isTransactionLoading" class="text-center p-3">
       <b-spinner small variant="primary" />
     </div>
@@ -187,12 +187,24 @@
             Program : {{ td.program?.name ?? "-" }} ·
             {{ formatCurrency(td.nominal) }}
           </p>
+          <!-- Link -->
+           <div class="mt-2">
+             <a
+             :href="`https://beramalbersama.com/project/${td.project?.id}`"
+             target="_blank"
+             rel="noopener noreferrer"
+             class="small text-break"
+             >
+             beramalbersama.com/project/{{ td.project?.id }}
+             <i class="bx bx-link-external ms-1"></i>
+            </a>
+          </div>
         </div>
         <b-badge
           :variant="null"
-          class="fw-medium fs-10 badge-soft-cyan flex-shrink-0 ms-2"
+          class="fw-medium fs-11 badge-soft-cyan flex-shrink-0 ms-2"
         >
-          {{ td.project?.status ?? td.activity }}
+          {{ td.activity }}
         </b-badge>
       </div>
     </template>
@@ -201,9 +213,24 @@
 
   <!-- Kegiatan -->
   <div class="rounded-3 mb-3">
-    <h6 class="fs-11 fw-semibold text-uppercase mb-2" style="color: #4e9c82">
-      <i class="bx bx-news me-1"></i>Update Kegiatan
-    </h6>
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <h6 class="fs-11 fw-semibold text-uppercase mb-0" style="color: #4e9c82">
+        <i class="bx bx-news me-1"></i>Update Kegiatan
+      </h6>
+
+      <div v-if="currentTransactionDetails[0]?.project?.id">
+        <a
+          :href="`kegiatan?project_id=${currentTransactionDetails[0].project.id}`"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="small text-break"
+        >
+          Lihat detail Kegiatan
+          <i class="bx bx-link-external ms-1"></i>
+        </a>
+      </div>
+    </div>
+    
     <div v-if="isKegiatanLoading" class="text-center p-3">
       <b-spinner small variant="primary" />
     </div>
@@ -219,6 +246,7 @@
         <p class="mb-0 text-muted fs-11">
           {{ formatDate(act.date) }} · {{ act.type }}
         </p>
+
       </div>
     </template>
     <p v-else class="text-muted fs-13 mb-0">Belum ada update kegiatan</p>

@@ -15,6 +15,7 @@ export const ALWAYS_ACCESSIBLE: string[] = [
   "/crm/wa-template/:id/edit",
   "/image/:id/edit",
   "/iniaja",
+  "/crm/profiling/:id",
 ];
 
 // Helper untuk mencocokkan dynamic path pattern (contoh: :id, :slug, atau wildcard *)

@@ -106,12 +106,12 @@
       </div>
       <div v-else-if="kegiatanDetail" class="pb-4">
         <!-- Thumbnail -->
-        <div v-if="kegiatanDetail.thumbnail" class="mb-3">
+        <div v-if="kegiatanDetail.thumbnail_url" class="mb-3">
           <img
-            :src="`${STORAGE_BASE}${kegiatanDetail.thumbnail}`"
+            :src="`${kegiatanDetail.thumbnail_url}`"
             :alt="kegiatanDetail.judul"
             class="w-100 rounded"
-            style="max-height: 220px; object-fit: cover"
+            style=" object-fit: cover"
           />
         </div>
 

@@ -26,8 +26,7 @@
     <div v-if="allTemplates.length" class="p-3 border-bottom">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <p class="text-muted fs-12 mb-0 d-flex align-items-center">
-          <i class="bx bx-message-square-dots fs-15 me-1"></i>Template Pesan
-          Cepat
+          <i class="bx bx-message-square-dots fs-15 me-1"></i>Template Pesan Cepat
         </p>
 
         <b-spinner v-if="isRendering" small variant="primary" />
@@ -221,7 +220,7 @@ const { data: templatesRaw } = useQuery({
   enabled: computed(() => stageId.value > 0),
 });
 const templates = computed<CrmChatTemplate[]>(() =>
-  Array.isArray(templatesRaw.value) ? templatesRaw.value : [],
+  Array.isArray(templatesRaw.value) ? templatesRaw.value.filter((t: CrmChatTemplate) => t.type === "crm") : [],
 );
 
 const extraTemplate = ref<CrmChatTemplate | null>(null);

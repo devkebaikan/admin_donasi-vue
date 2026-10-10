@@ -120,13 +120,14 @@
 
               <div class="dropdown-divider my-1"></div>
 
-              <router-link
-                class="dropdown-item text-danger"
-                :to="{ name: 'auth.sign-in' }"
+              <a
+                href="javascript:void(0);"
+                class="dropdown-item text-danger cursor-pointer"
+                @click="logout"
               >
                 <i class="bx bx-log-out fs-18 align-middle me-1"></i
                 ><span class="align-middle">Logout</span>
-              </router-link>
+              </a>
             </div>
           </DropDown>
         </div>
@@ -140,6 +141,7 @@ import { onMounted } from "vue";
 import { Icon } from "@iconify/vue";
 
 import { useLayoutStore } from "@/stores/layout";
+import { useAuthStore } from "@/stores/auth";
 import { toggleDocumentAttribute } from "@/helpers";
 import { profileMenuItems } from "@/layouts/partials/data";
 
@@ -148,8 +150,13 @@ import avatar1 from "@/assets/images/users/avatar-1.jpg";
 import Notification from "./Notification.vue";
 import { hasPermission } from "@/helpers/permission";
 
+const authStore = useAuthStore();
+const logout = async () => {
+  await authStore.logout();
+};
+
 const dataUser = JSON.parse(localStorage.getItem("VUE_USER") || "{}");
-const role = dataUser?.role.toUpperCase();
+const role = dataUser?.role?.toUpperCase() || "";
 
 const isAccessCRM = hasPermission("crm:task");
 
