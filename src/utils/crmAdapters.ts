@@ -1,5 +1,5 @@
 import { formatCurrency } from "@/helpers/format";
-import type { CrmCaseCard, CrmPipelineCase } from "../types/crm";
+import type { CrmBoardItem, CrmCaseCard } from "../types/crm";
 
 const COLOR_TAG_VARIANT: Record<string, string> = {
   blue: "info",
@@ -47,25 +47,40 @@ export const stageColorVariant = (color?: string) =>
 export const cycleStatusVariant = (status?: string) =>
   CYCLE_STATUS_VARIANT[status ?? ""] ?? "secondary";
 
-export const toCaseCard = (item: CrmPipelineCase): CrmCaseCard => ({
-  id: item.id,
-  initials: initialsOf(item.donor.name),
-  colorVariant: colorTagVariant(item.donor.color_tag),
-  color_tag: item.donor.color_tag,
-  name: item.donor.name,
-  nickname: item.donor.nick,
-  phone: item.donor.phone,
-  amount: formatCurrency(item.transaction.total),
-  stage: item.pipeline_stage.label,
-  tags: [
-    { label: item.donor.level, variant: "secondary" },
-    {
+export const toCaseCard = (item: CrmBoardItem): CrmCaseCard => {
+  const name =
+    item.donor?.name || ("task" in item ? item.task : undefined) || "Donatur";
+  const tags = [];
+
+  if (item.donor?.level) {
+    tags.push({ label: item.donor.level, variant: "secondary" });
+  }
+  if (item.donor?.cycle_status) {
+    tags.push({
       label: item.donor.cycle_status,
       variant: cycleStatusVariant(item.donor.cycle_status),
-    },
-    {
-      label: item.pipeline_stage.label,
-      variant: stageColorVariant(item.pipeline_stage.color),
-    },
-  ],
-});
+    });
+  }
+  const stageLabel =
+    item.pipeline_stage?.label ??
+    ("source_stage" in item ? item.source_stage : undefined);
+  if (stageLabel) {
+    tags.push({
+      label: stageLabel,
+      variant: stageColorVariant(item.pipeline_stage?.color),
+    });
+  }
+
+  return {
+    id: item.id,
+    initials: initialsOf(name),
+    colorVariant: colorTagVariant(item.donor?.color_tag),
+    color_tag: item.donor?.color_tag,
+    name,
+    nickname: item.donor?.nick,
+    phone: item.donor?.phone ?? "",
+    amount: item.transaction ? formatCurrency(item.transaction.total) : undefined,
+    stage: stageLabel,
+    tags,
+  };
+};

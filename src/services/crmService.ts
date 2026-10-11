@@ -1,4 +1,5 @@
 import HttpClient from "@/helpers/http-client";
+import type { CrmCardActionRequest } from "@/types/crm";
 
 // CRM Pipeline
 export const getPipeline = async (params = {}) => {
@@ -19,6 +20,16 @@ export const getDonorCases = async (params: Record<string, any> = {}) => {
   } catch (error) {
     console.error("Error fetching crm donors:", error);
     return { data: [], meta: { total: 0, last_page: 1 } };
+  }
+};
+
+export const performCrmCardAction = async (data: CrmCardActionRequest) => {
+  try {
+    const res = await HttpClient.post("/crm/cards/action", data);
+    return res.data.data;
+  } catch (error) {
+    console.error("Error performing CRM card action:", error);
+    throw error;
   }
 };
 

@@ -104,9 +104,9 @@
 
       <!-- Kartu 0 - khusus -->
       <router-link
-        :to="'/crm'"
+        :to="{ path: '/crm', query: { stage: 'kartu0' } }"
         class="d-flex align-items-start gap-2 rounded-2 px-2 py-1 mb-1 text-body crm-pipeline-item"
-        :class="{ active: isRouteActive('/crm/kartu0') }"
+        :class="{ active: isOnCrmDashboard && activeStageCode === 'kartu0' }"
       >
         <i :class="`bx bx-book fs-14 flex-shrink-0 mt-1 text-info`"></i>
         <span class="lh-sm">
@@ -205,7 +205,10 @@ const { data, isLoading } = useQuery({
 
 // Hanya stage dinamis dari API
 const pipelineStages = computed<PipelineStage[]>(
-  () => (data.value ?? []) as PipelineStage[],
+  () =>
+    ((data.value ?? []) as PipelineStage[]).filter(
+      (stage) => stage.code !== "kartu0",
+    ),
 );
 
 const route = useRoute();

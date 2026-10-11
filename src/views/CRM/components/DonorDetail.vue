@@ -15,14 +15,14 @@
     </div>
 
     <div
-      v-else-if="isLoading || !detail"
+      v-else-if="donorProfileId > 0 && (isLoading || !detail)"
       class="text-center p-5 flex-grow-1 d-flex flex-column align-items-center justify-content-center"
     >
       <b-spinner variant="primary" small />
       <p class="mt-2 text-muted fs-13">Memuat detail...</p>
     </div>
 
-    <template v-else>
+    <template v-else-if="detail">
       <!-- ============ Header ============ -->
       <b-card-header
         class="d-flex flex-wrap align-items-center justify-content-between gap-2 py-2 flex-shrink-0 border-bottom"
@@ -122,6 +122,14 @@
             :format-date="formatDate"
             :transaction-status-variant="transactionStatusVariant"
           />
+          <div
+            v-if="isCardActionUnavailable"
+            class="alert alert-warning mb-0"
+            role="alert"
+          >
+            Action belum tersedia karena data kartu tidak menyertakan
+            <code>source_type</code> dan <code>source_id</code>.
+          </div>
         </b-card-body>
 
         <div
@@ -140,6 +148,8 @@
             size="sm"
             variant="primary"
             class="d-inline-flex align-items-center"
+            :disabled="isCardActionUnavailable || isSubmittingAction"
+            @click="openCardAction('done')"
           >
             <i class="bx bx-check me-1"></i>Selesai
           </b-button>
@@ -147,6 +157,8 @@
             size="sm"
             :variant="null"
             class="btn-outline-secondary d-inline-flex align-items-center"
+            :disabled="isCardActionUnavailable || isSubmittingAction"
+            @click="openCardAction('skipped')"
           >
             <i class="bx bx-skip-next me-1"></i>Lewati
           </b-button>
@@ -154,6 +166,8 @@
             size="sm"
             :variant="null"
             class="btn-outline-secondary d-inline-flex align-items-center"
+            :disabled="isCardActionUnavailable || isSubmittingAction || isTaskCard"
+            @click="openCardAction('delegated')"
           >
             <i class="bx bx-transfer-alt me-1"></i>Limpahkan
           </b-button>
@@ -177,7 +191,96 @@
         @send="handleSend"
       />
     </template>
+
+    <template v-else>
+      <b-card-header class="border-bottom py-3">
+        <h6 class="mb-1">{{ selectedItemTitle }}</h6>
+        <p class="mb-0 text-muted fs-12">
+          {{ selectedItemSource }}
+        </p>
+      </b-card-header>
+      <b-card-body class="flex-grow-1">
+        <div
+          v-if="isCardActionUnavailable"
+          class="alert alert-warning"
+          role="alert"
+        >
+          Action belum tersedia karena data kartu tidak menyertakan
+          <code>source_type</code> dan <code>source_id</code>.
+        </div>
+        <p v-if="props.case?.note" class="mb-0">{{ props.case.note }}</p>
+        <p v-else class="text-muted mb-0">
+          Kartu ini tidak memiliki profil donatur terhubung.
+        </p>
+      </b-card-body>
+      <div class="border-top py-2 px-3 d-flex flex-wrap align-items-center gap-2">
+        <b-button
+          size="sm"
+          variant="primary"
+          :disabled="isCardActionUnavailable || isSubmittingAction"
+          @click="openCardAction('done')"
+        >
+          <i class="bx bx-check me-1"></i>Selesai
+        </b-button>
+        <b-button
+          size="sm"
+          :variant="null"
+          class="btn-outline-secondary"
+          :disabled="isCardActionUnavailable || isSubmittingAction"
+          @click="openCardAction('skipped')"
+        >
+          <i class="bx bx-skip-next me-1"></i>Lewati
+        </b-button>
+        <b-button
+          size="sm"
+          :variant="null"
+          class="btn-outline-secondary"
+          :disabled="isCardActionUnavailable || isSubmittingAction || isTaskCard"
+          @click="openCardAction('delegated')"
+        >
+          <i class="bx bx-transfer-alt me-1"></i>Limpahkan
+        </b-button>
+      </div>
+    </template>
   </b-card>
+
+  <b-modal
+    v-model="showActionModal"
+    :title="actionModalTitle"
+    centered
+    :no-close-on-backdrop="isSubmittingAction"
+    :no-close-on-esc="isSubmittingAction"
+  >
+    <p class="mb-2">
+      {{ actionModalDescription }}
+    </p>
+    <b-form-group label="Catatan (opsional)" label-class="fw-semibold">
+      <b-form-textarea
+        v-model="actionNote"
+        rows="3"
+        maxlength="1000"
+        placeholder="Tambahkan catatan untuk action ini"
+        :disabled="isSubmittingAction"
+      />
+    </b-form-group>
+    <template #footer>
+      <b-button
+        variant="light"
+        :disabled="isSubmittingAction"
+        @click="showActionModal = false"
+      >
+        Batal
+      </b-button>
+      <b-button
+        :variant="actionButtonVariant"
+        :disabled="isSubmittingAction"
+        @click="submitCardAction"
+      >
+        <b-spinner v-if="isSubmittingAction" small class="me-2" />
+        {{ actionConfirmLabel }}
+      </b-button>
+    </template>
+  </b-modal>
 
   <b-modal
     v-model="showFuModal"
@@ -335,6 +438,7 @@ import {
   getCrmKegiatans,
   getCrmChatTemplates,
   sendCrmChatToDonor,
+  performCrmCardAction,
   createFollowUp,
   updateStatusFollowUp,
 } from "@/services/crmService";
@@ -352,6 +456,9 @@ import DonorDetailFollowUpsSection from "./donor-detail/DonorDetailFollowUpsSect
 import DonorDetailDonationHistorySection from "./donor-detail/DonorDetailDonationHistorySection.vue";
 import type {
   ChatMessageItem,
+  CrmBoardItem,
+  CrmCardAction,
+  CrmCardActionRequest,
   CrmChatCard,
   CrmKegiatan,
   CrmPipelineCase,
@@ -364,7 +471,7 @@ const router = useRouter();
 
 const props = defineProps<{
   donorId: number;
-  case: CrmPipelineCase | null;
+  case: CrmBoardItem | null;
 }>();
 
 const activeTab = ref<"detail" | "chat">("detail");
@@ -373,6 +480,10 @@ const pendingFuId = ref<number | null>(null);
 const showFuModal = ref(false);
 const isSendingFu = ref(false);
 const isSubmittingFu = ref(false);
+const showActionModal = ref(false);
+const actionNote = ref("");
+const selectedCardAction = ref<CrmCardAction>("done");
+const isSubmittingAction = ref(false);
 const queryClient = useQueryClient();
 
 const fuTypes = [
@@ -440,11 +551,166 @@ watch(
 );
 
 // Kartu pipeline mentah (untuk keterangan, donor_profile_id & transaction_id) — lihat data.ts
-const pipelineCase = computed(() => props.case);
+const pipelineCase = computed<CrmPipelineCase | null>(() =>
+  props.case && props.case.card_type !== "task_card"
+    ? props.case
+    : null,
+);
 const transactionId = computed(() => props.case?.transaction_id ?? 0);
 
 // Detail donatur dipanggil pakai donor_profile_id
 const donorProfileId = computed(() => props.case?.donor_profile_id ?? 0);
+const isTaskCard = computed(() => props.case?.card_type === "task_card");
+const selectedStageCode = computed(
+  () =>
+    props.case?.pipeline_stage?.code ??
+    props.case?.source_stage ??
+    "",
+);
+const selectedItemTitle = computed(
+  () =>
+    props.case?.task ??
+    props.case?.donor?.name ??
+    props.case?.pipeline_stage?.label ??
+    "Kartu CRM",
+);
+const selectedItemSource = computed(() => {
+  if (props.case?.card_type === "task_card") {
+    return `${props.case.source_type} #${props.case.source_id}`;
+  }
+  return props.case?.pipeline_stage?.label ?? selectedStageCode.value;
+});
+
+const actionLabels: Record<CrmCardAction, string> = {
+  done: "Selesai",
+  skipped: "Lewati",
+  delegated: "Limpahkan",
+};
+const donationCaseStages = new Set([
+  "kartu1",
+  "kartu2",
+  "kartu3",
+  "kartu6",
+  "kartu9",
+]);
+const isExternalCard = computed(
+  () =>
+    !isTaskCard.value &&
+    !!selectedStageCode.value &&
+    !donationCaseStages.has(selectedStageCode.value),
+);
+const isCardActionUnavailable = computed(
+  () =>
+    isExternalCard.value &&
+    (!props.case?.source_type?.trim() ||
+      !props.case?.source_id ||
+      props.case.source_id <= 0),
+);
+const actionModalTitle = computed(
+  () => `Konfirmasi ${actionLabels[selectedCardAction.value].toLowerCase()}`,
+);
+const actionModalDescription = computed(() => {
+  if (selectedCardAction.value === "delegated") {
+    return "Kartu akan ditutup dan dibuat sebagai task aktif di Kartu 0.";
+  }
+  return `Kartu akan ditutup sebagai "${actionLabels[selectedCardAction.value].toLowerCase()}".`;
+});
+const actionConfirmLabel = computed(
+  () => actionLabels[selectedCardAction.value],
+);
+const actionButtonVariant = computed(() =>
+  selectedCardAction.value === "done" ? "primary" : "secondary",
+);
+
+const openCardAction = (action: CrmCardAction) => {
+  selectedCardAction.value = action;
+  actionNote.value = "";
+  showActionModal.value = true;
+};
+
+const createCardActionRequest = (
+  item: CrmBoardItem,
+  action: CrmCardAction,
+  note: string,
+): CrmCardActionRequest => {
+  const request: Omit<CrmCardActionRequest, "target_type"> = {
+    action,
+    ...(note.trim() ? { note: note.trim() } : {}),
+  };
+
+  if (item.card_type === "task_card") {
+    return { ...request, target_type: "task_card", target_id: item.id };
+  }
+
+  const stageCode = item.pipeline_stage?.code ?? "";
+  if (donationCaseStages.has(stageCode) || !stageCode) {
+    return { ...request, target_type: "donation_case", target_id: item.id };
+  }
+
+  const sourceType = item.source_type?.trim();
+  const sourceId = item.source_id;
+  if (!sourceType || !sourceId || sourceId <= 0) {
+    throw new Error("External CRM card source identity is missing");
+  }
+  const sourceStage = item.source_stage?.trim() || stageCode;
+  const task =
+    item.task?.trim() ||
+    item.keterangan ||
+    item.pipeline_stage?.label ||
+    stageCode;
+
+  return {
+    ...request,
+    target_type: "external",
+    source_type: sourceType,
+    source_id: sourceId,
+    source_stage: sourceStage,
+    task,
+    ...(item.donor_profile_id > 0
+      ? { donor_profile_id: item.donor_profile_id }
+      : {}),
+    ...(item.transaction_id > 0
+      ? { transaction_id: item.transaction_id }
+      : {}),
+  };
+};
+
+const submitCardAction = async () => {
+  if (!props.case) return;
+  if (isCardActionUnavailable.value) {
+    showToast(
+      "Action belum tersedia karena identitas sumber kartu belum dikirim oleh API",
+      { type: "warning", position: "top-center" },
+    );
+    return;
+  }
+  isSubmittingAction.value = true;
+  try {
+    await performCrmCardAction(
+      createCardActionRequest(
+        props.case,
+        selectedCardAction.value,
+        actionNote.value,
+      ),
+    );
+    showActionModal.value = false;
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["crm-donors"] }),
+      queryClient.invalidateQueries({ queryKey: ["crm-pipeline-stages"] }),
+    ]);
+    showToast(`Kartu berhasil di-${actionLabels[selectedCardAction.value].toLowerCase()}`, {
+      type: "success",
+      position: "top-center",
+    });
+  } catch (err: any) {
+    showToast(
+      err?.response?.data?.message ?? "Gagal memproses action kartu",
+      { type: "error", position: "top-center" },
+    );
+  } finally {
+    isSubmittingAction.value = false;
+  }
+};
 
 // Fetch detail
 const {

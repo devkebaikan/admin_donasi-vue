@@ -82,7 +82,7 @@
 
           <b-badge :variant="null" class="badge-soft-warning">
             <i class="bx bx-task me-1"></i>
-            Donasi ke - {{ transactionDetail.donation_number }}
+            Donasi ke - {{ transactionDetail?.donation_number }}
           </b-badge>
 
           <b-badge :variant="null" class="badge-soft-primary">

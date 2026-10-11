@@ -117,6 +117,12 @@ export type CrmTransactionSummary = {
 
 export type CrmPipelineCase = {
   id: number;
+  card_type?: "donation_case";
+  source_type?: string;
+  source_id?: number;
+  source_stage?: string;
+  task?: string;
+  note?: string;
   donor_profile_id: number;
   transaction_id: number;
   color_tag?: string;
@@ -127,6 +133,41 @@ export type CrmPipelineCase = {
   donor: CrmDonorSummary;
   created_at?: string;
   updated_at?: string;
+};
+
+export type CrmTaskCardRecord = {
+  id: number;
+  card_type: "task_card";
+  source_type: string;
+  source_id: number;
+  source_stage: string;
+  task: string;
+  note?: string;
+  donor_profile_id?: number;
+  transaction_id?: number;
+  is_active: boolean;
+  pipeline_stage?: PipelineStage;
+  transaction?: CrmTransactionSummary;
+  donor?: CrmDonorSummary;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type CrmBoardItem = CrmPipelineCase | CrmTaskCardRecord;
+
+export type CrmCardAction = "done" | "skipped" | "delegated";
+
+export type CrmCardActionRequest = {
+  target_type: "donation_case" | "task_card" | "external";
+  target_id?: number;
+  action: CrmCardAction;
+  source_type?: string;
+  source_id?: number;
+  source_stage?: string;
+  task?: string;
+  donor_profile_id?: number;
+  transaction_id?: number;
+  note?: string;
 };
 
 export type CrmAssignedCs = {

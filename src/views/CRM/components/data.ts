@@ -3,7 +3,7 @@ import { keepPreviousData, useQuery } from "@tanstack/vue-query";
 import { useRoute, useRouter } from "vue-router";
 import { getDonorCases } from "@/services/crmService";
 import { toCaseCard } from "@/utils/crmAdapters";
-import type { CrmCaseCard, CrmPipelineCase } from "@/types/crm";
+import type { CrmBoardItem, CrmCaseCard } from "@/types/crm";
 
 /**
  * Board donatur CRM berbasis data asli: daftar kasus pipeline (donasi + stage
@@ -54,7 +54,7 @@ export function useDonorsBoard() {
   const selectedId = ref(0);
 
   // Akumulasi hasil tiap halaman yang sudah dimuat (bukan hanya halaman aktif).
-  const loadedCases = ref<CrmPipelineCase[]>([]);
+  const loadedCases = ref<CrmBoardItem[]>([]);
 
   const selectedStage = computed(() => (route.query.stage as string) || "");
 
@@ -99,7 +99,7 @@ export function useDonorsBoard() {
   watch(
     data,
     (page) => {
-      const pageItems = (page?.data ?? []) as CrmPipelineCase[];
+      const pageItems = (page?.data ?? []) as CrmBoardItem[];
       if (currentPage.value <= 1) {
         loadedCases.value = pageItems;
         return;
@@ -162,7 +162,7 @@ export function useDonorsBoard() {
 
   // Case mentah (belum di-map ke CrmCaseCard) — dipakai DonorDetail untuk
   // ambil transaction_id & keterangan yang tidak ada di CrmCaseCard.
-  const selectedPipelineCase = computed<CrmPipelineCase | null>(
+  const selectedPipelineCase = computed<CrmBoardItem | null>(
     () =>
       loadedCases.value.find((item) => item.id === selectedId.value) ?? null,
   );
