@@ -48,6 +48,7 @@
               <span class="text-muted small">Nama program</span>
               <span
                 class="fw-semibold small text-end"
+                style="max-width: 60%"
                 :title="
                   currentTransactionDetails
                     ?.map((td) => td.program?.name)
@@ -96,12 +97,14 @@
             <div class="d-flex justify-content-between gap-2">
               <span class="text-muted small">Doa</span>
               <span
-                class="fw-semibold small text-end text-truncate"
-                style="max-width: 60%"
-                :title="(transaction as any).doa || '-'"
+              class="fw-semibold small text-end rounded-2 bg-white p-1"
+              v-if="(transaction as any).doa"
+              style="max-width: 80%;font-style: italic;"
+                :title="(transaction as any).doa"
               >
-                {{ (transaction as any).doa || "-" }}
+                {{ (transaction as any).doa }}
               </span>
+              <span v-else class="fw-semibold small text-end">-</span>  
             </div>
           </div>
         </b-col>

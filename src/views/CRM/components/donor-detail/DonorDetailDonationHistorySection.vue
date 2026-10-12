@@ -58,7 +58,7 @@
         <div class="text-right flex-shrink-0">
           <!-- Jam -->
           <div v-if="don.time" class="text-muted fs-10 mb-1">
-            {{ formatDateTime(don.date) }}
+            {{ formatDateTime(don.created_at) }}
           </div>
 
           <!-- Status -->

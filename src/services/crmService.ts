@@ -176,10 +176,25 @@ export const getCrmChatTemplateById = async (
 // send chat to donor
 export const sendCrmChatToDonor = async (
   id: number,
-  data: Record<string, any>,
+  data: Record<string, any> | FormData,
 ) => {
   try {
-    const res = await HttpClient.post(`/crm/donors/${id}/chat`, data);
+    let payload = data;
+    if (!(data instanceof FormData)) {
+      const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          formData.append(key, value);
+        }
+      });
+      payload = formData;
+    }
+
+    const res = await HttpClient.post(`/crm/donors/${id}/chat`, payload, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return res.data.data;
   } catch (error) {
     console.error("Error sending chat to donor:", error);

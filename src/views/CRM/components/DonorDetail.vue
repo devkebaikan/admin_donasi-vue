@@ -972,12 +972,28 @@ const chatCard = computed<CrmChatCard | null>(() => {
 });
 
 // Kirim pesan WA ke donatur
-const handleSend = async (text: string, templateId: number | null) => {
+const handleSend = async (
+  text: string,
+  templateId: number | null,
+  file?: File | null,
+  imageUrl?: string | null,
+) => {
   try {
-    await sendCrmChatToDonor(donorProfileId.value, {
-      message: text,
-      template_id: templateId,
-    });
+    const formData = new FormData();
+    if (text) {
+      formData.append("message", text);
+    }
+    if (templateId) {
+      formData.append("template_id", String(templateId));
+    }
+    if (file) {
+      formData.append("file", file);
+    }
+    if (imageUrl && !file) {
+      formData.append("image_url", imageUrl);
+    }
+
+    await sendCrmChatToDonor(donorProfileId.value, formData);
 
     // Jika pesan dikirim dari follow up yang pending, update statusnya menjadi selesai
     if (pendingFuId.value) {

@@ -50,7 +50,7 @@ export function useDonorsBoard() {
   const dateFilter = ref<string>("");
   const searchQuery = ref("");
   const currentPage = ref(1);
-  const perPageItem = ref(5);
+  const perPageItem = ref(10);
   const selectedId = ref(0);
 
   // Akumulasi hasil tiap halaman yang sudah dimuat (bukan hanya halaman aktif).

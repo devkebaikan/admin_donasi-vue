@@ -5,12 +5,33 @@ export type TagType = {
   variant: string;
 };
 
+export type ChatAttachmentItem = {
+  type: string;
+  source?: string;
+  url: string;
+  name?: string;
+  mime_type?: string;
+  size?: number;
+};
+
 export type ChatMessageItem = {
+  id?: number;
   message: any;
   from_role: string;
-  text: string;
-  isSender: boolean;
+  sent_at?: string;
+  cs_user?: {
+    id: number;
+    name: string;
+  };
+  attachments?: ChatAttachmentItem[];
+  text?: string;
+  isSender?: boolean;
   timeStamp?: string;
+  image_url?: string;
+  image?: string;
+  media_url?: string;
+  file_url?: string;
+  [key: string]: any;
 };
 
 /**
@@ -79,6 +100,8 @@ export type CrmChatTemplate = {
  */
 export type CrmChatTemplateRendered = {
   rendered_content: string;
+  image_url?: string | null;
+  [key: string]: any;
 };
 
 // ─── CRM API types (see crmService.ts) ───────────────────────────────────────

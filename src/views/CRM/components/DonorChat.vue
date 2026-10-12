@@ -89,15 +89,52 @@
                 color: '#111b21',
               }"
             >
-              <div v-if="msg.templateName" class="mb-1">
-                <small class="text-primary"
-                  >Template: {{ msg.templateName }}</small
-                >
+              <div
+                v-if="msg.from_role !== 'donor' && (msg.cs_user?.name || msg.templateName)"
+                class="mb-1 d-flex flex-wrap align-items-center justify-content-between gap-2"
+              >
+                <small v-if="msg.cs_user?.name" class="fw-semibold text-success fs-11">
+                  <i class="bx bx-user me-1"></i>{{ msg.cs_user.name }}
+                </small>
+                <small v-if="msg.templateName" class="text-primary fs-11">
+                  Template: {{ msg.templateName }}
+                </small>
               </div>
 
-              <p class="mb-1" v-html="formatWhatsAppMessage(msg.message)"></p>
+              <!-- Gambar dalam pesan chat jika ada (dari attachments / image_url) -->
+              <div v-if="msg.images && msg.images.length" class="mb-2">
+                <div
+                  v-for="(img, imgIdx) in msg.images"
+                  :key="imgIdx"
+                  class="mb-1"
+                >
+                  <img
+                    :src="img.url"
+                    :alt="img.name || 'Gambar Chat'"
+                    class="rounded img-fluid border bg-white"
+                    style="max-height: 260px; width: 100%; object-fit: cover; cursor: pointer"
+                    loading="lazy"
+                    @click="previewImage(img.url)"
+                  />
+                </div>
+              </div>
+              <div
+                v-else-if="msg.image_url"
+                class="mb-2"
+              >
+                <img
+                  :src="msg.image_url"
+                  alt="Gambar Chat"
+                  class="rounded img-fluid border bg-white"
+                  style="max-height: 260px; width: 100%; object-fit: cover; cursor: pointer"
+                  loading="lazy"
+                  @click="previewImage(msg.image_url)"
+                />
+              </div>
 
-              <div class="small text-muted text-end">
+              <p class="mb-1" v-if="msg.message" v-html="formatWhatsAppMessage(msg.message)"></p>
+
+              <div class="small text-muted text-end mt-1" style="font-size: 11px">
                 {{ msg.timeStamp || "Waktu tidak tersedia" }}
               </div>
             </div>
@@ -106,8 +143,57 @@
       </ul>
     </simplebar>
 
-    <div class="bg-light bg-opacity-50 p-2">
+    <div class="bg-light bg-opacity-50 p-2 border-top">
+      <!-- Preview Lampiran Gambar Sebelum Kirim -->
+      <div
+        v-if="selectedFile || templateImageUrl"
+        class="d-flex align-items-center justify-content-between p-2 mb-2 bg-white rounded border shadow-sm"
+      >
+        <div class="d-flex align-items-center gap-2 overflow-hidden">
+          <img
+            :src="filePreviewUrl || templateImageUrl || ''"
+            alt="Preview"
+            class="rounded border flex-shrink-0"
+            style="width: 44px; height: 44px; object-fit: cover; cursor: pointer"
+            @click="previewImage(filePreviewUrl || templateImageUrl)"
+          />
+          <div class="text-truncate">
+            <div class="d-flex align-items-center gap-1">
+              <span
+                class="badge fs-10"
+                :class="selectedFile ? 'bg-primary' : 'bg-info'"
+              >
+                {{ selectedFile ? 'Upload Gambar' : 'Gambar Template' }}
+              </span>
+              <span v-if="selectedFile" class="text-muted fs-11">
+                {{ formatFileSize(selectedFile.size) }}
+              </span>
+            </div>
+            <small class="text-truncate d-block text-muted" style="max-width: 250px">
+              {{ selectedFile ? selectedFile.name : 'Gambar dari template WA' }}
+            </small>
+          </div>
+        </div>
+        <!-- <b-button
+          size="sm"
+          variant="light"
+          class="text-danger border-0 p-1"
+          title="Hapus gambar"
+          @click="selectedFile ? clearFile() : clearTemplateImage()"
+        >
+          <i class="bx bx-x fs-18"></i>
+        </b-button> -->
+      </div>
+
       <form @submit.prevent="handleSend">
+        <input
+          ref="fileInput"
+          type="file"
+          class="d-none"
+          accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif"
+          @change="handleFileChange"
+        />
+
         <b-row class="align-items-center g-2">
           <b-col>
             <div class="position-relative">
@@ -130,10 +216,24 @@
           </b-col>
           <b-col cols="auto" class="align-self-end">
             <b-button-group>
+              <b-button
+                :variant="null"
+                class="btn-light"
+                :class="{ 'text-primary fw-bold': selectedFile || templateImageUrl }"
+                title="Lampirkan Gambar (Max 2MB)"
+                @click="triggerFileInput"
+              >
+                <i class="bx bx-image-add fs-18"></i>
+              </b-button>
               <b-button :variant="null" class="btn-light" title="Salin pesan" @click="copyMessage">
                 <i class="bx bx-copy fs-18"></i>
               </b-button>
-              <b-button type="submit" variant="primary" title="Kirim pesan">
+              <b-button
+                type="submit"
+                variant="primary"
+                title="Kirim pesan"
+                :disabled="!message.trim() && !selectedFile && !templateImageUrl"
+              >
                 <i class="bx bx-send fs-18"></i>
               </b-button>
             </b-button-group>
@@ -151,21 +251,131 @@
       hide-footer
     >
       <div class="d-flex flex-column gap-3">
+        <!-- Section Upload & Preview Gambar -->
+        <div class="p-3 border rounded bg-light bg-opacity-50">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <label class="form-label fw-semibold fs-13 mb-0">
+              <i class="bx bx-image me-1"></i>Lampiran Gambar
+            </label>
+            <span class="text-muted fs-11">
+              Image (jpg/png/webp/gif, max 2MB)
+            </span>
+          </div>
+
+          <!-- Preview jika ada file atau gambar template -->
+          <div
+            v-if="selectedFile || templateImageUrl"
+            class="d-flex align-items-center gap-3 p-2 border rounded bg-white my-2"
+          >
+            <img
+              :src="filePreviewUrl || templateImageUrl || ''"
+              alt="Preview"
+              class="rounded border"
+              style="width: 164px; height: 64px; object-fit: cover; cursor: pointer"
+              @click="previewImage(filePreviewUrl || templateImageUrl)"
+            />
+            <div class="flex-grow-1 overflow-hidden">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <span
+                  class="badge"
+                  :class="selectedFile ? 'bg-primary' : 'bg-info'"
+                >
+                  {{ selectedFile ? 'Upload Gambar' : 'Gambar Template' }}
+                </span>
+                <span v-if="selectedFile" class="text-muted fs-11">
+                  {{ formatFileSize(selectedFile.size) }}
+                </span>
+              </div>
+              <p class="mb-0 fs-12 text-truncate text-muted">
+                {{ selectedFile ? selectedFile.name : templateImageUrl }}
+              </p>
+            </div>
+            <b-button
+              size="sm"
+              variant="outline-danger"
+              class="d-inline-flex align-items-center"
+              title="Hapus gambar"
+              @click="selectedFile ? clearFile() : clearTemplateImage()"
+            >
+              <i class="bx bx-trash me-1"></i>Hapus
+            </b-button>
+          </div>
+
+          <!-- Input File -->
+          <div class="d-flex align-items-center gap-2 mt-2">
+            <input
+              ref="modalFileInput"
+              type="file"
+              class="form-control form-control-sm"
+              accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif"
+              @change="handleFileChange"
+            />
+            <b-button
+              v-if="selectedFile"
+              size="sm"
+              variant="outline-secondary"
+              @click="clearFile"
+            >
+              Reset
+            </b-button>
+          </div>
+          <div v-if="!selectedFile && !templateImageUrl" class="text-muted fs-11 mt-1">
+            Tidak ada file yang dipilih
+          </div>
+        </div>
+
         <div>
           <label class="form-label fw-semibold fs-13 mb-1">Isi Pesan Lengkap:</label>
           <b-form-textarea
             v-model="message"
             placeholder="Tulis atau edit pesan lengkap di sini..."
-            rows="10"
+            rows="8"
             no-resize
           />
         </div>
 
-        <div class="d-flex justify-content-end gap-2 mt-2">
-          <b-button variant="primary" @click="isModalOpen = false">
-            Selesai
+        <div class="d-flex justify-content-between align-items-center mt-2">
+          <b-button
+            :variant="null"
+            class="btn-light border"
+            title="Salin pesan"
+            @click="copyMessage"
+          >
+            <i class="bx bx-copy me-1"></i>Salin Pesan
           </b-button>
+
+          <div class="d-flex gap-2">
+            <b-button variant="light" class="border" @click="isModalOpen = false">
+              Tutup
+            </b-button>
+            <b-button
+              variant="primary"
+              :disabled="!message.trim() && !selectedFile && !templateImageUrl"
+              @click="handleSend"
+            >
+              <i class="bx bx-send me-1"></i>Kirim Pesan
+            </b-button>
+          </div>
         </div>
+      </div>
+    </b-modal>
+
+    <!-- Lightbox Modal untuk Preview Gambar -->
+    <b-modal
+      v-model="isLightboxOpen"
+      title="Preview Gambar"
+      size="lg"
+      centered
+      hide-footer
+    >
+      <div class="text-center p-2">
+        <img
+          v-if="lightboxImageUrl"
+          :src="lightboxImageUrl"
+          alt="Preview"
+          class="img-fluid rounded shadow-sm"
+          style="max-height: 70vh; object-fit: contain"
+        />
       </div>
     </b-modal>
   </div>
@@ -197,12 +407,98 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  send: [text: string, templateId: number | null];
+  send: [
+    text: string,
+    templateId: number | null,
+    file?: File | null,
+    imageUrl?: string | null,
+  ];
 }>();
 
 const message = ref("");
 const waAccount = ref(props.card.waAccount || "Official WA");
 const isModalOpen = ref(false);
+
+const templateImageUrl = ref<string | null>(null);
+const selectedFile = ref<File | null>(null);
+const filePreviewUrl = ref<string | null>(null);
+const fileInput = ref<HTMLInputElement | null>(null);
+const modalFileInput = ref<HTMLInputElement | null>(null);
+
+const isLightboxOpen = ref(false);
+const lightboxImageUrl = ref<string | null>(null);
+
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+
+const triggerFileInput = () => {
+  fileInput.value?.click();
+};
+
+const handleFileChange = (e: Event) => {
+  const target = e.target as HTMLInputElement;
+  const file = target.files?.[0];
+  if (!file) return;
+
+  const isValidType =
+    ALLOWED_TYPES.includes(file.type) ||
+    /\.(jpe?g|png|webp|gif)$/i.test(file.name);
+
+  if (!isValidType) {
+    showToast("Format gambar harus berupa JPG, PNG, WEBP, atau GIF", {
+      type: "error",
+      position: "top-center",
+    });
+    target.value = "";
+    return;
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    showToast("Ukuran gambar maksimal 2MB", {
+      type: "error",
+      position: "top-center",
+    });
+    target.value = "";
+    return;
+  }
+
+  selectedFile.value = file;
+  if (filePreviewUrl.value) {
+    URL.revokeObjectURL(filePreviewUrl.value);
+  }
+  filePreviewUrl.value = URL.createObjectURL(file);
+  target.value = "";
+};
+
+const clearFile = () => {
+  selectedFile.value = null;
+  if (filePreviewUrl.value) {
+    URL.revokeObjectURL(filePreviewUrl.value);
+    filePreviewUrl.value = null;
+  }
+  if (fileInput.value) {
+    fileInput.value.value = "";
+  }
+  if (modalFileInput.value) {
+    modalFileInput.value.value = "";
+  }
+};
+
+const clearTemplateImage = () => {
+  templateImageUrl.value = null;
+};
+
+const previewImage = (url: string | null) => {
+  if (!url) return;
+  lightboxImageUrl.value = url;
+  isLightboxOpen.value = true;
+};
+
+const formatFileSize = (bytes: number) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
 
 const stageId = computed(() => props.card.pipelineStageId ?? 0);
 
@@ -251,6 +547,7 @@ const applyTemplate = async (templateId: number) => {
       } else if (rendered.isi || rendered.content) {
         message.value = rendered.isi || rendered.content;
       }
+      templateImageUrl.value = rendered.image_url || null;
       if (
         !templates.value.some((t) => t.id === templateId) &&
         (rendered.name || rendered.judul)
@@ -312,15 +609,25 @@ watch(
     message.value = "";
     selectedTemplateId.value = null;
     extraTemplate.value = null;
+    templateImageUrl.value = null;
+    clearFile();
     isModalOpen.value = false;
   },
 );
 
 const handleSend = () => {
-  if (!message.value.trim()) return;
-  emit("send", message.value.trim(), selectedTemplateId.value);
+  if (!message.value.trim() && !selectedFile.value && !templateImageUrl.value) return;
+  emit(
+    "send",
+    message.value.trim(),
+    selectedTemplateId.value,
+    selectedFile.value,
+    templateImageUrl.value,
+  );
   message.value = "";
   selectedTemplateId.value = null;
+  clearFile();
+  templateImageUrl.value = null;
   isModalOpen.value = false;
 };
 
@@ -340,7 +647,91 @@ const copyMessage = async () => {
   }
 };
 
-// Prepare messages: ensure timestamp/date exist and resolve template names
+const parseDateTime = (raw: any): Date | null => {
+  if (!raw) return null;
+  if (raw instanceof Date) return isNaN(raw.getTime()) ? null : raw;
+  if (typeof raw === "string") {
+    const trimmed = raw.trim();
+    const normalized = trimmed.replace(
+      /^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}(?::\d{2})?)/,
+      "$1T$2",
+    );
+    const d = new Date(normalized);
+    if (!isNaN(d.getTime())) return d;
+    const fallback = new Date(trimmed);
+    if (!isNaN(fallback.getTime())) return fallback;
+  }
+  return null;
+};
+
+const formatTimeAndDate = (m: any) => {
+  const raw =
+    m.sent_at || m.created_at || m.date || m.timestamp || m.timeStamp;
+  const dateObj = parseDateTime(raw);
+
+  let timeStr = "";
+  let dateLabel = "";
+  let dateKey = "";
+
+  if (
+    typeof raw === "string" &&
+    /^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}/.test(raw.trim())
+  ) {
+    const [dPart, tPart] = raw.trim().split(/\s+/);
+    timeStr = tPart.slice(0, 5); // e.g. "05:02"
+    dateKey = dPart; // e.g. "2026-09-28"
+  }
+
+  if (dateObj) {
+    if (!timeStr) {
+      timeStr = dateObj
+        .toLocaleTimeString("id-ID", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+        .replace(".", ":");
+    }
+    if (!dateKey) {
+      const year = dateObj.getFullYear();
+      const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+      const day = String(dateObj.getDate()).padStart(2, "0");
+      dateKey = `${year}-${month}-${day}`;
+    }
+
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
+
+    if (dateKey === todayStr) {
+      dateLabel = "Hari ini";
+    } else if (dateKey === yesterdayStr) {
+      dateLabel = "Kemarin";
+    } else {
+      dateLabel = dateObj.toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    }
+  } else if (m.timeStamp) {
+    timeStr = m.timeStamp;
+    dateLabel = m.dateLabel || "Hari ini";
+    dateKey = dateLabel;
+  } else {
+    timeStr = new Date()
+      .toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+      .replace(".", ":");
+    dateLabel = "Hari ini";
+    dateKey = "Hari ini";
+  }
+
+  return { timeStamp: timeStr, dateLabel, dateKey };
+};
+
+// Prepare messages: ensure timestamp/date exist and resolve template names & attachments
 const processedMessages = computed(() => {
   const raw = props.card.chatMessages ?? [];
   const tplById = new Map<number, string>(
@@ -348,30 +739,7 @@ const processedMessages = computed(() => {
   );
 
   return raw.map((m: any) => {
-    const timeStamp = m.timeStamp
-      ? m.timeStamp
-      : new Date().toLocaleTimeString("id-ID", {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-
-    // prefer explicit date fields, otherwise assume today's date
-    let dateLabel = "";
-    if (m.date) {
-      try {
-        dateLabel = new Date(m.date).toLocaleDateString("id-ID");
-      } catch (e) {
-        dateLabel = String(m.date);
-      }
-    } else if (m.created_at) {
-      try {
-        dateLabel = new Date(m.created_at).toLocaleDateString("id-ID");
-      } catch (e) {
-        dateLabel = String(m.created_at);
-      }
-    } else {
-      dateLabel = new Date().toLocaleDateString("id-ID");
-    }
+    const { timeStamp, dateLabel, dateKey } = formatTimeAndDate(m);
 
     // resolve template name if message carries template id/name
     const maybeTid = m.template_id ?? m.templateId ?? m.template?.id;
@@ -381,10 +749,35 @@ const processedMessages = computed(() => {
       templateName = tplById.get(Number(maybeTid)) || null;
     }
 
+    // Extract images from attachments or direct url fields
+    const images: { url: string; name?: string; source?: string }[] = [];
+    if (Array.isArray(m.attachments) && m.attachments.length) {
+      m.attachments.forEach((att: any) => {
+        if (att && att.url) {
+          images.push({
+            url: att.url,
+            name: att.name || "",
+            source: att.source || "",
+          });
+        }
+      });
+    }
+
+    if (!images.length) {
+      const fallbackUrl =
+        m.image_url ?? m.image ?? m.media_url ?? m.file_url ?? null;
+      if (fallbackUrl) {
+        images.push({ url: fallbackUrl });
+      }
+    }
+
     return {
       ...m,
+      images,
+      image_url: images[0]?.url || null,
       timeStamp,
       dateLabel,
+      dateKey,
       templateName,
     };
   });
@@ -395,6 +788,6 @@ const shouldShowDateSeparator = (idx: number) => {
   if (idx === 0) return true;
   const prev = processedMessages.value[idx - 1];
   const cur = processedMessages.value[idx];
-  return prev.dateLabel !== cur.dateLabel;
+  return prev.dateKey !== cur.dateKey;
 };
 </script>

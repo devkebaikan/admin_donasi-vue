@@ -103,7 +103,7 @@
       </router-link>
 
       <!-- Kartu 0 - khusus -->
-      <router-link
+      <!-- <router-link
         :to="{ path: '/crm', query: { stage: 'kartu0' } }"
         class="d-flex align-items-start gap-2 rounded-2 px-2 py-1 mb-1 text-body crm-pipeline-item"
         :class="{ active: isOnCrmDashboard && activeStageCode === 'kartu0' }"
@@ -115,7 +115,7 @@
             >khusus untuk case tertentu</span
           >
         </span>
-      </router-link>
+      </router-link> -->
 
       <!-- Section: Modul (halaman terpisah) -->
       <div class="px-2 pt-2 pb-1 fs-10 fw-bold text-muted text-uppercase">
@@ -139,7 +139,7 @@
       <b-card-title class="mb-0 fs-12 d-flex justify-content-between">
         <div>
           <h6>{{userName}}</h6>
-          <div class="fs-10 text-muted">{{userRole}} | online</div>
+          <div class="fs-10 text-muted">{{userRole}}</div>
         </div>
 
         <b-button
@@ -206,9 +206,10 @@ const { data, isLoading } = useQuery({
 // Hanya stage dinamis dari API
 const pipelineStages = computed<PipelineStage[]>(
   () =>
-    ((data.value ?? []) as PipelineStage[]).filter(
-      (stage) => stage.code !== "kartu0",
-    ),
+    ((data.value ?? []) as PipelineStage[])
+    // .filter(
+    //   (stage) => stage.code !== "kartu0",
+    // ),
 );
 
 const route = useRoute();
