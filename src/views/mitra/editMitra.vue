@@ -409,7 +409,12 @@ watch(
     formState.account_behalf = data.account_behalf ?? "";
     formState.account_number = data.account_number ?? "";
     formState.bank_refferences_id = data.bank_refferences_id ?? null;
-    formState.bank_name = data.bank_refference.name ?? ""
+    formState.bank_name =
+      data.bank_refference?.name ??
+      data.bank_reference?.name ??
+      data.bank_references?.name ??
+      data.bank_name ??
+      "";
 
     existingLogoUrl.value = data.logo_url ?? null;
 
