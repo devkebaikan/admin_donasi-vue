@@ -102,6 +102,7 @@
             :format-date="formatDate"
             :transaction-status-variant="transactionStatusVariant"
             @open-project="openProjectModal"
+            @send-kegiatan-fu="handleSendKegiatanFu"
           />
 
           <DonorDetailFollowUpsSection
@@ -186,6 +187,8 @@
         v-else-if="chatCard"
         :card="chatCard"
         :preset-template-id="selectedChatTemplateId"
+        :preset-initial-message="selectedChatInitialMessage"
+        :preset-image-url="selectedChatImageUrl"
         class="flex-grow-1"
         style="min-height: 0"
         @send="handleSend"
@@ -476,6 +479,8 @@ const props = defineProps<{
 
 const activeTab = ref<"detail" | "chat">("detail");
 const selectedChatTemplateId = ref<number | null>(null);
+const selectedChatInitialMessage = ref<string | null>(null);
+const selectedChatImageUrl = ref<string | null>(null);
 const pendingFuId = ref<number | null>(null);
 const showFuModal = ref(false);
 const isSendingFu = ref(false);
@@ -546,6 +551,8 @@ watch(
   () => {
     activeTab.value = "detail";
     selectedChatTemplateId.value = null;
+    selectedChatInitialMessage.value = null;
+    selectedChatImageUrl.value = null;
     pendingFuId.value = null;
   },
 );
@@ -1009,6 +1016,8 @@ const handleSend = async (
     }
 
     selectedChatTemplateId.value = null;
+    selectedChatInitialMessage.value = null;
+    selectedChatImageUrl.value = null;
 
     // Invalidate donor detail agar chat messages terbaru ter-refresh langsung dari server
     await queryClient.invalidateQueries({
@@ -1134,6 +1143,42 @@ const handleSendFollowUp = (fu: any) => {
 
   pendingFuId.value = fu.id ?? null;
   selectedChatTemplateId.value = templateId;
+  selectedChatInitialMessage.value = null;
+  selectedChatImageUrl.value = null;
+  activeTab.value = "chat";
+};
+
+const htmlToPlainText = (html?: string) => {
+  if (!html) return "";
+  let text = html
+    .replace(/<p[^>]*>/gi, "")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<strong>(.*?)<\/strong>/gi, "*$1*")
+    .replace(/<b>(.*?)<\/b>/gi, "*$1*")
+    .replace(/<em>(.*?)<\/em>/gi, "_$1_")
+    .replace(/<i>(.*?)<\/i>/gi, "_$1_")
+    .replace(/&nbsp;/gi, " ");
+
+  const temp = document.createElement("div");
+  temp.innerHTML = text;
+  return (temp.textContent || temp.innerText || "").trim();
+};
+
+const handleSendKegiatanFu = (kegiatan: CrmKegiatan) => {
+  pendingFuId.value = null;
+  selectedChatTemplateId.value = null;
+
+  const plainDeskripsi = htmlToPlainText(kegiatan.deskripsi);
+  const title = kegiatan.judul?.trim();
+  const textMessage = title
+    ? `*${title}*\n\n${plainDeskripsi}`
+    : plainDeskripsi;
+
+  selectedChatInitialMessage.value = textMessage;
+  selectedChatImageUrl.value =
+    kegiatan.thumbnail_url || kegiatan.thumbnail || null;
+
   activeTab.value = "chat";
 };
 

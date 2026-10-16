@@ -400,9 +400,13 @@ const props = withDefaults(
   defineProps<{
     card: CrmChatCard;
     presetTemplateId?: number | null;
+    presetInitialMessage?: string | null;
+    presetImageUrl?: string | null;
   }>(),
   {
     presetTemplateId: null,
+    presetInitialMessage: null,
+    presetImageUrl: null,
   },
 );
 
@@ -597,6 +601,19 @@ watch(
       } else {
         selectedTemplateId.value = newId;
       }
+    }
+  },
+  { immediate: true },
+);
+
+watch(
+  [() => props.presetInitialMessage, () => props.presetImageUrl],
+  ([newMsg, newImg]) => {
+    if (newMsg !== undefined && newMsg !== null) {
+      message.value = newMsg;
+    }
+    if (newImg !== undefined && newImg !== null) {
+      templateImageUrl.value = newImg;
     }
   },
   { immediate: true },

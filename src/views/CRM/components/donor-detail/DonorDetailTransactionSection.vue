@@ -241,15 +241,26 @@
       <div
         v-for="(act, idx) in kegiatanList"
         :key="act.id"
-        class="py-1 p-3 rounded-1"
-        :style="idx ? 'border-top: 1px solid rgba(0,0,0,0.06)' : ''"
+        class="d-flex align-items-center justify-content-between p-3 rounded-1"
+        :class="idx ? 'mt-2' : ''"
         style="background-color: #eaf8f3"
       >
-        <p class="mb-0 fs-12 fw-semibold">{{ act.judul }}</p>
-        <p class="mb-0 text-muted fs-11">
-          {{ formatDate(act.date) }} · {{ act.type }}
-        </p>
-
+        <div class="flex-grow-1 overflow-hidden me-2">
+          <p class="mb-0 fs-12 fw-semibold text-truncate">{{ act.judul }}</p>
+          <p class="mb-0 text-muted fs-11">
+            {{ formatDate(act.date) }} · {{ act.type }}
+          </p>
+        </div>
+        <b-button
+          size="sm"
+          variant="outline-success"
+          class="d-inline-flex align-items-center gap-1 fs-11 flex-shrink-0"
+          title="Kirim pesan FU kegiatan ke WhatsApp"
+          @click="$emit('send-kegiatan-fu', act)"
+        >
+          <i class="bx bxl-whatsapp fs-14"></i>
+          Kirim FU
+        </b-button>
       </div>
     </template>
     <p v-else class="text-muted fs-13 mb-0">Belum ada update kegiatan</p>
@@ -266,6 +277,7 @@ import type {
 
 defineEmits<{
   (e: "open-project"): void;
+  (e: "send-kegiatan-fu", kegiatan: CrmKegiatan): void;
 }>();
 
 defineProps<{

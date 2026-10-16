@@ -356,7 +356,7 @@ import { useQuery } from "@tanstack/vue-query";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
-import ChoicesSelect from "@/components/ChoicesSelect.vue";
+// import ChoicesSelect from "@/components/ChoicesSelect.vue";
 import { formatDate } from "@/helpers/format";
 import { useReportTable } from "./components/data";
 import { getReportById } from "@/services/reportService";
