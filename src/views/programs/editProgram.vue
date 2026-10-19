@@ -35,7 +35,7 @@
             finish-button-text="Simpan Perubahan"
             @on-complete="handleSubmit"
           >
-            <!-- ══════════════════════════════════════════════════════════ STEP 1 — Identitas Program ══════════════════════════════════════════════════════════ -->
+            <!-- ══════════ STEP 1 — Identitas Program ══════════ -->
             <tab-content
               custom-icon='<a class="nav-link fs-5">Identitas</a>'
               :before-change="validateStep1"
@@ -189,7 +189,7 @@
               </b-row>
             </tab-content>
 
-            <!-- ══════════════════════════════════════════════════════════ STEP 2 — Konten & Target ══════════════════════════════════════════════════════════ -->
+            <!-- ══════════ STEP 2 — Konten & Target ══════════ -->
             <tab-content
               custom-icon='<a class="nav-link fs-5">Konten & Target</a>'
               :before-change="validateStep2"
@@ -229,7 +229,8 @@
                     />
                   </b-form-group>
                   <small class="text-muted"
-                    >Opsional — klik ikon gambar, drag-and-drop, atau paste gambar untuk upload otomatis</small
+                    >Opsional — klik ikon gambar, drag-and-drop, atau paste
+                    gambar untuk upload otomatis</small
                   >
                 </b-col>
 
@@ -339,80 +340,27 @@
                   </b-form-group>
                 </b-col>
 
-                <!-- ── Nominal Items (tampil hanya jika jenis_nominal = masukan) ── -->
-                <b-col cols="12" v-if="formState.jenis_nominal === 'masukan'">
-                  <div class="border rounded p-3">
-                    <div
-                      class="d-flex justify-content-between align-items-center mb-3"
-                    >
-                      <div>
-                        <h6 class="mb-0 fw-semibold">Pilihan Nominal Donasi</h6>
-                        <small class="text-muted">
-                          Tambahkan pilihan nominal yang bisa dipilih donatur
-                        </small>
-                      </div>
-                      <b-button
-                        variant="primary"
-                        size="sm"
-                        @click="addNominalItem"
-                      >
-                        <i class="bx bx-plus me-1"></i>Tambah Item
-                      </b-button>
-                    </div>
-
-                    <!-- Empty state -->
-                    <div
-                      v-if="nominalItems.length === 0"
-                      class="text-center text-muted py-3"
-                    >
-                      <i
-                        class="bx bx-list-plus fs-2 d-block mb-1 opacity-50"
-                      ></i>
-                      <small
-                        >Belum ada pilihan nominal. Klik "Tambah Item" untuk
-                        menambahkan.</small
-                      >
-                    </div>
-
-                    <!-- Item list -->
-                    <div
-                      v-for="(item, idx) in nominalItems"
-                      :key="idx"
-                      class="d-flex gap-2 mb-2 align-items-center"
-                    >
-                      <span
-                        class="text-muted small flex-shrink-0"
-                        style="width: 28px"
-                      >
-                        {{ idx + 1 }}.
-                      </span>
-                      <b-form-input
-                        v-model="item.nama"
-                        placeholder="Nama pilihan (e.g., Paket Hemat)"
-                        style="flex: 2"
-                      />
-                      <CurrencyInput
-                        v-model="item.nominal"
-                        placeholder="Nominal"
-                        style="flex: 1; min-width: 140px"
-                        :state="null"
-                      />
-                      <b-button
-                        variant="outline-danger"
-                        size="sm"
-                        class="flex-shrink-0"
-                        @click="removeNominalItem(idx)"
-                        title="Hapus item"
-                      >
-                        <i class="bx bx-trash"></i>
-                      </b-button>
-                    </div>
-                  </div>
-                </b-col>
+                <!-- Pilihan nominal (tampil hanya jika jenis_nominal = masukan) -->
+                <template v-if="formState.jenis_nominal === 'masukan'">
+                  <b-col md="6">
+                    <NominalItemsEditor
+                      v-model="nominalBiasa"
+                      title="Masukan Biasa"
+                      description="Pilihan nominal untuk donasi biasa (kosongkan jika sama dengan default)"
+                    />
+                  </b-col>
+                  <b-col md="6">
+                    <NominalItemsEditor
+                      v-model="nominalAds"
+                      title="Masukan Ads"
+                      description="Pilihan nominal untuk donasi dari iklan"
+                    />
+                  </b-col>
+                </template>
               </b-row>
             </tab-content>
 
-            <!-- ══════════════════════════════════════════════════════════ STEP 3 — Media ══════════════════════════════════════════════════════════ -->
+            <!-- ══════════ STEP 3 — Media ══════════ -->
             <tab-content
               custom-icon='<a class="nav-link fs-5">Media</a>'
               :before-change="validateStep3"
@@ -561,6 +509,7 @@ import { useRouter, useRoute } from "vue-router";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
+import NominalItemsEditor from "@/components/NominalItemsEditor.vue";
 // import CurrencyInput from "@/components/CurrencyInput.vue";
 import CustomQuillEditor from "@/components/CustomQuillEditor.vue";
 import { FormWizard, TabContent } from "vue3-form-wizard";
@@ -570,12 +519,17 @@ import "vue3-toastify/dist/index.css";
 
 import {
   updateProgram,
-  getProgramBylink,
   getProgramPercentages,
   getProgramTypes,
   getProgramCategories,
   getProgramById,
 } from "@/services/programService";
+import {
+  type NominalItem,
+  validateMasukan,
+  serializeNominalItems,
+  mapNominalOptions,
+} from "@/helpers/programNominal";
 import { toast, type ToastOptions } from "vue3-toastify";
 
 // ── Route params ───────────────────────────────────────────────────────────
@@ -587,22 +541,14 @@ const programId = computed(() => Number(route.params.id));
 const showToast = (message: string, options: ToastOptions) =>
   toast(message, options);
 
-// ── Nominal Items ──────────────────────────────────────────────────────────
-interface NominalItem {
-  id?: number; // id existing dari server (jika ada)
-  nama: string;
-  nominal: number | undefined;
-}
+// ── Nominal items (masukan biasa & masukan ads) ────────────────────────────
+const nominalBiasa = ref<NominalItem[]>([]);
+const nominalAds = ref<NominalItem[]>([]);
 
-const nominalItems = ref<NominalItem[]>([]);
-
-const addNominalItem = () => {
-  nominalItems.value.push({ nama: "", nominal: undefined });
-};
-
-const removeNominalItem = (index: number) => {
-  nominalItems.value.splice(index, 1);
-};
+// true jika response program memuat `nominal_options` (array). Dipakai sebagai
+// pengaman: kalau backend belum mengirim nominal, daftar kosong di form
+// BUKAN berarti user ingin menghapus semua nominal.
+const nominalsLoaded = ref(false);
 
 // ── Image state ────────────────────────────────────────────────────────────
 const imageFile = ref<File | null>(null);
@@ -669,10 +615,21 @@ const touchAndCheck = (fields: string[]): boolean => {
   return !hasError;
 };
 
+// Validasi pilihan nominal — hanya berlaku jika jenis_nominal = masukan
+const validateNominals = (): boolean => {
+  if (formState.jenis_nominal !== "masukan") return true;
+  const err = validateMasukan(nominalBiasa.value, nominalAds.value);
+  if (err) {
+    showToast(err, { type: "warning", position: "top-center" });
+    return false;
+  }
+  return true;
+};
+
 const validateStep1 = () =>
   touchAndCheck(["tipe_id", "judul", "link", "kode", "status"]);
 
-const validateStep2 = () => touchAndCheck(["rangkuman"]);
+const validateStep2 = () => touchAndCheck(["rangkuman"]) && validateNominals();
 
 const validateStep3 = () => touchAndCheck(["image"]);
 
@@ -694,7 +651,6 @@ watch(
   (data) => {
     if (!data) return;
 
-    // console.log(data);
     formState.id = data.id ?? null;
     formState.mitra_id = data.mitra?.id ?? null;
     formState.mitra_name = data.mitra?.nama ?? data.mitra?.name ?? null;
@@ -725,16 +681,10 @@ watch(
     existingImageUrl.value = data.image_url ?? data.image ?? null;
     existingImageWaUrl.value = data.image_wa_url ?? data.image_wa ?? null;
 
-    // console.log(formState.is_target_waktu, formState.target_nominal);
-
-    // Nominal items existing
-    if (Array.isArray(data.nominal_options)) {
-      nominalItems.value = data.nominal_options.map((item: any) => ({
-        id: item.id,
-        nama: item.nama ?? "",
-        nominal: item.nominal ?? undefined,
-      }));
-    }
+    // Pilihan nominal existing, dipisah per tipe (biasa / ads)
+    nominalsLoaded.value = Array.isArray(data.nominal_options);
+    nominalBiasa.value = mapNominalOptions(data.nominal_options, "biasa");
+    nominalAds.value = mapNominalOptions(data.nominal_options, "ads");
 
     formReady.value = true;
   },
@@ -759,14 +709,6 @@ const tipeList = computed(() => {
     })),
   ];
 });
-
-// const tipeList = [
-//   { value: 0, text: "Choose Tipe..." },
-//   { value: 1, text: "Zakat" },
-//   { value: 2, text: "Infaq" },
-//   { value: 3, text: "Sadaqah" },
-//   { value: 4, text: "Wakaf" },
-// ];
 
 const { data: categoryData, isLoading: isCategoryLoading } = useQuery({
   queryKey: ["program-categories"],
@@ -877,6 +819,8 @@ const handleSubmit = async () => {
     return;
   }
 
+  if (!validateNominals()) return;
+
   const formData = new FormData();
 
   // Method spoofing untuk Laravel (jika menggunakan _method)
@@ -912,34 +856,21 @@ const handleSubmit = async () => {
   if (formState.is_target_nominal === "TERTENTU" && formState.target_nominal)
     formData.append("target_nominal", String(formState.target_nominal));
 
-  // Nominal items — hanya saat jenis_nominal = masukan
-  if (formState.jenis_nominal === "masukan") {
-    nominalItems.value.forEach((item, i) => {
-      // Kirim id jika item existing (untuk update/delete di backend)
-      if (item.id)
-        formData.append(`nominal_options[${i}][id]`, String(item.id));
-      formData.append(`nominal_options[${i}][nama]`, item.nama);
-      formData.append(
-        `nominal_options[${i}][nominal]`,
-        String(item.nominal ?? 0),
-      );
-    });
+  // Pilihan nominal — hanya saat jenis_nominal = masukan.
+  // Backend: field dikirim = REPLACE semua nominal tipe itu (JSON kosong = hapus
+  // semua); field tidak dikirim = nominal tidak diubah. Karena itu keduanya
+  // selalu dikirim berpasangan, kecuali nominal belum pernah termuat dari server
+  // dan user belum mengisi apa pun (supaya tidak menghapus data lama tanpa sengaja).
+  const hasAnyNominal =
+    nominalBiasa.value.length > 0 || nominalAds.value.length > 0;
+  if (
+    formState.jenis_nominal === "masukan" &&
+    (nominalsLoaded.value || hasAnyNominal)
+  ) {
+    formData.append("nominal_biasa", serializeNominalItems(nominalBiasa.value));
+    formData.append("nominal_ads", serializeNominalItems(nominalAds.value));
   }
 
   updateProgramPayload(formData);
-  // console.log(formState);
 };
-
-// ── Quill toolbar ──────────────────────────────────────────────────────────
-const toolbar1 = [
-  [{ font: [] }, { size: [] }],
-  ["bold", "italic", "underline", "strike"],
-  [{ color: [] }, { background: [] }],
-  [{ script: "super" }, { script: "sub" }],
-  [{ header: [false, 1, 2, 3, 4, 5, 6] }, "blockquote", "code-block"],
-  [{ list: "ordered" }, { list: "bullet" }, { indent: "-1" }, { indent: "+1" }],
-  ["direction", { align: [] }],
-  ["link", "image", "video"],
-  ["clean"],
-];
 </script>
