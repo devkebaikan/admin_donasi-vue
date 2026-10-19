@@ -255,11 +255,11 @@
           size="sm"
           variant="outline-success"
           class="d-inline-flex align-items-center gap-1 fs-11 flex-shrink-0"
-          title="Kirim pesan FU kegiatan ke WhatsApp"
+          title="Kirim laporan kegiatan ke WhatsApp"
           @click="$emit('send-kegiatan-fu', act)"
         >
           <i class="bx bxl-whatsapp fs-14"></i>
-          Kirim FU
+          Kirim Laporan
         </b-button>
       </div>
     </template>
