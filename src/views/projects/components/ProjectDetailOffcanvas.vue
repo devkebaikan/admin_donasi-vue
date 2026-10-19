@@ -116,7 +116,7 @@
         </b-col>
         <b-col cols="6">
           <div class="bg-light rounded p-2">
-            <small class="text-muted d-block">Lokasi</small>
+            <small class="text-muted d-block">Lokasi <i class="bx bx-map ms-1"></i> </small>
             <a
               v-if="projectDetail.lat && projectDetail.lng"
               :href="`https://maps.google.com/?q=${projectDetail.lat},${projectDetail.lng}`"
@@ -124,8 +124,10 @@
               rel="noopener noreferrer"
               class="fw-semibold small"
             >
-              {{ projectDetail.lat }}, {{ projectDetail.lng }}
-              <i class="bx bx-map ms-1"></i>
+              <span v-if="projectDetail.lokasi_penyaluran">{{
+                projectDetail.lokasi_penyaluran
+              }}</span>
+              <span v-else>{{ projectDetail.lat }}, {{ projectDetail.lng }}</span>
             </a>
             <span v-else class="small text-muted">-</span>
           </div>

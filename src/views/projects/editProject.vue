@@ -293,6 +293,18 @@
                   </b-col>
 
                   <b-col md="6">
+                    <b-form-group label="Lokasi Penyaluran" label-for="lokasi-penyaluran">
+                      <b-form-input
+                        id="lokasi-penyaluran"
+                        v-model="formState.lokasi_penyaluran"
+                        type="text"
+                        placeholder="Contoh: Desa Sukamaju, Kec. Cilincing..."
+                      />
+                      <small class="text-muted">Opsional</small>
+                    </b-form-group>
+                  </b-col>
+
+                  <b-col md="6">
                     <b-form-group label="Kode Wilayah" label-for="kode-wilayah">
                       <b-form-input
                         id="kode-wilayah"
@@ -544,6 +556,7 @@ const formState = reactive({
   deskripsi: "",
   lat: undefined as number | undefined,
   lng: undefined as number | undefined,
+  lokasi_penyaluran: "",
   kode_wilayah: "",
   pengaju: "",
   email: "",
@@ -615,6 +628,7 @@ watch(
     formState.deskripsi = data.deskripsi ?? "";
     formState.lat = data.lat ? Number(data.lat) : undefined;
     formState.lng = data.lng ? Number(data.lng) : undefined;
+    formState.lokasi_penyaluran = data.lokasi_penyaluran ?? "";
     formState.kode_wilayah = data.kode_wilayah ?? "";
     formState.pengaju = data.pengaju ?? "";
     formState.email = data.email ?? "";
@@ -752,6 +766,8 @@ const handleSubmit = async () => {
   if (formState.deskripsi) formData.append("deskripsi", formState.deskripsi);
   if (formState.lat != null) formData.append("lat", String(formState.lat));
   if (formState.lng != null) formData.append("lng", String(formState.lng));
+  if (formState.lokasi_penyaluran)
+    formData.append("lokasi_penyaluran", formState.lokasi_penyaluran.trim());
   if (formState.kode_wilayah)
     formData.append("kode_wilayah", formState.kode_wilayah.trim());
   if (formState.pengaju) formData.append("pengaju", formState.pengaju.trim());
