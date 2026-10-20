@@ -177,6 +177,7 @@
                     <b-form-select
                       id="status"
                       v-model="v$.status.$model"
+                      disabled
                       :state="v$.status.$error ? false : null"
                     >
                       <option value="" disabled>Pilih status...</option>

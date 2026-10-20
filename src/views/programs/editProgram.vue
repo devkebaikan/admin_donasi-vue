@@ -174,12 +174,13 @@
                     <b-form-select
                       id="status"
                       v-model="v$.status.$model"
+                      :disabled="v$.status.$model === 'DRAFT'"
                       :state="v$.status.$error ? false : null"
                     >
                       <option value="" disabled>Pilih status...</option>
                       <option value="DRAFT">Draft</option>
                       <option value="PUBLISH">Publish</option>
-                      <option value="REQUEST AKUN">Request Akun</option>
+                      <option value="REQUEST AKUN">Request Akun</option> -
                     </b-form-select>
                     <b-form-invalid-feedback v-if="v$.status.$error">
                       Status wajib dipilih.

@@ -187,10 +187,19 @@
                 />
               </b-input-group>
             </b-col>
-            <b-col>
-              <b-button @click="handleLihatDonatur" :disabled="isLoading">
+            <b-col cols="12" md="8" class="d-flex flex-wrap gap-2 align-items-center">
+              <b-button variant="primary" @click="handleLihatDonatur" :disabled="isLoading">
                 <b-spinner v-if="isLoading" small class="me-1" />
                 Lihat Donatur
+              </b-button>
+              <b-button
+                variant="outline-primary"
+                @click="handleLihatSemuaDonatur"
+                :disabled="isLoading || !selectedProgramId || canClaim <= 0"
+                title="Lihat semua donatur dengan memaksimalkan nominal yang bisa diclaim"
+              >
+                <i class="bx bx-list-check me-1"></i>
+                Lihat Semua Donatur (Max Claim)
               </b-button>
             </b-col>
           </b-row>
@@ -302,9 +311,9 @@
       </div>
 
       <template v-else>
-        <div class="table-responsive">
+        <div class="table-responsive table-scroll-container">
           <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
+            <thead class="table-light sticky-top">
               <tr>
                 <th style="width: 44px" class="text-center">
                   <b-form-checkbox
@@ -346,7 +355,7 @@
                 <td class="small text-muted">{{ formatDate(trx.date) }}</td>
               </tr>
             </tbody>
-            <tfoot class="table-light">
+            <tfoot class="table-light sticky-bottom">
               <tr>
                 <td colspan="2" class="text-end fw-semibold small text-muted">
                   Total Dipilih ({{ checkedIds.size }})
@@ -432,7 +441,7 @@ watch(programs, (list) => {
 const finance = computed(() => ({
   nominal_proyek:
     projectDetail.value?.nominal_acc || 0,
-  nominal_terkumpul: projectDetail.value?.total_allocated ?? 0,
+  nominal_terkumpul: projectDetail.value?.claimed_donasi ?? 0,
   sisa_saldo_sebelumnya: fundCheck.value?.saldo_awal_program ?? 0,
   dana_dicairkan: projectDetail.value?.total_tf_ke_mitra ?? 0,
   project_name: fundCheck.value?.project_name ?? "Proyek",
@@ -492,6 +501,29 @@ const handleLihatDonatur = async () => {
     return;
   }
 
+  checkedIds.value = new Set();
+
+  await fetchClaimableDonations();
+};
+
+const handleLihatSemuaDonatur = async () => {
+  if (!selectedProgramId.value) {
+    showToast("Pilih program terlebih dahulu.", {
+      type: "warning",
+      position: "top-center",
+    });
+    return;
+  }
+
+  if (canClaim.value <= 0) {
+    showToast("Tidak ada nominal donasi yang bisa diclaim pada program ini.", {
+      type: "warning",
+      position: "top-center",
+    });
+    return;
+  }
+
+  nominalClaim.value = canClaim.value;
   checkedIds.value = new Set();
 
   await fetchClaimableDonations();
@@ -559,29 +591,98 @@ const pakaiSaldoMax = () => {
 };
 
 const doAutoCheck = () => {
-  const target = kekuranganDana.value - (saldoPakai.value || 0);
+  // Target yang harus dipenuhi oleh donasi: kekurangan dana dikurangi pending refund dan saldo yang dipakai
+  const target = Math.max(
+    0,
+    kekuranganDana.value - totalPendingRefund.value - (saldoPakai.value || 0),
+  );
+
   if (target <= 0) {
     checkedIds.value = new Set();
-    showToast("Saldo sebelumnya sudah mencukupi kekurangan dana.", {
+    showToast("Kekurangan dana sudah terpenuhi oleh pending refund atau saldo sebelumnya.", {
       type: "info",
       position: "top-center",
     });
     return;
   }
 
-  let running = 0;
-  const next = new Set<number>();
-  for (const trx of transactions.value) {
-    if (running >= target) break;
-    next.add(trx.id);
-    running += trx.nominal;
+  if (!transactions.value.length) {
+    showToast("Belum ada data donasi untuk dipilih.", {
+      type: "warning",
+      position: "top-center",
+    });
+    return;
   }
 
+  // 1. Urutkan donasi dari yang paling lama (oldest date first)
+  const sorted = [...transactions.value].sort((a, b) => {
+    const timeA = a.date ? new Date(a.date).getTime() : 0;
+    const timeB = b.date ? new Date(b.date).getTime() : 0;
+    return timeA - timeB;
+  });
+
+  // 2. Pilih kombinasi yang paling dekat dengan target (target <= total alokasi, tanpa melebihi jika memungkinkan)
+  // Algoritma greedy terpandu:
+  // Mulai akumulasi dari donasi terlama hingga mencapai target.
+  const chosen: Trx[] = [];
+  let currentTotal = 0;
+
+  for (const trx of sorted) {
+    if (currentTotal >= target) break;
+    chosen.push(trx);
+    currentTotal += trx.nominal;
+  }
+
+  // 3. Jika total akumulasi melebihi target dan ada donasi yang bisa diganti/dihapus
+  // agar nilainya semakin mendekati target tanpa melebihi kekuranganDana
+  if (currentTotal > target) {
+    // Coba hapus elemen dari chosen (dari yang paling baru atau terbesar) jika setelah dihapus masih >= target
+    for (let i = chosen.length - 1; i >= 0; i--) {
+      const candidate = chosen[i];
+      if (currentTotal - candidate.nominal >= target) {
+        currentTotal -= candidate.nominal;
+        chosen.splice(i, 1);
+      }
+    }
+
+    // Jika masih ada sisa selisih kelebihan dan totalAlokasi melebihi kekuranganDana,
+    // cari apakah ada donasi di luar chosen atau di dalam chosen yang bisa di-swap
+    // agar kelebihan minimal (paling dekat dengan target dan <= target jika perlu)
+    const excess = currentTotal - target;
+    if (excess > 0) {
+      const remaining = sorted.filter((t) => !chosen.some((c) => c.id === t.id));
+      for (let i = chosen.length - 1; i >= 0; i--) {
+        const item = chosen[i];
+        // Cari pengganti di remaining yang membuat newTotal lebih dekat ke target
+        for (const rem of remaining) {
+          const newTotal = currentTotal - item.nominal + rem.nominal;
+          if (
+            newTotal >= target &&
+            newTotal < currentTotal
+          ) {
+            currentTotal = newTotal;
+            chosen[i] = rem;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  const next = new Set<number>(chosen.map((t) => t.id));
   checkedIds.value = next;
-  showToast(
-    `Auto centang: ${next.size} donasi dipilih (${formatCurrency(running)})`,
-    { type: "info", position: "top-center" },
-  );
+
+  const selisih = currentTotal - target;
+  let notifMsg = `Auto centang: ${next.size} donasi dipilih (${formatCurrency(currentTotal)})`;
+  if (selisih > 0) {
+    notifMsg += ` · Selisih +${formatCurrency(selisih)} dari target`;
+  } else if (currentTotal < target) {
+    notifMsg += ` · Masih kurang ${formatCurrency(target - currentTotal)}`;
+  } else {
+    notifMsg += ` · Pas dengan target`;
+  }
+
+  showToast(notifMsg, { type: "info", position: "top-center" });
 };
 
 const onProgramChange = () => {
@@ -653,3 +754,27 @@ const handleAlokasikan = () => {
   mutateClaim();
 };
 </script>
+
+<style scoped>
+.table-scroll-container {
+  max-height: 520px;
+  overflow-y: auto;
+  position: relative;
+}
+
+.table-scroll-container thead.sticky-top th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: var(--bs-light, #f8f9fa);
+  box-shadow: inset 0 -1px 0 var(--bs-border-color, #dee2e6);
+}
+
+.table-scroll-container tfoot.sticky-bottom td {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  background-color: var(--bs-light, #f8f9fa);
+  box-shadow: inset 0 1px 0 var(--bs-border-color, #dee2e6);
+}
+</style>

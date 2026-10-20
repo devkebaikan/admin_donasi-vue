@@ -264,7 +264,7 @@ export function useProjectsTable() {
       {
         ajuan : project.nominal_ajuan,
         acc: project.nominal_acc,
-        claimed: project.total_allocated,
+        claimed: project.claimed_donasi,
         alokasi: project.total_alokasi,
         tfMitra: project.total_tf_ke_mitra,
         pakaiMitra: project.total_pakai_mitra,
@@ -274,7 +274,7 @@ export function useProjectsTable() {
       JSON.stringify({
         id: project.id,
         activity: project.activity,
-        claimed: project.total_allocated,
+        claimed: project.claimed_donasi,
         acc: project.nominal_acc,
         sisaDana: project.sisa_dana_mitra,
         tfMitra: project.total_tf_ke_mitra,
