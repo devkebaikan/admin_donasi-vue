@@ -108,11 +108,19 @@ export function useEventTable() {
       },
       {
         name: "Actions",
-        width: "100px",
+        width: "120px",
         sort: false,
         formatter: (id: number) =>
           html(`
             <div class="d-flex gap-2 justify-content-center">
+              <button
+                class="btn btn-sm btn-soft-primary detail-btn"
+                data-action="detail"
+                data-id="${id}"
+                title="Lihat Detail Event & Peserta">
+                <i class="bx bx-show fs-16"></i>
+              </button>
+
             ${
               isCanEdit
                 ? `<button

@@ -137,19 +137,29 @@
         </UIComponentCard>
       </b-col>
     </b-row>
+
+    <!-- Offcanvas Detail Event & Peserta -->
+    <EventDetailOffcanvas
+      v-model="showDetailOffcanvas"
+      :event-id="selectedEventId"
+    />
   </VerticalLayout>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onBeforeUnmount } from "vue";
+import { computed, ref, onMounted, onBeforeUnmount } from "vue";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
+import EventDetailOffcanvas from "./components/EventDetailOffcanvas.vue";
 import { useEventTable } from "./components/data";
 import { hasPermission } from "@/helpers/permission";
 import router from "@/router";
 
 const isCanCreate = hasPermission("event:create");
+
+const showDetailOffcanvas = ref(false);
+const selectedEventId = ref(0);
 
 const {
   tableOptions,
@@ -182,6 +192,9 @@ const clearFilters = () => {
 
 const handleGlobalClick = (event: Event) => {
   const target = event.target as HTMLElement;
+  const detailBtn = target.closest<HTMLElement>(
+    '#table-gridjs .detail-btn[data-action="detail"]',
+  );
   const editBtn = target.closest<HTMLElement>(
     '#table-gridjs .edit-btn[data-action="edit"]',
   );
@@ -189,6 +202,14 @@ const handleGlobalClick = (event: Event) => {
     '#table-gridjs .delete-btn[data-action="delete"]',
   );
 
+  if (detailBtn) {
+    event.preventDefault();
+    const id = detailBtn.getAttribute("data-id");
+    if (id) {
+      selectedEventId.value = Number(id);
+      showDetailOffcanvas.value = true;
+    }
+  }
   if (editBtn) {
     event.preventDefault();
     const id = editBtn.getAttribute("data-id");

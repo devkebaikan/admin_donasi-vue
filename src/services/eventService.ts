@@ -162,3 +162,16 @@ export const deleteEventAttribute = async (id: number) => {
     throw error;
   }
 };
+
+// Event Participants
+export const getEventParticipants = async (eventId: number, params = {}) => {
+  try {
+    const res = await HttpClient.get(`/events/${eventId}/participants`, {
+      params,
+    });
+    return res.data?.data ?? [];
+  } catch (error) {
+    console.error(`Error fetching participants for event ${eventId}:`, error);
+    return [];
+  }
+};
