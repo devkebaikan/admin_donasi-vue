@@ -563,12 +563,34 @@
 
       <!--  Tab Content Notifikasi -->
       <div v-if="activeTab === 'notification'" class="tab-content">
+        <div class="border rounded p-3 mb-3">
+          <div class="fw-semibold small mb-2">Kirim melalui channel</div>
+          <div class="d-flex flex-wrap gap-3">
+            <b-form-checkbox
+              v-for="channel in notificationChannels"
+              :key="channel.value"
+              v-model="selectedNotifChannels"
+              :value="channel.value"
+              :disabled="isSendingNotif"
+            >
+              {{ channel.label }}
+            </b-form-checkbox>
+          </div>
+          <small class="d-block text-muted mt-2">
+            Web Push dikirim ke perangkat donatur yang sudah mengaktifkan
+            notifikasi pada situs publik. (hanya notif Sukses)
+          </small>
+          <small v-if="selectedNotifChannels.length === 0" class="d-block text-danger mt-1">
+            Pilih setidaknya satu channel.
+          </small>
+        </div>
+
         <!-- Tombol Kirim Notifikasi -->
         <div class="d-flex gap-2 mb-3">
           <b-button
             size="sm"
             variant="outline-warning"
-            :disabled="isSendingNotif"
+            :disabled="isSendingNotif || selectedNotifChannels.length === 0"
             @click="handleSendNotif('tagihan')"
           >
             <b-spinner v-if="isSendingNotif && sendingNotifType === 'tagihan'" small class="me-1" />
@@ -578,7 +600,7 @@
           <b-button
             size="sm"
             variant="outline-success"
-            :disabled="isSendingNotif"
+            :disabled="isSendingNotif || selectedNotifChannels.length === 0"
             @click="handleSendNotif('sukses')"
           >
             <b-spinner v-if="isSendingNotif && sendingNotifType === 'sukses'" small class="me-1" />
@@ -651,6 +673,7 @@ import {
   getTransactionById,
   getNotifsByTransactionId,
   sendTransactionNotification,
+  type TransactionNotificationChannel,
 } from "@/services/transactionService";
 import { formatCurrency, formatDateTime, formatDate } from "@/helpers/format";
 import { getUserById } from "@/services/userService";
@@ -763,16 +786,31 @@ watch(
 const queryClient = useQueryClient();
 const isSendingNotif = ref(false);
 const sendingNotifType = ref<"tagihan" | "sukses" | null>(null);
+const notificationChannels: {
+  value: TransactionNotificationChannel;
+  label: string;
+}[] = [
+  { value: "wa", label: "WhatsApp" },
+  { value: "db", label: "In-app" },
+  { value: "fcm", label: "FCM" },
+  { value: "webpush", label: "Web Push" },
+];
+const selectedNotifChannels = ref<TransactionNotificationChannel[]>(["wa"]);
 
 const handleSendNotif = async (type: "tagihan" | "sukses") => {
   const txId = txDetail.value?.id;
   if (!txId) return;
+  if (selectedNotifChannels.value.length === 0) return;
 
   const label = type === "tagihan" ? "Tagihan" : "Sukses";
+  const channelLabels = notificationChannels
+    .filter((channel) => selectedNotifChannels.value.includes(channel.value))
+    .map((channel) => channel.label)
+    .join(", ");
 
   const confirm = await Swal.fire({
     title: `Kirim Notifikasi ${label}?`,
-    text: `Notifikasi ${label} akan dikirim via WhatsApp ke donatur.`,
+    text: `Notifikasi ${label} akan dikirim melalui: ${channelLabels}.`,
     icon: "question",
     showCancelButton: true,
     confirmButtonText: "Ya, Kirim",
@@ -785,11 +823,11 @@ const handleSendNotif = async (type: "tagihan" | "sukses") => {
   sendingNotifType.value = type;
 
   try {
-    await sendTransactionNotification(txId, type);
+    await sendTransactionNotification(txId, type, [...selectedNotifChannels.value]);
     Swal.fire({
       icon: "success",
-      title: "Berhasil",
-      text: `Notifikasi ${label} berhasil dikirim.`,
+      title: "Permintaan diterima",
+      text: `Notifikasi ${label} sedang dikirim melalui: ${channelLabels}.`,
       timer: 2000,
       showConfirmButton: false,
     });
