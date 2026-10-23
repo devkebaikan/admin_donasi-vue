@@ -44,10 +44,10 @@
             <b-col md="6">
               <b-form-group label="Nominal" label-for="nominal">
                 <CurrencyInput
-                  id="nominal"
-                  v-model="formState.nominal"
-                  :key="`nominal-${formState.nominal}`"
+                  id="target-nominal"
                   placeholder="0"
+                  v-model="formState.nominal"
+                  :state="null"
                 />
                 <div
                   v-if="v$.nominal.$error"
@@ -99,7 +99,6 @@ import { required } from "@vuelidate/validators";
 import { useRouter, useRoute } from "vue-router";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
-import CurrencyInput from "@/components/CurrencyInput.vue";
 import { getNominalById, updateNominal } from "@/services/nominalService";
 import { toast, type ToastOptions } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
