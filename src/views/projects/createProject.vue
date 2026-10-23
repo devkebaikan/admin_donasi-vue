@@ -108,7 +108,14 @@
                         :options="mitraList"
                         :isLoading="isMitraLoading"
                       />
-                      <small class="text-muted">Opsional</small>
+                      <b-form-invalid-feedback
+                        v-if="v$.mitra_id.$error"
+                        class="d-block"
+                      >
+                        Mitra wajib dipilih.
+                      </b-form-invalid-feedback>
+
+                      <!-- <small class="text-muted">Opsional</small> -->
                     </b-form-group>
                   </b-col>
 
@@ -541,6 +548,7 @@ const rules = computed(() => ({
   judul: { required },
   status: { required },
   activity: { required },
+  mitra_id: { required },
   program_ids: { required },
   nominal_ajuan: { required },
   waktu_pelaksanaan: { required },
@@ -561,7 +569,7 @@ const touchAndCheck = (fields: string[]): boolean => {
 };
 
 const validateStep1 = () =>
-  touchAndCheck(["judul", "status", "activity", "program_ids"]);
+  touchAndCheck(["judul", "status", "activity", "mitra_id", "program_ids"]);
 const validateStep2 = () =>
   touchAndCheck(["nominal_ajuan", "waktu_pelaksanaan"]);
 const validateStep3 = () => true;
