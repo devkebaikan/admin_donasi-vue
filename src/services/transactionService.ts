@@ -137,13 +137,16 @@ export const getNotifsByTransactionId = async (transactionId: number) => {
 };
 
 // Kirim Notifikasi Transaksi (tagihan / sukses)
+export type TransactionNotificationChannel = "db" | "wa" | "fcm" | "webpush";
+
 export const sendTransactionNotification = async (
   id: number,
   type: "tagihan" | "sukses",
+  channels: TransactionNotificationChannel[],
 ) => {
   try {
     const res = await HttpClient.post(`/admin/transactions/${id}/notify`, {
-      channels: ["wa"],
+      channels,
       type,
     });
     return res.data;
