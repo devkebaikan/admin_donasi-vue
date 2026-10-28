@@ -1353,7 +1353,7 @@ const crmRoutes = [
 
 
 
-// Tema Routes
+// Utility Routes
 const utilityRoutes = [
   {
     path: "/utility/third-party-logs",
@@ -1366,6 +1366,18 @@ const utilityRoutes = [
     name: "webhook-logs",
     meta: { title: "Webhook Logs", permission: "utility:read" },
     component: () => import("@/views/utility/webhook-logs/list.vue"),
+  },
+  {
+    path: "/utility/whacaster-queue",
+    name: "utility.whacaster-queue",
+    meta: { title: "Whacaster Queue", authRequired: true, menuModule: "utility" },
+    component: () => import("@/views/utility/whacaster-queue/list.vue"),
+  },
+  {
+    path: "/utility/activity-logs",
+    name: "utility.activity-logs",
+    meta: { title: "Activity Logs", authRequired: true, menuModule: "utility" },
+    component: () => import("@/views/utility/activity-logs/list.vue"),
   },
 ];
 
