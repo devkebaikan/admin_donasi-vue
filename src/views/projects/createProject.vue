@@ -70,7 +70,7 @@
                         <option value="inactive">Inactive</option>
                         <option value="active open">Active Open</option>
                         <option value="active close">Active Close</option>
-                        <option value="selesai">Selesai</option>
+                        <!-- <option value="selesai">Selesai</option> -->
                       </b-form-select>
                       <b-form-invalid-feedback v-if="v$.activity.$error">
                         Activity wajib dipilih.

@@ -791,8 +791,8 @@ const notificationChannels: {
   label: string;
 }[] = [
   { value: "wa", label: "WhatsApp" },
-  { value: "db", label: "In-app" },
-  { value: "fcm", label: "FCM" },
+  // { value: "db", label: "In-app" },
+  // { value: "fcm", label: "FCM" },
   { value: "webpush", label: "Web Push" },
 ];
 const selectedNotifChannels = ref<TransactionNotificationChannel[]>(["wa"]);

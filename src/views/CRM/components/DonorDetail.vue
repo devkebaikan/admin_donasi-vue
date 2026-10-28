@@ -96,13 +96,13 @@
             :transaction="transaction"
             :transaction-time="transactionTime"
             :current-transaction-details="currentTransactionDetails"
-            :kegiatan-list="kegiatanList"
-            :is-kegiatan-loading="isKegiatanLoading"
+            :report-list="reportList"
+            :is-report-loading="isReportLoading"
             :format-currency="formatCurrency"
             :format-date="formatDate"
             :transaction-status-variant="transactionStatusVariant"
             @open-project="openProjectModal"
-            @send-kegiatan-fu="handleSendKegiatanFu"
+            @send-report-fu="handleSendReportFu"
           />
 
           <DonorDetailFollowUpsSection
@@ -438,7 +438,7 @@ import {
   getDonorDetail,
   getCrmTransactionById,
   getCrmTransactions,
-  getCrmKegiatans,
+  getCrmReports,
   getCrmChatTemplates,
   sendCrmChatToDonor,
   performCrmCardAction,
@@ -449,7 +449,7 @@ import { getProjects } from "@/services/projectService";
 import { updateTransactionDetailProject } from "@/services/transactionService";
 import {
   colorTagVariant,
-  cycleStatusVariant,
+  // cycleStatusVariant,
   initialsOf,
 } from "@/utils/crmAdapters";
 import DonorChat from "./DonorChat.vue";
@@ -458,7 +458,7 @@ import DonorDetailTransactionSection from "./donor-detail/DonorDetailTransaction
 import DonorDetailFollowUpsSection from "./donor-detail/DonorDetailFollowUpsSection.vue";
 import DonorDetailDonationHistorySection from "./donor-detail/DonorDetailDonationHistorySection.vue";
 import type {
-  ChatMessageItem,
+  // ChatMessageItem,
   CrmBoardItem,
   CrmCardAction,
   CrmCardActionRequest,
@@ -467,6 +467,7 @@ import type {
   CrmPipelineCase,
   CrmTransactionHistoryItem,
 } from "@/types/crm";
+import { getUserProfileById } from "@/services/userService.js";
 
 const showToast = (message: string, options: ToastOptions) =>
   toast(message, options);
@@ -726,7 +727,7 @@ const {
   refetch: refetchDetail,
 } = useQuery({
   queryKey: computed(() => ["crm-donor-detail", donorProfileId.value]),
-  queryFn: () => getDonorDetail(donorProfileId.value),
+  queryFn: () => getUserProfileById(donorProfileId.value),
   enabled: computed(() => donorProfileId.value > 0),
 });
 
@@ -781,7 +782,7 @@ const donationHistory = computed<CrmTransactionHistoryItem[]>(
 );
 
 const openProfiling = () => {
-  const profileUserId = Number(transaction.value?.user_id ?? 0);
+  const profileUserId = Number(detail.value?.id ?? 0);
   if (!profileUserId) {
     showToast("User ID untuk profiling belum tersedia", {
       type: "warning",
@@ -926,12 +927,12 @@ const handleAssignProject = async () => {
   }
 };
 
-const { data: kegiatanListRaw, isLoading: isKegiatanLoading } = useQuery({
-  queryKey: computed(() => ["crm-kegiatan", currentProjectId.value]),
-  queryFn: () => getCrmKegiatans({ project_id: currentProjectId.value }),
+const { data: reportListRaw, isLoading: isReportLoading } = useQuery({
+  queryKey: computed(() => ["crm-reports", currentProjectId.value]),
+  queryFn: () => getCrmReports({ project_id: currentProjectId.value }),
   enabled: computed(() => currentProjectId.value > 0),
 });
-const kegiatanList = computed<CrmKegiatan[]>(() => kegiatanListRaw.value ?? []);
+const reportList = computed<any[]>(() => reportListRaw.value ?? []);
 
 // const totalDonasiLifetime = computed(() =>
 //   donationHistory.value
@@ -1165,19 +1166,12 @@ const htmlToPlainText = (html?: string) => {
   return (temp.textContent || temp.innerText || "").trim();
 };
 
-const handleSendKegiatanFu = (kegiatan: CrmKegiatan) => {
+const handleSendReportFu = (report: Record<string, any>) => {
   pendingFuId.value = null;
   selectedChatTemplateId.value = null;
 
-  const plainDeskripsi = htmlToPlainText(kegiatan.deskripsi);
-  const title = kegiatan.judul?.trim();
-  const textMessage = title
-    ? `*${title}*\n\n${plainDeskripsi}`
-    : plainDeskripsi;
-
-  selectedChatInitialMessage.value = textMessage;
-  selectedChatImageUrl.value =
-    kegiatan.thumbnail_url || kegiatan.thumbnail || null;
+  selectedChatInitialMessage.value = report.wa_caption?.trim() ?? "";
+  selectedChatImageUrl.value = report.thumbnail_url || null;
 
   activeTab.value = "chat";
 };

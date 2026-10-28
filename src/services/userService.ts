@@ -30,12 +30,35 @@ export const getUserDetailById = async (id: number) => {
   }
 };
 
+export const getUserProfileById = async (id: number) => {
+  try {
+    const res = await HttpClient.get(`/crm/donors/${id}`);
+    return res.data.data;
+  } catch (error) {
+    console.error(`Error fetching user with id ${id}:`, error);
+    return null;
+  }
+};
+
 export const updateUserProfiling = async (
   id: number,
   data: Record<string, any>,
 ) => {
   try {
     const res = await HttpClient.put(`/rbac/users/${id}/donatur`, data);
+    return res.data.data;
+  } catch (error) {
+    console.error(`Error updating profiling user with id ${id}:`, error);
+    throw error;
+  }
+};
+
+export const updateCRMUserProfiling = async (
+  id: number,
+  data: Record<string, any>,
+) => {
+  try {
+    const res = await HttpClient.patch(`/crm/donors/${id}/info`, data);
     return res.data.data;
   } catch (error) {
     console.error(`Error updating profiling user with id ${id}:`, error);

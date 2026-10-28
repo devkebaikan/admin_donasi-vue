@@ -3,12 +3,12 @@
     <b-row>
       <b-col>
         <UIComponentCard
-          :title="`Edit Kegiatan${kegiatanData ? ': ' + kegiatanData.judul : ''}`"
+          :title="`Edit Progres${kegiatanData ? ': ' + kegiatanData.judul : ''}`"
         >
           <!-- Loading -->
           <div v-if="isLoadingKegiatan" class="text-center py-5">
             <b-spinner variant="primary" class="me-2" />
-            <span class="text-muted">Memuat data kegiatan...</span>
+            <span class="text-muted">Memuat data Progres...</span>
           </div>
 
           <!-- Error -->
@@ -36,7 +36,7 @@
               </b-col>
 
               <!-- Tipe -->
-              <b-col md="4">
+              <!-- <b-col md="4">
                 <b-form-group label="Tipe" label-for="type">
                   <b-form-select id="type" v-model="formState.type">
                     <option value="">-- Pilih Tipe --</option>
@@ -44,11 +44,11 @@
                     <option value="Final">Final</option>
                   </b-form-select>
                 </b-form-group>
-              </b-col>
+              </b-col> -->
 
               <!-- Tanggal -->
               <b-col md="4">
-                <b-form-group label="Tanggal Kegiatan" label-for="date">
+                <b-form-group label="Tanggal Progres" label-for="date">
                   <b-form-input
                     id="date"
                     v-model="formState.date"
@@ -141,7 +141,7 @@
                   <CustomQuillEditor
                     storage="kegiatan-content"
                     :style="{ height: '260px' }"
-                    placeholder="Deskripsi kegiatan..."
+                    placeholder="Deskripsi Progres..."
                     v-model:content="formState.deskripsi"
                   />
                 </b-form-group>
@@ -202,10 +202,6 @@ const showToast = (message: string, options: ToastOptions) =>
   toast(message, options);
 const route = useRoute();
 const queryClient = useQueryClient();
-
-const STORAGE_BASE =
-  (import.meta.env.VITE_API_BASE_URL as string).replace("/api/v1", "") +
-  "/storage/";
 
 const kegiatanId = Number(route.params.id);
 
@@ -277,9 +273,7 @@ watch(kegiatanData, (data) => {
   formState.type = data.type ?? "";
   formState.date = toDateOnly(data.date);
   formState.deskripsi = data.deskripsi ?? "";
-  existingThumbnail.value = data.thumbnail
-    ? `${STORAGE_BASE}${data.thumbnail}`
-    : null;
+  existingThumbnail.value = data.thumbnail_url ? data.thumbnail_url : null;
 });
 
 // Mitra list
@@ -327,7 +321,7 @@ const { mutate, isPending } = useMutation({
   onSuccess: () => {
     queryClient.invalidateQueries({ queryKey: ["kegiatans"] });
     queryClient.invalidateQueries({ queryKey: ["kegiatan", kegiatanId] });
-    showToast("Kegiatan berhasil diperbarui", {
+    showToast("Progres berhasil diperbarui", {
       type: "success",
       position: "top-center",
     });
@@ -337,7 +331,7 @@ const { mutate, isPending } = useMutation({
     );
   },
   onError: (err: any) => {
-    const msg = err?.response?.data?.message ?? "Gagal memperbarui kegiatan";
+    const msg = err?.response?.data?.message ?? "Gagal memperbarui Progres";
     showToast(msg, { type: "error", position: "top-center" });
   },
 });

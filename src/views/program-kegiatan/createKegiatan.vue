@@ -2,7 +2,7 @@
   <VerticalLayout>
     <b-row>
       <b-col>
-        <UIComponentCard title="Tambah Kegiatan">
+        <UIComponentCard title="Tambah Progres">
           <b-row class="g-3">
             <!-- Judul -->
             <b-col md="8">
@@ -22,7 +22,7 @@
             </b-col>
 
             <!-- Tipe -->
-            <b-col md="4">
+            <!-- <b-col md="4">
               <b-form-group label="Tipe" label-for="type">
                 <b-form-select id="type" v-model="formState.type">
                   <option value="">-- Pilih Tipe --</option>
@@ -30,11 +30,11 @@
                   <option value="Final">Final</option>
                 </b-form-select>
               </b-form-group>
-            </b-col>
+            </b-col> -->
 
             <!-- Tanggal -->
             <b-col md="4">
-              <b-form-group label="Tanggal Kegiatan" label-for="date">
+              <b-form-group label="Tanggal Progres" label-for="date">
                 <b-form-input id="date" v-model="formState.date" type="date" />
                 <small class="text-muted">Opsional</small>
               </b-form-group>
@@ -54,7 +54,7 @@
                 <CustomQuillEditor
                   storage="kegiatan-content"
                   :style="{ height: '260px' }"
-                  placeholder="Deskripsi kegiatan..."
+                  placeholder="Deskripsi Progres..."
                   v-model:content="formState.deskripsi"
                 />
               </b-form-group>
@@ -85,7 +85,7 @@
                   @click="handleSubmit"
                 >
                   <b-spinner v-if="isPending" small class="me-1" />
-                  Simpan Kegiatan
+                  Simpan Progres
                 </b-button>
               </div>
             </b-col>
@@ -122,7 +122,7 @@ const formState = reactive({
   mitra_id: "",
   project_id: 0,
   judul: "",
-  type: "",
+  type: "Progress",
   date: "",
   thumbnail: null as File | null,
   deskripsi: "",
@@ -180,7 +180,7 @@ const { mutate, isPending } = useMutation({
   },
   onSuccess: () => {
     queryClient.invalidateQueries({ queryKey: ["kegiatans"] });
-    showToast("Kegiatan berhasil ditambahkan", {
+    showToast("Progres berhasil ditambahkan", {
       type: "success",
       position: "top-center",
     });
@@ -190,7 +190,7 @@ const { mutate, isPending } = useMutation({
     );
   },
   onError: (err: any) => {
-    const msg = err?.response?.data?.message ?? "Gagal menyimpan kegiatan";
+    const msg = err?.response?.data?.message ?? "Gagal menyimpan Progres";
     showToast(msg, { type: "error", position: "top-center" });
   },
 });

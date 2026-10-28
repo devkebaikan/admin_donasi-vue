@@ -68,6 +68,22 @@
             </span>
           </button>
         </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            :class="{ active: activeTab === 'transactions' }"
+            @click="activeTab = 'transactions'"
+            type="button"
+          >
+            <i class="bx bx-receipt me-1"></i>Transaksi
+            <span
+              v-if="transactionsList && transactionsList.length"
+              class="badge bg-secondary ms-1"
+            >
+              {{ transactionsList.length }}
+            </span>
+          </button>
+        </li>
       </ul>
 
       <!-- ================= TAB 1: DETAIL EVENT ================= -->
@@ -169,12 +185,28 @@
               </span>
             </div>
           </b-col>
-          <b-col cols="12">
+          <b-col cols="6">
             <div class="bg-light rounded p-2">
               <small class="text-muted d-block">Lokasi</small>
               <span class="fw-semibold small">
                 <i class="bx bx-map me-1 text-primary"></i>
                 {{ eventDetail.location || '-' }}
+              </span>
+            </div>
+          </b-col>
+         
+          <b-col cols="6">
+            <div class="bg-light rounded p-2">
+              <small class="text-muted d-block"><i class="bx bx-link me-1"></i> Link</small>
+              <span class="fw-semibold small">
+                <a
+                  :href="`https://linkup.beramalbersama.com/event/${eventDetail.slug}`"
+                  target="_blank"
+                  class="text-primary small text-truncate d-inline-block"
+                  style="max-width: 90%;"
+                >
+                  https://linkup.beramalbersama.com/event/{{ eventDetail.slug }}
+                </a>
               </span>
             </div>
           </b-col>
@@ -362,6 +394,68 @@
           </div>
         </div>
       </div>
+
+      <!-- ================= TAB 3: TRANSAKSI ================= -->
+      <div v-if="activeTab === 'transactions'" class="tab-content">
+        <div v-if="isTransactionsLoading" class="text-center py-5">
+          <b-spinner variant="primary" />
+          <p class="mt-2 text-muted">Memuat transaksi...</p>
+        </div>
+
+        <div v-else-if="!transactionsList || transactionsList.length === 0"
+          class="text-center py-5 border rounded bg-light"
+        >
+          <i class="bx bx-receipt fs-1 text-muted d-block mb-2"></i>
+          <p class="text-muted small mb-0">Belum ada transaksi untuk event ini.</p>
+        </div>
+
+        <div v-else class="d-flex flex-column gap-2">
+          <!-- Summary -->
+          <div class="d-flex gap-2 mb-2">
+            <div class="border rounded p-2 bg-light text-center flex-fill">
+              <small class="text-muted d-block">Total Transaksi</small>
+              <span class="fw-bold fs-5 text-primary">{{ transactionsList.length }}</span>
+            </div>
+            <div class="border rounded p-2 bg-light text-center flex-fill">
+              <small class="text-muted d-block">Paid</small>
+              <span class="fw-bold fs-5 text-success">
+                {{ transactionsList.filter((t: any) => t.status === 'Paid').length }}
+              </span>
+            </div>
+            <div class="border rounded p-2 bg-light text-center flex-fill">
+              <small class="text-muted d-block">Canceled</small>
+              <span class="fw-bold fs-5 text-danger">
+                {{ transactionsList.filter((t: any) => t.status === 'Canceled').length }}
+              </span>
+            </div>
+          </div>
+
+          <!-- List -->
+          <div
+            v-for="tx in transactionsList"
+            :key="tx.id"
+            class="border rounded p-3 bg-white d-flex align-items-center justify-content-between gap-2"
+          >
+            <div class="flex-grow-1 overflow-hidden">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="fw-semibold small text-truncate">{{ tx.user?.name || 'Anonim' }}</span>
+                <span class="text-muted small">·</span>
+                <span class="text-muted small">{{ tx.payment_method?.bank_name ?? '-' }}</span>
+              </div>
+              <div class="font-monospace text-muted" style="font-size: 11px">{{ tx.invoice }}</div>
+            </div>
+            <div class="text-end flex-shrink-0">
+              <div class="fw-semibold small">{{ tx.total ? formatCurrency(tx.total) : 'Gratis' }}</div>
+              <span
+                class="badge"
+                :class="tx.status === 'Paid' ? 'bg-success' : tx.status === 'Canceled' ? 'bg-danger' : 'bg-warning text-dark'"
+              >
+                {{ tx.status }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </b-offcanvas>
 </template>
@@ -369,7 +463,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useQuery } from "@tanstack/vue-query";
-import { getEventById, getEventParticipants } from "@/services/eventService";
+import { getEventById, getEventParticipants, getEventTransactions } from "@/services/eventService";
 import { formatCurrency, formatDateTime, formatDate } from "@/helpers/format";
 import router from "@/router";
 
@@ -391,7 +485,7 @@ const isVisible = computed({
   set: (val) => emit("update:modelValue", val),
 });
 
-const activeTab = ref<"detail" | "participants">("detail");
+const activeTab = ref<"detail" | "participants" | "transactions">("detail");
 
 // Reset to detail tab whenever eventId changes
 watch(
@@ -424,6 +518,18 @@ const {
   queryFn: () => getEventParticipants(props.eventId),
   enabled: computed(
     () => props.modelValue && props.eventId > 0 && activeTab.value === "participants",
+  ),
+});
+
+// ── Event Transactions Query ───────────────────────────────────
+const {
+  data: transactionsList,
+  isLoading: isTransactionsLoading,
+} = useQuery({
+  queryKey: computed(() => ["event-transactions", props.eventId]),
+  queryFn: () => getEventTransactions(props.eventId),
+  enabled: computed(
+    () => props.modelValue && props.eventId > 0 && activeTab.value === "transactions",
   ),
 });
 

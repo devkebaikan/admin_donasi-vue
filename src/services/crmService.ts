@@ -77,6 +77,17 @@ export const getCrmKegiatans = async (params = {}) => {
   }
 };
 
+// list report filter by projectid
+export const getCrmReports = async (params = {}) => {
+  try {
+    const res = await HttpClient.get("/program/project-laporan", { params });
+    return res.data.data;
+  } catch (error) {
+    console.error("Error fetching reports:", error);
+    return { data: [], meta: { total: 0, last_page: 1 } };
+  }
+};
+
 // list riwayat transaction by userId
 export const getCrmTransactions = async (params = {}) => {
   try {

@@ -89,7 +89,7 @@
           class="d-flex align-items-center justify-content-between w-100 gap-2"
         >
           <h5 class="mb-0 fw-semibold text-truncate">
-            <i class="bx bx-info-circle me-1 text-primary"></i>Detail Kegiatan
+            <i class="bx bx-info-circle me-1 text-primary"></i>Detail Progres
           </h5>
           <b-button size="sm" variant="outline-secondary" @click="hide">
             <i class="bx bx-x fs-18"></i>
@@ -155,7 +155,7 @@
           </b-col>
           <b-col cols="6">
             <div class="bg-light rounded p-2">
-              <small class="text-muted d-block">Tanggal Kegiatan</small>
+              <small class="text-muted d-block">Tanggal Progres</small>
               <span class="fw-semibold small">{{
                 formatDate(kegiatanDetail.date)
               }}</span>
@@ -184,14 +184,14 @@
     <!-- Table -->
     <b-row>
       <b-col>
-        <UIComponentCard id="basic" title="Daftar Kegiatan">
+        <UIComponentCard id="basic" title="Daftar Progres">
           <div v-if="isCanCreate" class="d-flex justify-content-end mb-3">
             <b-button
               v-if="selectedProjectId"
               variant="primary"
               @click="handleAddKegiatan"
             >
-              <i class="bx bx-plus fs-16 me-1"></i>Tambah kegiatan
+              <i class="bx bx-plus fs-16 me-1"></i>Tambah Progres
             </b-button>
           </div>
 

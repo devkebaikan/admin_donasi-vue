@@ -32,6 +32,18 @@
             <small class="text-muted">
               Maksimal: Rp {{ formatRupiah(maxNominal) }}
             </small>
+            <small
+              v-if="props.mode === 'ajuan' && (projectData?.ringkasan_ajuan?.total_proposed ?? 0) > 0"
+              class="text-warning small"
+            >
+              (Sedang diajukan: Rp {{ formatRupiah(projectData?.ringkasan_ajuan?.total_proposed) }})
+            </small>
+            <small
+              v-else-if="props.mode === 'refund' && (projectData?.ringkasan_refund?.total_proposed ?? 0) > 0"
+              class="text-warning small"
+            >
+              (Sedang diajukan: Rp {{ formatRupiah(projectData?.ringkasan_refund?.total_proposed) }})
+            </small>
             <b-button
               v-if="config.label === 'Refund'"
               size="sm"
@@ -249,9 +261,18 @@ const maxNominal = computed(() => {
   if (field === "total_alokasi") {
     const claimed = Number(projectData.value?.claimed_donasi ?? 0);
     const totalTf = Number(projectData.value?.total_tf_ke_mitra ?? 0);
-    return Math.max(0, claimed - totalTf);
+    const proposedAjuan = Number(
+      projectData.value?.ringkasan_ajuan?.total_proposed ?? 0,
+    );
+    // Maksimal ajuan adalah sisa belum dicairkan dikurangi ajuan yang masih berstatus proposed
+    return Math.max(0, claimed - totalTf - proposedAjuan);
   } else {
-    return Number(projectData.value?.sisa_dana_mitra ?? 0);
+    const sisaDanaMitra = Number(projectData.value?.sisa_dana_mitra ?? 0);
+    const proposedRefund = Number(
+      projectData.value?.ringkasan_refund?.total_proposed ?? 0,
+    );
+    // Maksimal refund adalah sisa dana mitra dikurangi refund yang masih berstatus proposed
+    return Math.max(0, sisaDanaMitra - proposedRefund);
   }
 });
 

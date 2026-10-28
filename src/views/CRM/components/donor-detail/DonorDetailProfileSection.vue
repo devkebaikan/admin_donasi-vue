@@ -158,7 +158,7 @@
                   <span
                     class="fw-semibold text-dark"
                     style="font-size: 0.74rem; line-height: 1.25"
-                    >{{ formatShortDate(donorProfileDummy.joinedDate) }}</span
+                    >{{ formatShortDate(detail.donatur?.joined_at) }}</span
                   >
                 </div>
               </div>
@@ -175,7 +175,7 @@
                   <span
                     class="fw-semibold text-dark"
                     style="font-size: 0.74rem; line-height: 1.25"
-                    >{{ donorProfileDummy.lastDonationDays }} hari lalu</span
+                    >{{ detail.last_donation_at ? formatShortDate(detail.last_donation_at) : '-' }}</span
                   >
                 </div>
               </div>
@@ -187,12 +187,12 @@
                   <small
                     class="text-muted"
                     style="font-size: 0.66rem; line-height: 1.2"
-                    >Aktivitas</small
+                    >Cycle Status</small
                   >
                   <span
                     class="fw-semibold text-dark"
                     style="font-size: 0.74rem; line-height: 1.25"
-                    >{{ donorProfileDummy.activity }}</span
+                    >{{ detail.cycle_status ?? '-' }}</span
                   >
                 </div>
               </div>
@@ -211,13 +211,14 @@
             </h6>
 
             <div class="d-flex flex-wrap gap-1 mb-2">
+              <span v-if="!detail.tags?.length" class="text-muted" style="font-size: 0.72rem">Belum ada tag</span>
               <b-badge
-                v-for="tag in donorProfileDummy.tags"
-                :key="tag"
+                v-for="tag in detail.tags"
+                :key="tag.id ?? tag"
                 :variant="null"
                 class="badge-soft-info"
               >
-                #{{ tag }}
+                #{{ tag.name ?? tag }}
               </b-badge>
             </div>
 
@@ -235,7 +236,7 @@
                   <span
                     class="fw-semibold text-dark"
                     style="font-size: 0.74rem; line-height: 1.25"
-                    >{{ donorProfileDummy.city }}</span
+                    >{{ detail.kota ?? '-' }}</span
                   >
                 </div>
               </div>
@@ -252,7 +253,7 @@
                   <span
                     class="fw-semibold text-dark"
                     style="font-size: 0.74rem; line-height: 1.25"
-                    >{{ donorProfileDummy.age }} tahun</span
+                    >{{ detail.usia_range ?? '-' }}</span
                   >
                 </div>
               </div>
@@ -269,7 +270,7 @@
                   <span
                     class="fw-semibold text-dark"
                     style="font-size: 0.74rem; line-height: 1.25"
-                    >{{ donorProfileDummy.job }}</span
+                    >{{ detail.pekerjaan ?? '-' }}</span
                   >
                 </div>
               </div>
@@ -286,7 +287,7 @@
                   <span
                     class="fw-semibold text-dark"
                     style="font-size: 0.74rem; line-height: 1.25"
-                    >{{ donorProfileDummy.community }}</span
+                    >{{ detail.komunitas ?? '-' }}</span
                   >
                 </div>
               </div>
@@ -303,7 +304,7 @@
                   <span
                     class="fw-semibold text-muted"
                     style="font-size: 0.74rem; line-height: 1.25"
-                    >{{ donorProfileDummy.note }}</span
+                    >{{ detail.note ?? '-' }}</span
                   >
                 </div>
               </div>
@@ -327,104 +328,27 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import { cycleStatusVariant, initialsOf } from "@/utils/crmAdapters";
-import type { CrmDonorDetail } from "@/types/crm";
+import { ref } from "vue";
+import { cycleStatusVariant } from "@/utils/crmAdapters";
 
 const props = defineProps<{
-  detail: CrmDonorDetail;
-  transactionDetail : any;
+  detail: Record<string, any>;
+  transactionDetail: any;
   userId?: number;
 }>();
 
-type DonorProfileDummy = {
-  joinedDate: string;
-  donationCount: number;
-  lastDonationDays: number;
-  activity: string;
-  tags: string[];
-  city: string;
-  age: number;
-  job: string;
-  community: string;
-  note: string;
-  statusUser: "Aktif" | "Perlu Follow Up" | "Tidak Aktif";
-};
-
 const detailProfileShow = ref(false);
 
-const DUMMY_DONOR_PROFILES: DonorProfileDummy[] = [
-  {
-    joinedDate: "2024-01-12",
-    donationCount: 0,
-    lastDonationDays: 0,
-    activity: "Baru masuk CRM",
-    tags: ["baru", "potensial", "wa"],
-    city: "Bandung",
-    age: 27,
-    job: "Karyawan Swasta",
-    community: "Komunitas Masjid Al-Hikmah",
-    note: "Perlu sapaan awal untuk perkenalan campaign rutin.",
-    statusUser: "Aktif",
-  },
-  {
-    joinedDate: "2023-08-23",
-    donationCount: 3,
-    lastDonationDays: 15,
-    activity: "Respons cepat di WhatsApp",
-    tags: ["repeat", "ramah", "rutin"],
-    city: "Jakarta",
-    age: 33,
-    job: "Wirausaha",
-    community: "Sahabat Sedekah Jakarta",
-    note: "Minat ke program pendidikan dan santunan yatim.",
-    statusUser: "Aktif",
-  },
-  {
-    joinedDate: "2022-05-10",
-    donationCount: 5,
-    lastDonationDays: 42,
-    activity: "Belum merespons follow up terakhir",
-    tags: ["existing", "prioritas", "followup"],
-    city: "Surabaya",
-    age: 39,
-    job: "Profesional",
-    community: "Majelis Taklim Ar-Rahmah",
-    note: "Ideal dihubungi malam hari setelah jam kerja.",
-    statusUser: "Perlu Follow Up",
-  },
-];
-
-const donorProfileDummy = computed<DonorProfileDummy>(() => {
-  const index = props.detail.id % DUMMY_DONOR_PROFILES.length;
-  const base = DUMMY_DONOR_PROFILES[index];
-
-  return {
-    ...base,
-    donationCount: Math.max(base.donationCount, props.detail.follow_ups.length),
-    lastDonationDays: Math.max(
-      base.lastDonationDays,
-      props.detail.hari_tidak_aktif,
-    ),
-  };
-});
-
-const formatShortDate = (value: string) => {
+const formatShortDate = (value: string | null | undefined) => {
+  if (!value) return "-";
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return "-";
-
   return parsed.toLocaleDateString("id-ID", {
     day: "2-digit",
     month: "short",
     year: "numeric",
   });
 };
-
-// const statusUserVariant = (status: DonorProfileDummy["statusUser"]) => {
-//   if (status === "Aktif") return "success";
-//   if (status === "Perlu Follow Up") return "warning";
-//   return "secondary";
-// };
 </script>
 
 <style scoped>

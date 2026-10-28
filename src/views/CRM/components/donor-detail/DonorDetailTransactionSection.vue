@@ -234,42 +234,44 @@
       </div>
     </div>
     
-    <div v-if="isKegiatanLoading" class="text-center p-3">
+    <div v-if="isReportLoading" class="text-center p-3">
       <b-spinner small variant="primary" />
     </div>
-    <template v-else-if="kegiatanList.length">
+    <template v-else-if="reportList.length">
       <div
-        v-for="(act, idx) in kegiatanList"
-        :key="act.id"
+        v-for="(report, idx) in reportList"
+        :key="report.id"
         class="d-flex align-items-center justify-content-between p-3 rounded-1"
         :class="idx ? 'mt-2' : ''"
         style="background-color: #eaf8f3"
       >
         <div class="flex-grow-1 overflow-hidden me-2">
-          <p class="mb-0 fs-12 fw-semibold text-truncate">{{ act.judul }}</p>
+          <p class="mb-0 fs-12 fw-semibold text-truncate">{{ report.kegiatan?.nama ?? '-' }}</p>
           <p class="mb-0 text-muted fs-11">
-            {{ formatDate(act.date) }} · {{ act.type }}
+            {{ report.type }}
+            <template v-if="report.link_ig">
+              · <a :href="report.link_ig" target="_blank" rel="noopener noreferrer" class="text-info">IG</a>
+            </template>
           </p>
         </div>
         <b-button
           size="sm"
           variant="outline-success"
           class="d-inline-flex align-items-center gap-1 fs-11 flex-shrink-0"
-          title="Kirim laporan kegiatan ke WhatsApp"
-          @click="$emit('send-kegiatan-fu', act)"
+          title="Kirim laporan ke WhatsApp"
+          @click="$emit('send-report-fu', report)"
         >
           <i class="bx bxl-whatsapp fs-14"></i>
           Kirim Laporan
         </b-button>
       </div>
     </template>
-    <p v-else class="text-muted fs-13 mb-0">Belum ada update kegiatan</p>
+    <p v-else class="text-muted fs-13 mb-0">Belum ada laporan</p>
   </div>
 </template>
 
 <script setup lang="ts">
 import type {
-  CrmKegiatan,
   CrmPipelineCase,
   CrmTransactionDetail,
   CrmTransactionDetailItem,
@@ -277,7 +279,7 @@ import type {
 
 defineEmits<{
   (e: "open-project"): void;
-  (e: "send-kegiatan-fu", kegiatan: CrmKegiatan): void;
+  (e: "send-report-fu", report: Record<string, any>): void;
 }>();
 
 defineProps<{
@@ -286,8 +288,8 @@ defineProps<{
   transaction: CrmTransactionDetail | null | undefined;
   transactionTime: string;
   currentTransactionDetails: CrmTransactionDetailItem[];
-  kegiatanList: CrmKegiatan[];
-  isKegiatanLoading: boolean;
+  reportList: Record<string, any>[];
+  isReportLoading: boolean;
   formatCurrency: (value: string | number) => string;
   formatDate: (value: string | Date | null | undefined) => string;
   transactionStatusVariant: (status?: string) => string;

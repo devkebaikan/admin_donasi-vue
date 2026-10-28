@@ -28,6 +28,23 @@
               </b-form-group>
             </b-col>
 
+            <!-- Deskripsi Kegiatan -->
+            <b-col v-if="formState.kegiatan_id" cols="12">
+              <b-form-group label="Deskripsi Kegiatan" label-for="kegiatan-deskripsi">
+                <div v-if="isLoadingKegiatanDetail" class="text-muted small py-2">
+                  <b-spinner small class="me-1" /> Memuat deskripsi kegiatan...
+                </div>
+                <CustomQuillEditor
+                  v-else
+                  storage="kegiatan-content"
+                  :style="{ height: '260px' }"
+                  placeholder="Deskripsi kegiatan..."
+                  v-model:content="kegiatanDeskripsi"
+                />
+                <small class="text-muted">Deskripsi kegiatan terkait yang dapat diedit dan akan diperbarui saat menyimpan laporan.</small>
+              </b-form-group>
+            </b-col>
+
             <!-- Type -->
             <!-- <b-col md="4">
               <b-form-group label="Tipe" label-for="type">
@@ -144,7 +161,7 @@
             </b-col>
 
             <!-- Instagram Embed -->
-            <b-col md="6">
+            <!-- <b-col md="6">
               <b-form-group label="Instagram Embed" label-for="embed-ig">
                 <b-form-textarea
                   id="embed-ig"
@@ -154,15 +171,15 @@
                 />
                 <small class="text-muted">Opsional</small>
               </b-form-group>
-            </b-col>
+            </b-col> -->
 
-            <!-- WhatsApp Caption -->
+            <!-- Deskripsi Report -->
             <b-col cols="12">
-              <b-form-group label="WhatsApp Caption" label-for="wa-caption">
+              <b-form-group label="Deskripsi Report" label-for="wa-caption">
                 <b-form-textarea
                   id="wa-caption"
                   v-model="formState.wa_caption"
-                  placeholder="Caption untuk WhatsApp..."
+                  placeholder="Deskripsi report..."
                   rows="4"
                 />
                 <small class="text-muted">Opsional</small>
@@ -212,9 +229,14 @@ import "vue3-toastify/dist/index.css";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
+import CustomQuillEditor from "@/components/CustomQuillEditor.vue";
 import { createReport } from "@/services/reportService";
 import { getProjectById, getProjects } from "@/services/projectService";
-import { getAllKegiatan } from "@/services/kegiatanService";
+import {
+  getAllKegiatan,
+  getKegiatanById,
+  updateKegiatan,
+} from "@/services/kegiatanService";
 import router from "@/router";
 import { useRoute } from "vue-router";
 
@@ -228,6 +250,11 @@ const thumbnailFile = ref<File | null>(null);
 const thumbnailPreview = ref<string | null>(null);
 const waImageFile = ref<File | null>(null);
 const waImagePreview = ref<string | null>(null);
+
+const kegiatanDeskripsi = ref("");
+const originalKegiatanDeskripsi = ref("");
+const currentKegiatanData = ref<any>(null);
+const isLoadingKegiatanDetail = ref(false);
 
 const formState = reactive({
   project_id: 0,
@@ -262,6 +289,30 @@ watch(
     }
   },
   { immediate: true },
+);
+
+watch(
+  () => formState.kegiatan_id,
+  async (kegId) => {
+    if (!kegId || kegId === 0) {
+      currentKegiatanData.value = null;
+      kegiatanDeskripsi.value = "";
+      originalKegiatanDeskripsi.value = "";
+      return;
+    }
+    isLoadingKegiatanDetail.value = true;
+    try {
+      const data = await getKegiatanById(kegId);
+      currentKegiatanData.value = data;
+      const desc = data?.deskripsi ?? "";
+      kegiatanDeskripsi.value = desc;
+      originalKegiatanDeskripsi.value = desc;
+    } catch (err) {
+      console.error("Gagal memuat detail kegiatan:", err);
+    } finally {
+      isLoadingKegiatanDetail.value = false;
+    }
+  },
 );
 
 const rules = {
@@ -323,7 +374,33 @@ const handleWaImageChange = (event: Event) => {
 
 // ── Submit ────────────────────────────────────────────────────────────────
 const { mutate, isPending } = useMutation({
-  mutationFn: () => {
+  mutationFn: async () => {
+    // 1. Update kegiatan deskripsi jika ada perubahan
+    if (
+      formState.kegiatan_id &&
+      currentKegiatanData.value &&
+      kegiatanDeskripsi.value !== originalKegiatanDeskripsi.value
+    ) {
+      const kData = currentKegiatanData.value;
+      const kfd = new FormData();
+      kfd.append("_method", "PUT");
+      if (kData.mitra_id) kfd.append("mitra_id", String(kData.mitra_id));
+      if (kData.project_id) kfd.append("project_id", String(kData.project_id));
+      if (kData.judul) kfd.append("judul", kData.judul);
+      if (kData.type) kfd.append("type", kData.type);
+      if (kData.date) {
+        const dateOnly = String(kData.date).split("T")[0];
+        kfd.append("date", dateOnly);
+      }
+      kfd.append("deskripsi", kegiatanDeskripsi.value || "");
+      await updateKegiatan(formState.kegiatan_id, kfd);
+      queryClient.invalidateQueries({ queryKey: ["kegiatans"] });
+      queryClient.invalidateQueries({
+        queryKey: ["kegiatan", formState.kegiatan_id],
+      });
+    }
+
+    // 2. Buat Laporan Project
     const formData = new FormData();
     formData.append("project_id", String(formState.project_id));
     formData.append("kegiatan_id", String(formState.kegiatan_id));

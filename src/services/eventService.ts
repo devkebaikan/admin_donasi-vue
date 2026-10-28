@@ -175,3 +175,15 @@ export const getEventParticipants = async (eventId: number, params = {}) => {
     return [];
   }
 };
+
+export const getEventTransactions = async (eventId: number, params = {}) => {
+  try {
+    const res = await HttpClient.get(`/events/${eventId}/transactions`, {
+      params,
+    });
+    return res.data?.data ?? [];
+  } catch (error) {
+    console.error(`Error fetching transactions for event ${eventId}:`, error);
+    return [];
+  }
+};

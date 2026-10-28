@@ -29,9 +29,13 @@ const renderActionButtons = (item: {
   acc: number;
   sisaDana: number;
   tfMitra: number;
+  proposedAjuan?: number;
+  proposedRefund?: number;
 }) => {
   const kurangFunding = item.acc - item.claimed;
   const belumCair = item.claimed - item.tfMitra;
+  const proposedAjuan = item.proposedAjuan ?? 0;
+  const sisaBisaDiajukan = Math.max(0, belumCair - proposedAjuan);
 
   let html = '<div class="d-flex flex-column gap-2">';
 
@@ -68,6 +72,11 @@ const renderActionButtons = (item: {
         <div class="small flex-grow-1 text-truncate">
           <div class="text-muted">Belum Cair</div>
           <div class="fw-semibold text-primary">${formatCurrency(belumCair)}</div>
+          ${
+            proposedAjuan > 0
+              ? `<div class="text-warning" style="font-size: 11px;">(Sedang diajukan: ${formatCurrency(proposedAjuan)})</div>`
+              : ""
+          }
         </div>
       </div>
     `;
@@ -98,6 +107,7 @@ const renderActionButtons = (item: {
       item.activity === "active close" ||
       item.activity === "selesai")
   ) {
+    const proposedRefund = item.proposedRefund ?? 0;
     html += `
       <div class="d-flex align-items-center gap-2 p-2 bg-light rounded">
         <button class="btn btn-sm btn-soft-danger refund-btn flex-shrink-0"
@@ -108,6 +118,11 @@ const renderActionButtons = (item: {
         <div class="small flex-grow-1 text-truncate">
           <div class="text-muted">Sisa Dana</div>
           <div class="fw-semibold text-danger">${formatCurrency(item.sisaDana)}</div>
+          ${
+            proposedRefund > 0
+              ? `<div class="text-warning" style="font-size: 11px;">(Sedang diajukan: ${formatCurrency(proposedRefund)})</div>`
+              : ""
+          }
         </div>
       </div>
     `;
@@ -278,6 +293,8 @@ export function useProjectsTable() {
         acc: project.nominal_acc,
         sisaDana: project.sisa_dana_mitra,
         tfMitra: project.total_tf_ke_mitra,
+        proposedAjuan: project.ringkasan_ajuan?.total_proposed ?? 0,
+        proposedRefund: project.ringkasan_refund?.total_proposed ?? 0,
       }),
     ],
   });

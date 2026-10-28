@@ -10,171 +10,142 @@
     </div>
 
     <template v-else>
-      <UIComponentCard title="Detail User" class="mb-3">
-        <hr class="mb-3" />
-        <b-row class="g-3">
-          <b-col md="2">
-            <small class="text-muted d-block">User ID</small>
-            <span class="fs-13 fw-semibold">{{ userDetail.id ?? "-" }}</span>
-          </b-col>
-          <b-col md="2">
-            <small class="text-muted d-block">Nama</small>
-            <span class="fs-13 fw-semibold">{{ userDetail.name ?? "-" }}</span>
-          </b-col>
-          <b-col md="2">
-            <small class="text-muted d-block">Telepon</small>
-            <span class="fs-13 fw-semibold">{{ userDetail.phone ?? "-" }}</span>
-          </b-col>
-          <b-col md="2">
-            <small class="text-muted d-block">Role</small>
-            <span class="fs-13 fw-semibold">{{
-              userDetail.role?.name ?? "-"
-            }}</span>
-          </b-col>
-          <b-col md="2">
-            <small class="text-muted d-block">Panggilan Saat Ini</small>
-            <span class="fs-13 fw-semibold">{{
-              userDetail.donatur?.panggilan ?? "-"
-            }}</span>
-          </b-col>
-        </b-row>
+      <!-- Info User -->
+      <UIComponentCard class="mb-3">
+        <div class="d-flex align-items-center gap-3">
+          <div>
+            <div class="fw-semibold fs-6">{{ userDetail.name ?? "-" }}</div>
+            <div class="text-muted small">
+              {{ userDetail.phone ?? "-" }} &bull; ID: {{ userDetail.id }}
+            </div>
+          </div>
+          <span v-if="userDetail.role?.name" class="badge bg-primary ms-auto">
+            {{ userDetail.role.name }}
+          </span>
+        </div>
       </UIComponentCard>
 
-      <UIComponentCard title="Form Profiling" class="mb-3">
+      <!-- Form Profiling -->
+      <UIComponentCard title="Form Profiling">
         <hr class="mb-3" />
-        <b-row class="g-3">
+
+        <!-- Donatur Info -->
+        <p class="text-muted small fw-semibold mb-2">Informasi Donatur</p>
+        <b-row class="g-3 mb-3">
           <b-col md="6">
-            <b-form-group label="Panggilan" label-for="profiling-panggilan">
-              <b-form-input
-                id="profiling-panggilan"
-                v-model="formState.panggilan"
-                type="text"
-                placeholder="Contoh: Kak Ayu"
-              />
+            <b-form-group label="Panggilan" label-for="f-panggilan">
+              <b-form-input id="f-panggilan" v-model="form.panggilan" placeholder="Contoh: Kak Ayu" />
             </b-form-group>
           </b-col>
-
           <b-col md="6">
-            <b-form-group label="Nama Asli" label-for="profiling-real-name">
-              <b-form-input
-                id="profiling-real-name"
-                v-model="formState.real_name"
-                type="text"
-                placeholder="Contoh: Ayu Wulandari"
-              />
+            <b-form-group label="Nama Asli" label-for="f-real-name">
+              <b-form-input id="f-real-name" v-model="form.real_name" placeholder="Nama lengkap" />
             </b-form-group>
           </b-col>
-
-          <b-col md="4">
-            <b-form-group label="CS ID" label-for="profiling-cs-id">
-              <b-form-input
-                id="profiling-cs-id"
-                v-model.number="formState.cs_id"
-                type="number"
-                min="1"
-                placeholder="Contoh: 1"
-              />
+          <b-col md="6">
+            <b-form-group label="Soft" label-for="f-soft">
+              <b-form-input id="f-soft" v-model="form.soft" placeholder="Info soft" />
             </b-form-group>
           </b-col>
-
-          <b-col md="4">
-            <b-form-group label="Soft" label-for="profiling-soft">
-              <b-form-input
-                id="profiling-soft"
-                v-model="formState.soft"
-                type="text"
-                placeholder="Info soft"
-              />
+          <b-col md="6">
+            <b-form-group label="Soft Terakhir" label-for="f-soft-terakhir">
+              <b-form-input id="f-soft-terakhir" v-model="form.soft_terakhir" placeholder="Soft terakhir" />
             </b-form-group>
           </b-col>
-
-          <b-col md="4">
-            <b-form-group
-              label="Soft Terakhir"
-              label-for="profiling-soft-terakhir"
-            >
-              <b-form-input
-                id="profiling-soft-terakhir"
-                v-model="formState.soft_terakhir"
-                type="text"
-                placeholder="Info soft terakhir"
-              />
+          <b-col md="6">
+            <b-form-group label="Hard" label-for="f-hard">
+              <b-form-input id="f-hard" v-model="form.hard" placeholder="Info hard" />
             </b-form-group>
           </b-col>
-
-          <b-col md="4">
-            <b-form-group label="Hard" label-for="profiling-hard">
-              <b-form-input
-                id="profiling-hard"
-                v-model="formState.hard"
-                type="text"
-                placeholder="Info hard"
-              />
+          <b-col md="6">
+            <b-form-group label="Hard Terakhir" label-for="f-hard-terakhir">
+              <b-form-input id="f-hard-terakhir" v-model="form.hard_terakhir" placeholder="Hard terakhir" />
             </b-form-group>
           </b-col>
-
-          <b-col md="4">
-            <b-form-group
-              label="Hard Terakhir"
-              label-for="profiling-hard-terakhir"
-            >
-              <b-form-input
-                id="profiling-hard-terakhir"
-                v-model="formState.hard_terakhir"
-                type="text"
-                placeholder="Info hard terakhir"
-              />
+          <b-col md="6">
+            <b-form-group label="Exis" label-for="f-exis">
+              <b-form-input id="f-exis" v-model="form.exis" placeholder="Info exis" />
             </b-form-group>
           </b-col>
-
-          <b-col md="4">
-            <b-form-group label="Exis" label-for="profiling-exis">
-              <b-form-input
-                id="profiling-exis"
-                v-model="formState.exis"
-                type="text"
-                placeholder="Info exis"
-              />
+          <b-col md="6">
+            <b-form-group label="Is Bill Official" label-for="f-is-bill">
+              <b-form-checkbox id="f-is-bill" v-model="form.is_bill_official" switch>
+                {{ form.is_bill_official ? "Ya" : "Tidak" }}
+              </b-form-checkbox>
             </b-form-group>
-          </b-col>
-
-          <!-- <b-col md="12">
-            <b-form-group
-              label="JSON Info (Array JSON)"
-              label-for="profiling-json-info"
-            >
-              <b-form-textarea
-                id="profiling-json-info"
-                v-model="jsonInfoText"
-                rows="3"
-                placeholder="Contoh: [0] atau [1,2,3]"
-              />
-            </b-form-group>
-          </b-col> -->
-
-          <b-col cols="12">
-            <div class="d-flex justify-content-end gap-2">
-              <b-button variant="outline-secondary" size="sm" @click="goBack">
-                <i class="bx bx-arrow-back me-1"></i>Kembali
-              </b-button>
-              <b-button
-                variant="outline-secondary"
-                :disabled="isPending"
-                @click="resetForm"
-              >
-                Reset
-              </b-button>
-              <b-button
-                variant="primary"
-                :disabled="isPending"
-                @click="handleSubmit"
-              >
-                <b-spinner v-if="isPending" small class="me-1" />
-                Simpan Profiling
-              </b-button>
-            </div>
           </b-col>
         </b-row>
+
+        <hr class="mb-3" />
+
+        <!-- CRM Info -->
+        <p class="text-muted small fw-semibold mb-2">Informasi CRM</p>
+        <b-row class="g-3 mb-3">
+          <b-col md="6">
+            <b-form-group label="Level" label-for="f-level">
+              <b-form-select id="f-level" v-model="form.level" :options="levelOptions" />
+            </b-form-group>
+          </b-col>
+          <b-col md="6">
+            <b-form-group label="Cycle Status" label-for="f-cycle-status">
+              <b-form-select id="f-cycle-status" v-model="form.cycle_status" :options="cycleStatusOptions" />
+            </b-form-group>
+          </b-col>
+          <b-col md="6">
+            <b-form-group label="Kota" label-for="f-kota">
+              <b-form-input id="f-kota" v-model="form.kota" placeholder="Kota domisili" />
+            </b-form-group>
+          </b-col>
+          <b-col md="6">
+            <b-form-group label="Pekerjaan" label-for="f-pekerjaan">
+              <b-form-input id="f-pekerjaan" v-model="form.pekerjaan" placeholder="Pekerjaan" />
+            </b-form-group>
+          </b-col>
+          <b-col md="6">
+            <b-form-group label="Komunitas" label-for="f-komunitas">
+              <b-form-input id="f-komunitas" v-model="form.komunitas" placeholder="Komunitas" />
+            </b-form-group>
+          </b-col>
+          <b-col md="6">
+            <b-form-group label="Usia Range" label-for="f-usia">
+              <b-form-select id="f-usia" v-model="form.usia_range" :options="rangeAgeOptions" />
+            </b-form-group>
+          </b-col>
+          <b-col md="6">
+            <b-form-group label="Poin" label-for="f-poin">
+              <b-form-input id="f-poin" v-model.number="form.poin" type="number" placeholder="0" />
+            </b-form-group>
+          </b-col>
+          <b-col md="6">
+            <b-form-group label="Hari Tidak Aktif" label-for="f-hari-tidak-aktif">
+              <b-form-input id="f-hari-tidak-aktif" v-model.number="form.hari_tidak_aktif" type="number" placeholder="0" />
+            </b-form-group>
+          </b-col>
+          <!-- <b-col cols="12">
+            <b-form-group label="Keterangan" label-for="f-keterangan">
+              <b-form-textarea id="f-keterangan" v-model="form.keterangan" rows="2" placeholder="Keterangan tambahan" />
+            </b-form-group>
+          </b-col> -->
+          <b-col cols="12">
+            <b-form-group label="Note" label-for="f-note">
+              <b-form-textarea id="f-note" v-model="form.note" rows="2" placeholder="Note internal" />
+            </b-form-group>
+          </b-col>
+        </b-row>
+
+        <!-- Actions -->
+        <div class="d-flex justify-content-end gap-2 mt-2">
+          <b-button variant="outline-secondary" size="sm" @click="goBack">
+            <i class="bx bx-arrow-back me-1" />Kembali
+          </b-button>
+          <b-button variant="outline-secondary" size="sm" :disabled="isPending" @click="resetForm">
+            Reset
+          </b-button>
+          <b-button variant="primary" size="sm" :disabled="isPending || !isDirty" @click="handleSubmit">
+            <b-spinner v-if="isPending" small class="me-1" />
+            Simpan
+          </b-button>
+        </div>
       </UIComponentCard>
     </template>
   </PipelineLayout>
@@ -185,10 +156,9 @@ import { computed, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { toast as showToast } from "vue3-toastify";
-import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
-import { getUserDetailById, updateUserProfiling } from "@/services/userService";
 import PipelineLayout from "@/components/PipelineLayout.vue";
+import {  getUserProfileById, updateCRMUserProfiling } from "@/services/userService";
 
 const route = useRoute();
 const router = useRouter();
@@ -197,122 +167,154 @@ const queryClient = useQueryClient();
 const userId = computed(() => {
   const routeId = Number(route.params.id);
   if (routeId > 0) return routeId;
-
   const queryId = Number(route.query.user_id);
   if (queryId > 0) return queryId;
-
   return 0;
 });
 
-const formState = reactive({
-  cs_id: null as number | null,
-  exis: "",
-  hard: "",
-  hard_terakhir: "",
+// Field options
+const levelOptions = ["New", "Regular", "Loyal", "VIP", "VVIP"];
+const cycleStatusOptions = ["Aktif", "Tidak Aktif", "Pasif"];
+const rangeAgeOptions = [
+  ">15",
+  "15-20",
+  "21-30",
+  "31-40",
+  "41-50",
+  "51-60",
+  ">60",
+];
+
+// Form state (flat - all editable fields)
+const form = reactive({
+  // donatur fields
+  id: null as number | null,
   panggilan: "",
   real_name: "",
   soft: "",
   soft_terakhir: "",
+  hard: "",
+  hard_terakhir: "",
+  exis: "",
+  is_bill_official: false,
+  // crm top-level fields
+  level: "New" as string,
+  cycle_status: "Aktif" as string,
+  kota: "",
+  pekerjaan: "",
+  komunitas: "",
+  usia_range: "",
+  poin: 0,
+  hari_tidak_aktif: 0,
+  // keterangan: "",
+  note: "",
 });
-const jsonInfoText = ref("[]");
+
+// Snapshot to detect dirty state
+const snapshot = ref<typeof form>({ ...form });
+
+const isDirty = computed(() => {
+  return (Object.keys(form) as Array<keyof typeof form>).some(
+    (key) => form[key] !== snapshot.value[key],
+  );
+});
 
 const { data: userDetail, isLoading: isLoadingDetail } = useQuery({
   queryKey: computed(() => ["user-detail-profiling", userId.value]),
-  queryFn: () => getUserDetailById(userId.value),
+  queryFn: () => getUserProfileById(userId.value),
   enabled: computed(() => userId.value > 0),
 });
 
-const fillFormFromDetail = () => {
+const fillForm = () => {
   const d = userDetail.value?.donatur ?? {};
+  const u = userDetail.value ?? {};
 
-  formState.cs_id = d.cs_id ?? null;
-  formState.exis = d.exis ?? "";
-  formState.hard = d.hard ?? "";
-  formState.hard_terakhir = d.hard_terakhir ?? "";
-  formState.panggilan = d.panggilan ?? "";
-  formState.real_name = d.real_name ?? userDetail.value?.name ?? "";
-  formState.soft = d.soft ?? "";
-  formState.soft_terakhir = d.soft_terakhir ?? "";
+  form.id = d.user_id ?? null;
+  form.panggilan = d.panggilan ?? "";
+  form.real_name = d.real_name ?? u.name ?? "";
+  form.soft = d.soft ?? "";
+  form.soft_terakhir = d.soft_terakhir ?? "";
+  form.hard = d.hard ?? "";
+  form.hard_terakhir = d.hard_terakhir ?? "";
+  form.exis = d.exis ?? "";
+  form.is_bill_official = d.is_bill_official ?? false;
 
-  const rawInfo = Array.isArray(d.json_info) ? d.json_info : [];
-  jsonInfoText.value = JSON.stringify(rawInfo);
+  form.level = u.level ?? "New";
+  form.cycle_status = u.cycle_status ?? "Aktif";
+  form.kota = u.kota ?? "";
+  form.pekerjaan = u.pekerjaan ?? "";
+  form.komunitas = u.komunitas ?? "";
+  form.usia_range = u.usia_range ?? "";
+  form.poin = u.poin ?? 0;
+  form.hari_tidak_aktif = u.hari_tidak_aktif ?? 0;
+  // form.keterangan = u.keterangan ?? "";
+  form.note = u.note ?? "";
+
+  snapshot.value = { ...form };
 };
 
 watch(userDetail, () => {
-  if (!userDetail.value) return;
-  fillFormFromDetail();
+  if (userDetail.value) fillForm();
 });
 
-const parseJsonInfo = () => {
-  if (!jsonInfoText.value.trim()) return [];
+// Build payload with only changed fields
+const buildPayload = () => {
+  const payload: Record<string, any> = {};
 
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(jsonInfoText.value);
-  } catch {
-    throw new Error("Format JSON Info tidak valid. Contoh yang benar: [0,1,2]");
+  const donaturFields: Array<keyof typeof form> = [
+    "panggilan", "real_name", "soft", "soft_terakhir",
+    "hard", "hard_terakhir", "exis", "is_bill_official",
+  ];
+  const donaturPayload: Record<string, any> = {};
+  for (const key of donaturFields) {
+    if (form[key] !== snapshot.value[key]) {
+      donaturPayload[key] = form[key];
+    }
+  }
+  if (Object.keys(donaturPayload).length > 0) {
+    payload.donatur = donaturPayload;
   }
 
-  if (!Array.isArray(parsed)) {
-    throw new Error("JSON Info harus berupa array.");
+  const topFields: Array<keyof typeof form> = [
+    "level", "cycle_status", "kota", "pekerjaan",
+    "komunitas", "usia_range", "poin", "hari_tidak_aktif", "note",
+  ];
+  for (const key of topFields) {
+    if (form[key] !== snapshot.value[key]) {
+      payload[key] = form[key];
+    }
   }
 
-  return parsed;
+  return payload;
 };
 
 const { mutate, isPending } = useMutation({
-  mutationFn: async () => {
-    const payload = {
-      cs_id: formState.cs_id,
-      exis: formState.exis,
-      hard: formState.hard,
-      hard_terakhir: formState.hard_terakhir,
-      json_info: parseJsonInfo(),
-      panggilan: formState.panggilan,
-      real_name: formState.real_name,
-      soft: formState.soft,
-      soft_terakhir: formState.soft_terakhir,
-    };
-
-    return updateUserProfiling(userId.value, payload);
+  mutationFn: () => {
+    const payload = buildPayload();
+    return updateCRMUserProfiling(userId.value, payload);
   },
   onSuccess: () => {
-    queryClient.invalidateQueries({
-      queryKey: ["user-detail-profiling", userId.value],
-    });
+    snapshot.value = { ...form };
+    queryClient.invalidateQueries({ queryKey: ["user-detail-profiling", userId.value] });
     queryClient.invalidateQueries({ queryKey: ["user-detail", userId.value] });
-    queryClient.invalidateQueries({ queryKey: ["users", userId.value] });
-    showToast("Profiling user berhasil disimpan", {
-      type: "success",
-      position: "top-center",
-    });
+    showToast("Profiling berhasil disimpan", { type: "success", position: "top-center" });
   },
   onError: (error: any) => {
     const msg =
-      error?.response?.data?.message ??
-      error?.message ??
-      "Gagal menyimpan profiling user";
+      error?.response?.data?.message ?? error?.message ?? "Gagal menyimpan profiling";
     showToast(msg, { type: "error", position: "top-center" });
   },
 });
 
 const handleSubmit = () => {
   if (!userId.value) {
-    showToast("ID user tidak valid", {
-      type: "warning",
-      position: "top-center",
-    });
+    showToast("ID user tidak valid", { type: "warning", position: "top-center" });
     return;
   }
-
   mutate();
 };
 
-const resetForm = () => {
-  fillFormFromDetail();
-};
+const resetForm = () => fillForm();
 
-const goBack = () => {
-  router.back();
-};
+const goBack = () => router.back();
 </script>

@@ -408,7 +408,7 @@
                       </b-col>
                       <b-col md="3">
                         <label class="form-label small">Source From</label>
-                        <b-form-select v-model="attr.source_from" size="sm">
+                        <b-form-select disabled v-model="attr.source_from" size="sm">
                           <option value="url">URL</option>
                           <option value="upload">Upload</option>
                         </b-form-select>
@@ -485,10 +485,6 @@ const showToast = (message: string, options: ToastOptions) =>
   toast(message, options);
 const route = useRoute();
 const queryClient = useQueryClient();
-
-const STORAGE_BASE =
-  (import.meta.env.VITE_API_BASE_URL as string).replace("/api/v1", "") +
-  "/storage/";
 
 const eventId = computed(() => Number(route.params.id));
 
@@ -650,7 +646,7 @@ watch(
     formState.description = data.description ?? "";
     regOnlyBool.value = !!data.reg_only;
     existingImageUrl.value = data.image_url ? `${data.image_url}` : null;
-    formState.event_attributes = (data.attributes ?? []).map((attr: any) => ({
+    formState.event_attributes = (data.event_attributes ?? []).map((attr: any) => ({
       title: attr.title ?? "",
       type: attr.type ?? "text",
       source: attr.source ?? "",

@@ -183,12 +183,13 @@ export function useTransactionTable() {
               </button>
               `: ""}
               
-              ${isCanDelete ? `<button class="btn btn-sm btn-soft-danger delete-btn"
-                data-action="delete" data-id="${item.id}" title="Hapus">
-                <i class="bx bx-trash fs-16"></i>
-              </button>`: ""}
-
-
+              ${isCanEdit && item.status !== "Canceled" ? `
+              <button class="btn btn-sm btn-soft-danger cancel-btn"
+                data-action="cancel" data-id="${item.id}" title="Batalkan">
+                <i class="bx bx-x-circle fs-16"></i>
+              </button>
+              `: ""}
+              
               ${item.status === "Pending"
                   ? `<button class="btn btn-sm btn-soft-success verifikasi-btn"
                 data-action="verifikasi" data-id="${item.id}" title="verifikasi">

@@ -442,7 +442,10 @@ import { getTransactionUnclaimed } from "@/services/programService";
 import {
   getTransactionById,
   verifTransaction,
+  updateTransaction,
 } from "@/services/transactionService";
+import Swal from "sweetalert2/dist/sweetalert2.js";
+import "sweetalert2/dist/sweetalert2.css";
 import { formatCurrency } from "@/helpers/format";
 
 // --- Detail Offcanvas ---
@@ -660,11 +663,49 @@ const clearFilters = () => {
   resetPage();
 };
 
+const handleCancelTransaction = (id: number) => {
+  Swal.fire({
+    title: "Batalkan Transaksi?",
+    text: "Status transaksi ini akan diubah menjadi Canceled!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Ya, Batalkan!",
+    cancelButtonText: "Tidak",
+    confirmButtonColor: "#ef5f5f",
+    cancelButtonColor: "#6c757d",
+  }).then(async (result: any) => {
+    if (result.isConfirmed) {
+      try {
+        await updateTransaction(id, { status: "Canceled" });
+        toast.success("Transaksi berhasil dibatalkan.");
+        await queryClient.invalidateQueries({
+          queryKey: ["transactions"],
+          exact: false,
+        });
+        Swal.fire({
+          title: "Dibatalkan!",
+          text: "Status transaksi berhasil diubah menjadi Canceled.",
+          icon: "success",
+          confirmButtonColor: "#0ab39c",
+        });
+      } catch (err: any) {
+        console.error("Gagal membatalkan transaksi:", err);
+        toast.error(
+          err?.response?.data?.message || "Gagal membatalkan transaksi.",
+        );
+      }
+    }
+  });
+};
+
 const handleGlobalClick = (event: Event) => {
   const target = event.target as HTMLElement;
 
   const detailBtn = target.closest<HTMLElement>(
     '#table-gridjs .detail-btn[data-action="detail"]',
+  );
+  const cancelBtn = target.closest<HTMLElement>(
+    '#table-gridjs .cancel-btn[data-action="cancel"]',
   );
   const editBtn = target.closest<HTMLElement>(
     '#table-gridjs .edit-btn[data-action="edit"]',
@@ -683,6 +724,13 @@ const handleGlobalClick = (event: Event) => {
     event.preventDefault();
     const id = detailBtn.getAttribute("data-id");
     if (id) openDetail(Number(id));
+    return;
+  }
+
+  if (cancelBtn) {
+    event.preventDefault();
+    const id = cancelBtn.getAttribute("data-id");
+    if (id) handleCancelTransaction(Number(id));
     return;
   }
 
