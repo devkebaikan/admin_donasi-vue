@@ -317,7 +317,7 @@ import { formatDateTime } from "@/helpers/format";
 import ChoicesSelect from "@/components/ChoicesSelect.vue";
 import { hasPermission } from "@/helpers/permission";
 
-const isCanCreate = hasPermission("user:create");
+const isCanCreate = hasPermission("user:assign-role");
 
 const {
   tableOptions,

@@ -4,7 +4,7 @@ import { useDataTable } from "@/composables/useDataTable";
 import { getUsers, deleteUser } from "@/services/userService";
 import { hasPermission } from "@/helpers/permission";
 
-const isCanEdit = hasPermission("user:update");
+const isCanEdit = hasPermission("user:assign-role");
 
 export function useUsersTable() {
   const selectedRoleId = ref<string>("");
