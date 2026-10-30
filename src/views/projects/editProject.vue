@@ -155,9 +155,9 @@
                   Nominal, waktu, dan keterangan project
                 </p>
 
-                <b-row class="g-3">
+                <b-row class="g-3" >
                   <!-- Nominal Ajuan -->
-                  <b-col md="6">
+                  <b-col md="6" v-if="isCanManageProject">
                     <b-form-group
                       label="Nominal Ajuan"
                       label-for="nominal-ajuan"
@@ -178,7 +178,7 @@
                   </b-col>
 
                   <!-- Nominal Acc -->
-                  <b-col md="6">
+                  <b-col md="6" v-if="isCanManageProject">
                     <b-form-group label="Nominal Acc" label-for="nominal-acc">
                       <CurrencyInput
                         id="nominal-acc"
@@ -518,10 +518,13 @@ import "vue3-toastify/dist/index.css";
 import { getProjectById, updateProject } from "@/services/projectService";
 import { getAllPrograms } from "@/services/programService";
 import { toast, type ToastOptions } from "vue3-toastify";
+import { hasPermission } from "@/helpers/permission";
 
 const route = useRoute();
 const router = useRouter();
 const projectId = computed(() => Number(route.params.id));
+
+const isCanManageProject = hasPermission('project:manage')
 
 const showToast = (message: string, options: ToastOptions) =>
   toast(message, options);

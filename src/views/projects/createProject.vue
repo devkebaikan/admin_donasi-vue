@@ -199,7 +199,7 @@
 
                 <b-row class="g-3">
                   <!-- Nominal Ajuan -->
-                  <b-col md="6">
+                  <b-col md="6" v-if="isCanManageProject">
                     <b-form-group
                       label="Nominal Ajuan"
                       label-for="nominal-ajuan"
@@ -220,7 +220,7 @@
                   </b-col>
 
                   <!-- Nominal Acc -->
-                  <b-col md="6">
+                  <b-col md="6" v-if="isCanManageProject">
                     <b-form-group label="Nominal Acc" label-for="nominal-acc">
                       <CurrencyInput
                         id="nominal-acc"
@@ -505,6 +505,9 @@ import { getAllPrograms } from "@/services/programService";
 import { getAllMitra } from "@/services/mitraService";
 import { toast, type ToastOptions } from "vue3-toastify";
 import { useSearchSelect } from "@/composables/useSearchSelect";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanManageProject = hasPermission('project:manage')
 
 const showToast = (message: string, options: ToastOptions) =>
   toast(message, options);

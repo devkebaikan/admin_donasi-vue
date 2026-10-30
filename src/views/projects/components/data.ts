@@ -74,7 +74,7 @@ const renderActionButtons = (item: {
           <div class="fw-semibold text-primary">${formatCurrency(belumCair)}</div>
           ${
             proposedAjuan > 0
-              ? `<div class="text-warning" style="font-size: 11px;">(Sedang diajukan: ${formatCurrency(proposedAjuan)})</div>`
+              ? `<div class="text-secondary" style="font-size: 11px;">(Sedang diajukan: ${formatCurrency(proposedAjuan)})</div>`
               : ""
           }
         </div>
@@ -120,7 +120,7 @@ const renderActionButtons = (item: {
           <div class="fw-semibold text-danger">${formatCurrency(item.sisaDana)}</div>
           ${
             proposedRefund > 0
-              ? `<div class="text-warning" style="font-size: 11px;">(Sedang diajukan: ${formatCurrency(proposedRefund)})</div>`
+              ? `<div class="text-secondary" style="font-size: 11px;">(Sedang diajukan: ${formatCurrency(proposedRefund)})</div>`
               : ""
           }
         </div>

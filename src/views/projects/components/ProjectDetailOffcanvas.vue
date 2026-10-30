@@ -64,6 +64,7 @@
       <div class="d-flex gap-2 mb-3">
         <b-button
           variant="soft-primary"
+          v-if="isCanEdit"
           size="sm"
           class="flex-fill"
           @click="router.push(`/projects/${projectDetail.id}/edit`)"
@@ -468,6 +469,9 @@ import { useQuery } from "@tanstack/vue-query";
 import { getProjectById } from "@/services/projectService";
 import { formatCurrency, formatDate, formatDateTime } from "@/helpers/format";
 import router from "@/router";
+import { hasPermission } from "@/helpers/permission";
+
+const isCanEdit = hasPermission("project:update");
 
 const props = withDefaults(
   defineProps<{

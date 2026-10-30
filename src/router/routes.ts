@@ -120,6 +120,40 @@ const programRoutes = [
   },
 ];
 
+// Influencer Routes
+const influencerRoutes = [
+  {
+    path: "/influencers",
+    name: "influencers.list",
+    meta: {
+      title: setTitle("Influencer"),
+      authRequired: true,
+      middleware: [auth, menuAccess],
+    },
+    component: () => import("@/views/influencer/listInfluencer.vue"),
+  },
+  {
+    path: "/influencers/create",
+    name: "influencers.create",
+    meta: {
+      title: setTitle("Tambah Influencer"),
+      authRequired: true,
+      middleware: [auth, menuAccess, permission("influencer:create")],
+    },
+    component: () => import("@/views/influencer/createInfluencer.vue"),
+  },
+  {
+    path: "/influencers/:id/edit",
+    name: "influencers.edit",
+    meta: {
+      title: setTitle("Edit Influencer"),
+      authRequired: true,
+      middleware: [auth, menuAccess, permission("influencer:update")],
+    },
+    component: () => import("@/views/influencer/editInfluencer.vue"),
+  },
+];
+
 // Mitra Routes
 const mitraRoutes = [
   {
@@ -2093,6 +2127,7 @@ export const allRoutes = [
   ...programRoutes,
   ...projectRoutes,
   ...mitraRoutes,
+  ...influencerRoutes,
   ...categoryRoutes,
   ...percentageRoutes,
   ...defaultNominalRoutes,

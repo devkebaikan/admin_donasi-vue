@@ -182,6 +182,12 @@ export const MENU_ITEMS: MenuItemType[] = [
     label: "Mitra",
     route: { name: "mitra.list" },
   },
+  {
+    key: "influencers",
+    icon: "solar:users-group-two-rounded-broken",
+    label: "Influencers",
+    route: { name: "influencers.list" },
+  },
 
   {
     key: "blogs",
