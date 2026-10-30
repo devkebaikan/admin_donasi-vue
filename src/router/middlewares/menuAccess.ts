@@ -16,7 +16,8 @@ export const ALWAYS_ACCESSIBLE: string[] = [
   "/image/:id/edit",
   "/iniaja",
   "/crm/profiling/:id",
-  "/influencers"
+  "/influencers/create",
+  "/influencers/:id/edit"
 ];
 
 // Helper untuk mencocokkan dynamic path pattern (contoh: :id, :slug, atau wildcard *)

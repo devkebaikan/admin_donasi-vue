@@ -524,7 +524,7 @@ const route = useRoute();
 const router = useRouter();
 const projectId = computed(() => Number(route.params.id));
 
-const isCanManageProject = hasPermission('project:manage')
+const isCanManageProject = hasPermission('transaction:approve')
 
 const showToast = (message: string, options: ToastOptions) =>
   toast(message, options);

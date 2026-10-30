@@ -143,10 +143,10 @@ import InfluencerDetailOffcanvas from "./components/InfluencerDetailOffcanvas.vu
 import { useInfluencerTable } from "./components/data";
 import { useListStatePreserve } from "@/composables/useListStatePreserve";
 import { useOffcanvasStatePreserve } from "@/composables/useOffcanvasStatePreserve";
-import { hasPermission } from "@/helpers/permission";
+// import { hasPermission } from "@/helpers/permission";
 import router from "@/router";
 
-const isCanCreate = hasPermission("influencer:create");
+const isCanCreate = true;
 
 const {
   tableOptions,

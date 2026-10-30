@@ -507,7 +507,7 @@ import { toast, type ToastOptions } from "vue3-toastify";
 import { useSearchSelect } from "@/composables/useSearchSelect";
 import { hasPermission } from "@/helpers/permission";
 
-const isCanManageProject = hasPermission('project:manage')
+const isCanManageProject = hasPermission('transaction:approve')
 
 const showToast = (message: string, options: ToastOptions) =>
   toast(message, options);

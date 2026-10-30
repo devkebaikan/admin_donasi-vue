@@ -92,10 +92,10 @@
           </b-col>
           <b-col cols="6">
             <div class="bg-light rounded p-2">
-              <small class="text-muted d-block">Mitra IDs</small>
-              <span class="fw-semibold small">{{
-                reportDetail.mitra_ids || "-"
-              }}</span>
+              <small class="text-muted d-block">Link</small>
+              <a :href="`https://beramalbersama.com/donasi/report/detail/${reportDetail.id}`" target="_blank" class="fw-semibold small">{{
+                "https://beramalbersama.com/donasi/report/detail/" + reportDetail.id || "-"
+              }}</a>
             </div>
           </b-col>
         </b-row>
@@ -122,35 +122,17 @@
           </b-col>
           <b-col cols="12">
             <div class="bg-light rounded p-2">
-              <small class="text-muted d-block">WhatsApp Caption</small>
-              <span class="fw-semibold small" v-if="reportDetail.wa_caption">
-                {{ reportDetail.wa_caption.substring(0, 100)
-                }}{{ reportDetail.wa_caption.length > 100 ? "..." : "" }}
-              </span>
+              <small class="text-muted d-block mb-1">Deskripsi Report / WhatsApp Caption</small>
+              <div
+                v-if="reportDetail.wa_caption"
+                class="small text-break rounded border"
+                v-html="reportDetail.wa_caption"
+              ></div>
               <span v-else class="text-muted small">-</span>
             </div>
           </b-col>
         </b-row>
 
-        <hr class="my-3" />
-        <div class="d-flex gap-3 text-muted small">
-          <div>
-            <span class="d-block">ID</span
-            ><span class="fw-semibold">{{ reportDetail.id }}</span>
-          </div>
-          <div>
-            <span class="d-block">Dibuat</span
-            ><span class="fw-semibold">{{
-              formatDate(reportDetail.created_at)
-            }}</span>
-          </div>
-          <div>
-            <span class="d-block">Diperbarui</span
-            ><span class="fw-semibold">{{
-              formatDate(reportDetail.updated_at)
-            }}</span>
-          </div>
-        </div>
       </div>
     </b-offcanvas>
 

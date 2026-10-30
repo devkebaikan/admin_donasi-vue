@@ -211,14 +211,15 @@
               </b-form-group>
             </b-col> -->
 
-            <!-- WhatsApp Caption -->
+            <!-- WhatsApp Caption / Deskripsi Report -->
             <b-col cols="12">
               <b-form-group label="Deskripsi Report" label-for="wa-caption">
-                <b-form-textarea
+                <CustomQuillEditor
                   id="wa-caption"
-                  v-model="formState.wa_caption"
+                  storage="report-content"
+                  :style="{ height: '260px' }"
                   placeholder="Deskripsi report..."
-                  rows="4"
+                  v-model:content="formState.wa_caption"
                 />
                 <small class="text-muted">Opsional</small>
               </b-form-group>

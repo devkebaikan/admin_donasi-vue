@@ -138,7 +138,7 @@ const influencerRoutes = [
     meta: {
       title: setTitle("Tambah Influencer"),
       authRequired: true,
-      middleware: [auth, menuAccess, permission("influencer:create")],
+      middleware: [auth, menuAccess],
     },
     component: () => import("@/views/influencer/createInfluencer.vue"),
   },
@@ -148,7 +148,7 @@ const influencerRoutes = [
     meta: {
       title: setTitle("Edit Influencer"),
       authRequired: true,
-      middleware: [auth, menuAccess, permission("influencer:update")],
+      middleware: [auth, menuAccess],
     },
     component: () => import("@/views/influencer/editInfluencer.vue"),
   },

@@ -1170,7 +1170,8 @@ const handleSendReportFu = (report: Record<string, any>) => {
   pendingFuId.value = null;
   selectedChatTemplateId.value = null;
 
-  selectedChatInitialMessage.value = report.wa_caption?.trim() ?? "";
+  const rawCaption = report.wa_caption?.trim() ?? "";
+  selectedChatInitialMessage.value = htmlToPlainText(rawCaption);
   selectedChatImageUrl.value = report.thumbnail_url || null;
 
   activeTab.value = "chat";

@@ -6,10 +6,10 @@ import {
   deleteInfluencer,
   type InfluencerProfile,
 } from "@/services/influencerService";
-import { hasPermission } from "@/helpers/permission";
+// import { hasPermission } from "@/helpers/permission";
 
-const isCanEdit = hasPermission("influencer:update");
-const isCanDelete = hasPermission("influencer:delete");
+const isCanEdit = true;
+const isCanDelete = true;
 
 export function useInfluencerTable() {
   const selectedStatus = ref<string>("");
