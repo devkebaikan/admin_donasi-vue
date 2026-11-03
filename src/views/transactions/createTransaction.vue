@@ -5,401 +5,48 @@
     <b-row>
       <b-col cols="12" lg="12">
         <form @submit.prevent="handleSubmit">
-          <!-- Informasi Detail -->
-          <UIComponentCard title="Informasi Detail" class="mb-3">
-            <b-row class="g-3">
-              <b-col cols="12" md="3">
-                <label class="form-label fw-semibold required">Tanggal</label>
-                <FlatPicker
-                  id="tx-date"
-                  v-model="formState.date"
-                  placeholder="Pilih tanggal"
-                  :options="{ dateFormat: 'Y-m-d' }"
-                />
-                <div v-if="v$.date.$error" class="invalid-feedback d-block">
-                  {{ v$.date.$errors[0]?.$message }}
-                </div>
-              </b-col>
+          <!-- 1. Informasi Detail (Tanggal, Waktu, Status, Source, User, Doa) -->
+          <TransactionInfoSection
+            :form-state="formState"
+            :v$="v$"
+            :user-display="userDisplay"
+            :user-id-error="userIdError"
+            @update:field="handleUpdateField"
+          />
 
-              <b-col cols="12" md="3">
-                <label class="form-label fw-semibold required">Waktu</label>
-                <FlatPicker
-                  id="tx-time"
-                  v-model="formState.time"
-                  placeholder="Pilih waktu"
-                  :options="{
-                    enableTime: true,
-                    noCalendar: true,
-                    dateFormat: 'H:i:S',
-                    time_24hr: true,
-                  }"
-                />
-                <div v-if="v$.time.$error" class="invalid-feedback d-block">
-                  {{ v$.time.$errors[0]?.$message }}
-                </div>
-              </b-col>
+          <!-- 2. Item Detail Transaksi (Donation / Event / Zakat / Qurban) -->
+          <TransactionItemsSection
+            :active-type="activeType"
+            :items="items"
+            :program-list="programList"
+            :is-program-loading="isProgramLoading"
+            :event-list="eventList"
+            :is-event-loading="isEventLoading"
+            :event-raw-list="eventRawList"
+            :zakat-program-list="zakatProgramList"
+            :is-program-zakat-loading="isProgramZakatLoading"
+            :zakat-type-list="zakatTypeList"
+            :item-error="itemError"
+            @add-item="addItem"
+            @remove-item="removeItem"
+          />
 
-              <b-col cols="12" md="3">
-                <label class="form-label fw-semibold required">Status</label>
-                <!-- disabled -->
-                <b-form-select
-                  v-model="formState.status"
-                  :state="v$.status.$dirty ? !v$.status.$error : null"
-                >
-                  <b-form-select-option value="Paid">Paid</b-form-select-option>
-                  <b-form-select-option value="Pending"
-                    >Pending</b-form-select-option
-                  >
-                </b-form-select>
-                <div v-if="v$.status.$error" class="invalid-feedback d-block">
-                  {{ v$.status.$errors[0]?.$message }}
-                </div>
-              </b-col>
-
-              <b-col cols="12" md="3">
-                <label class="form-label fw-semibold">Source</label>
-                <b-form-input
-                  v-model="formState.source"
-                  placeholder="CRM, direct, ..."
-                />
-              </b-col>
-
-              <b-col cols="12" md="4">
-                <label class="form-label fw-semibold required">User</label>
-                <b-form-input :model-value="userDisplay" disabled />
-                <div v-if="userIdError" class="invalid-feedback d-block">
-                  {{ userIdError }}
-                </div>
-              </b-col>
-
-              <b-col cols="12" :md="8">
-                <label class="form-label fw-semibold">Doa</label>
-                <b-form-input
-                  v-model="formState.doa"
-                  placeholder="Permohonan doa dari pendonor..."
-                />
-              </b-col>
-            </b-row>
-          </UIComponentCard>
-
-          <!-- Item Detail Transaksi -->
-          <UIComponentCard title="Item Detail Transaksi" class="mb-3">
-            <div
-              v-for="(item, idx) in items"
-              :key="idx"
-              class="border rounded p-3 mb-3"
-            >
-              <div
-                class="d-flex justify-content-between align-items-center mb-3"
-              >
-                <strong class="text-muted small text-uppercase"
-                  >Item #{{ idx + 1 }}</strong
-                >
-                <b-button
-                  v-if="items.length > 1"
-                  variant="outline-danger"
-                  size="sm"
-                  @click="removeItem(idx)"
-                >
-                  <i class="bx bx-trash"></i>
-                </b-button>
-              </div>
-
-              <b-row class="g-3" v-if="activeType === 'donation'">
-                <b-col cols="12" md="6">
-                  <label class="form-label fw-semibold required">Program</label>
-                  <ChoicesSelect
-                    :id="`donation-program-id-${idx}`"
-                    :modelValue="String(item.program_id || 0)"
-                    @update:modelValue="
-                      (val: string) => {
-                        item.program_id = val === '0' ? null : Number(val);
-                      }
-                    "
-                    :options="programList"
-                    :isLoading="isProgramLoading"
-                    :key="programList.length"
-                  />
-                </b-col>
-
-                <b-col cols="12" md="3">
-                  <label class="form-label fw-semibold required"
-                    >Gross Nominal</label
-                  >
-                  <CurrencyInput
-                    v-model.number="item.gross_nominal"
-                    placeholder="0"
-                    :state="null"
-                  />
-                </b-col>
-
-                <b-col cols="12" md="3">
-                  <label class="form-label fw-semibold">Diskon</label>
-                  <CurrencyInput
-                    v-model.number="item.discount"
-                    placeholder="0"
-                    :state="null"
-                  />
-                </b-col>
-
-                <!-- <b-col cols="12">
-                  <div class="bg-light rounded p-2 d-inline-block">
-                    <small class="text-muted d-block">Total</small>
-                    <span class="fw-semibold">{{
-                      formatCurrency(donationItemTotal(item))
-                    }}</span>
-                  </div>
-                </b-col> -->
-              </b-row>
-
-              <b-row class="g-3" v-else-if="activeType === 'event'">
-                <b-col cols="12" md="7">
-                  <label class="form-label fw-semibold required">Event</label>
-                  <ChoicesSelect
-                    :id="`event-id-${idx}`"
-                    :modelValue="String(item.event_id || 0)"
-                    @update:modelValue="
-                      (val: string) => {
-                        item.event_id = val === '0' ? null : Number(val);
-                      }
-                    "
-                    :options="eventList"
-                    :isLoading="isEventLoading"
-                    :key="eventList.length"
-                  />
-                </b-col>
-
-                <b-col cols="12" md="3">
-                  <label class="form-label fw-semibold required">Qty</label>
-                  <CurrencyInput
-                    v-model.number="item.quantity"
-                    placeholder="1"
-                    :state="null"
-                  />
-                </b-col>
-
-                <b-col cols="12" v-if="eventOf(item)">
-                  <div class="bg-light rounded p-2 d-inline-block">
-                    <small class="text-muted d-block">Estimasi Total</small>
-                    <span class="fw-semibold">{{
-                      formatCurrency(
-                        (eventOf(item)?.price || 0) * (item.quantity || 0),
-                      )
-                    }}</span>
-                  </div>
-                </b-col>
-              </b-row>
-
-              <b-row class="g-3" v-else-if="activeType === 'zakat'">
-                <b-col cols="12" md="5">
-                  <label class="form-label fw-semibold required">Program</label>
-                  <ChoicesSelect
-                    :id="`zakat-program-id-${idx}`"
-                    :modelValue="String(item.program_id || 0)"
-                    @update:modelValue="
-                      (val: string) => {
-                        item.program_id = val === '0' ? null : Number(val);
-                      }
-                    "
-                    :options="programList"
-                    :isLoading="isProgramLoading"
-                    :key="programList.length"
-                  />
-                </b-col>
-
-                <b-col cols="12" md="4">
-                  <label class="form-label fw-semibold required"
-                    >Jenis Zakat</label
-                  >
-                  <ChoicesSelect
-                    :id="`zakat-id-${idx}`"
-                    :modelValue="String(item.zakat_id || 0)"
-                    @update:modelValue="
-                      (val: string) => {
-                        item.zakat_id = val === '0' ? null : Number(val);
-                      }
-                    "
-                    :options="zakatTypeList"
-                  />
-                </b-col>
-
-                <b-col cols="12" md="3">
-                  <label class="form-label fw-semibold required">Qty</label>
-                  <CurrencyInput
-                    v-model.number="item.quantity"
-                    placeholder="1"
-                    :state="null"
-                  />
-                </b-col>
-
-                <b-col cols="12" md="4">
-                  <label class="form-label fw-semibold required"
-                    >Gross Nominal</label
-                  >
-                  <CurrencyInput
-                    v-model.number="item.gross_nominal"
-                    placeholder="0"
-                    :state="null"
-                  />
-                </b-col>
-
-                <b-col cols="12">
-                  <div class="bg-light rounded p-2 d-inline-block">
-                    <small class="text-muted d-block">Total</small>
-                    <span class="fw-semibold">{{
-                      formatCurrency(zakatItemTotal(item))
-                    }}</span>
-                  </div>
-                </b-col>
-              </b-row>
-
-              <b-row class="g-3" v-else-if="activeType === 'qurban'">
-                <b-col cols="12" md="5">
-                  <label class="form-label fw-semibold required">Program</label>
-                  <ChoicesSelect
-                    :id="`qurban-program-id-${idx}`"
-                    :modelValue="String(item.program_id || 0)"
-                    @update:modelValue="
-                      (val: string) => {
-                        item.program_id = val === '0' ? null : Number(val);
-                      }
-                    "
-                    :options="programList"
-                    :isLoading="isProgramLoading"
-                    :key="programList.length"
-                  />
-                </b-col>
-
-                <b-col cols="12" md="3">
-                  <label class="form-label fw-semibold required">Qty</label>
-                  <CurrencyInput
-                    v-model.number="item.quantity"
-                    placeholder="1"
-                    :state="null"
-                  />
-                </b-col>
-
-                <b-col cols="12" md="4">
-                  <label class="form-label fw-semibold required"
-                    >Gross Nominal</label
-                  >
-                  <CurrencyInput
-                    v-model.number="item.gross_nominal"
-                    placeholder="0"
-                    :state="null"
-                  />
-                </b-col>
-
-                <b-col cols="12">
-                  <div class="bg-light rounded p-2 d-inline-block">
-                    <small class="text-muted d-block">Total</small>
-                    <span class="fw-semibold">{{
-                      formatCurrency(qurbanItemTotal(item))
-                    }}</span>
-                  </div>
-                </b-col>
-              </b-row>
-            </div>
-
-            <b-button variant="outline-primary" size="sm" @click="addItem">
-              <i class="bx bx-plus me-1"></i>Tambah Item
-            </b-button>
-
-            <div v-if="itemError" class="text-danger small mt-2">
-              {{ itemError }}
-            </div>
-          </UIComponentCard>
-
-          <!-- Detail Payment -->
-          <UIComponentCard title="Detail Payment" class="mb-3">
-            <b-row class="g-3">
-              <b-col cols="12" md="6">
-                <label class="form-label fw-semibold required"
-                  >Payment Method</label
-                >
-                <SearchSelect
-                  id="payment-method-id"
-                  :modelValue="String(formState.payment_method_id || 0)"
-                  @update:modelValue="
-                    (val: any) => {
-                      formState.payment_method_id =
-                        val === '0' || !val ? null : Number(val);
-                    }
-                  "
-                  @search="
-                    (query: string) => {
-                      paymentMethodSearchQuery = query;
-                    }
-                  "
-                  :options="paymentMethodOptions"
-                  :isLoading="isPaymentMethodLoading"
-                />
-                <div
-                  v-if="v$.payment_method_id.$error"
-                  class="invalid-feedback d-block"
-                >
-                  {{ v$.payment_method_id.$errors[0]?.$message }}
-                </div>
-              </b-col>
-            </b-row>
-
-            <b-row v-if="activeType === 'donation'" class="g-3 mt-1">
-              <b-col cols="12">
-                <hr class="my-1" />
-                <h6 class="text-muted fw-semibold mb-3">
-                  Pencocokan Mutasi / Jurnal
-                </h6>
-              </b-col>
-
-              <b-col cols="12" md="4">
-                <label class="form-label fw-semibold">Total Nominal</label>
-                <b-form-input
-                  :model-value="formatCurrency(donationGrandTotal)"
-                  disabled
-                />
-              </b-col>
-
-              <b-col cols="12" md="3" class="d-flex align-items-end">
-                <b-button
-                  variant="outline-primary"
-                  class="w-100"
-                  :disabled="isDataUnclaimed || formState.status !== 'Paid'"
-                  @click="checkMutation"
-                >
-                  <b-spinner v-if="isDataUnclaimed" small class="me-1" />
-                  Cek Mutasi
-                </b-button>
-              </b-col>
-
-              <b-col cols="12" md="5">
-                <label class="form-label fw-semibold">Matching Mutation</label>
-                <ChoicesSelect
-                  id="jurnal-id"
-                  :modelValue="String(formState.jurnal_id || 0)"
-                  @update:modelValue="
-                    (val: string) => {
-                      formState.jurnal_id = val === '0' ? null : Number(val);
-                    }
-                  "
-                  :options="jurnalOptions"
-                  :isLoading="isDataUnclaimed"
-                  :disabled="formState.status !== 'Paid'"
-                  :key="jurnalOptions.length"
-                />
-              </b-col>
-            </b-row>
-
-            <!-- Actions -->
-            <div class="d-flex gap-2 mt-3">
-              <b-button type="submit" variant="primary" :disabled="isPending">
-                <b-spinner v-if="isPending" small class="me-1" />
-                {{ isPending ? "Menyimpan..." : "Simpan Transaksi" }}
-              </b-button>
-              <b-button variant="outline-secondary" @click="router.back()">
-                Batal
-              </b-button>
-            </div>
-          </UIComponentCard>
+          <!-- 3. Detail Payment & Matching Mutation / Jurnal -->
+          <TransactionPaymentSection
+            :active-type="activeType"
+            :form-state="formState"
+            :v$="v$"
+            :payment-method-options="paymentMethodOptions"
+            :is-payment-method-loading="isPaymentMethodLoading"
+            :active-grand-total="activeGrandTotal"
+            :jurnal-options="jurnalOptions"
+            :is-data-unclaimed="isDataUnclaimed"
+            :is-pending="isPending"
+            @update:field="handleUpdateField"
+            @search-payment-method="(q) => (paymentMethodSearchQuery = q)"
+            @check-mutation="checkMutation"
+            @cancel="router.back()"
+          />
         </form>
       </b-col>
     </b-row>
@@ -415,27 +62,31 @@ import { required, helpers } from "@vuelidate/validators";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
-import UIComponentCard from "@/components/UIComponentCard.vue";
-import FlatPicker from "@/components/FlatPicker.vue";
-import ChoicesSelect from "@/components/ChoicesSelect.vue";
-import SearchSelect from "@/components/SearchSelect.vue";
 import { useSearchSelect } from "@/composables/useSearchSelect";
 import GenericCreateTransaction from "./components/GenericCreateTransaction.vue";
+import {
+  TransactionInfoSection,
+  TransactionItemsSection,
+  TransactionPaymentSection,
+  type DedicatedType,
+  type TransactionItem,
+  type FormState,
+} from "./components/create-transaction";
 import { createTransaction } from "@/services/transactionService";
 import router from "@/router";
 import { getAllPaymentMethods } from "@/services/paymentMethodService";
 import { getUserById } from "@/services/userService";
 import {
   getAllPrograms,
+  getProgramSetup,
   getTransactionUnclaimed,
 } from "@/services/programService";
 import { getEvents } from "@/services/eventService";
-import { formatCurrency } from "@/helpers/format";
+import { getZakatTypes } from "@/services/zakatService.js";
 
 const route = useRoute();
 
 const DEDICATED_TYPES = ["donation", "event", "zakat", "qurban"] as const;
-type DedicatedType = (typeof DEDICATED_TYPES)[number];
 
 const activeType = computed<DedicatedType | null>(() => {
   const type = route.query.type;
@@ -452,35 +103,43 @@ const ZAKAT_TYPE_LIST = [
   { value: 2, text: "Zakat Maal" },
   { value: 3, text: "Zakat Fidyah" },
 ];
-const zakatTypeList = computed(() => [
-  { value: 0, text: "Pilih jenis zakat..." },
-  ...ZAKAT_TYPE_LIST,
-]);
+
+
+const { data: typezakat, isLoading: isTypeZakatLoading } = useQuery({
+  queryKey: ["zakat-type"],
+  queryFn: getZakatTypes,
+});
+
+const zakatTypeList = computed(() => {
+  const list = Array.isArray(typezakat.value) ? typezakat.value : [];
+  return [
+    { value: 0, text: "Pilih Tipe..." },
+    ...list.map((p: any) => ({ value: p.id, text: p.name })),
+  ];
+});
+
+
 
 const now = new Date();
 const pad = (n: number) => String(n).padStart(2, "0");
 const defaultDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 const defaultTime = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 
-const formState = reactive({
+const formState = reactive<FormState>({
   date: defaultDate,
   time: defaultTime,
   status: "Paid",
   source: "CRM",
   doa: "",
-  jurnal_id: null as number | null,
-  payment_method_id: null as number | null,
+  jurnal_id: null,
+  payment_method_id: null,
 });
 
-type TransactionItem = {
-  program_id: number | null;
-  gross_nominal: number;
-  discount: number;
-  event_id: number | null;
-  quantity: number;
-  zakat_id: number | null;
+const handleUpdateField = (field: keyof FormState, value: any) => {
+  (formState as any)[field] = value;
 };
 
+// ── Item management ────────────────────────────────────────────────────────
 const makeItem = (): TransactionItem => ({
   program_id: null,
   gross_nominal: 0,
@@ -492,7 +151,13 @@ const makeItem = (): TransactionItem => ({
 
 const items = ref<TransactionItem[]>([makeItem()]);
 
-const addItem = () => items.value.push(makeItem());
+const addItem = () => {
+  const item = makeItem();
+  if (activeType.value === "zakat" && zakatSetupProgram.value?.id) {
+    item.program_id = zakatSetupProgram.value.id;
+  }
+  items.value.push(item);
+};
 const removeItem = (idx: number) => items.value.splice(idx, 1);
 
 const donationItemTotal = (item: TransactionItem) =>
@@ -505,12 +170,20 @@ const qurbanItemTotal = (item: TransactionItem) =>
 const donationGrandTotal = computed(() =>
   items.value.reduce((sum, item) => sum + donationItemTotal(item), 0),
 );
+const zakatGrandTotal = computed(() =>
+  items.value.reduce((sum, item) => sum + zakatItemTotal(item), 0),
+);
+
+const activeGrandTotal = computed(() => {
+  if (activeType.value === "zakat") return zakatGrandTotal.value;
+  return donationGrandTotal.value;
+});
 
 const userId = ref<number | null>(null);
 const userDisplay = ref("");
 const userIdError = ref("");
 
-// jurnal id list (transaction unclaimed) — dicocokkan dari payment method + total nominal
+// ── Jurnal / Mutation Matching ─────────────────────────────────────────────
 const {
   data: dataUnclaimed,
   isLoading: isDataUnclaimed,
@@ -520,7 +193,7 @@ const {
   queryFn: () =>
     getTransactionUnclaimed({
       method: formState.payment_method_id,
-      nominal: donationGrandTotal.value,
+      nominal: activeGrandTotal.value,
     }),
   enabled: false,
 });
@@ -545,7 +218,7 @@ const jurnalOptions = computed(() => {
 });
 
 const checkMutation = () => {
-  if (!formState.payment_method_id || !donationGrandTotal.value) {
+  if (!formState.payment_method_id || !activeGrandTotal.value) {
     toast.warning("Pilih payment method dan isi nominal item terlebih dahulu.");
     return;
   }
@@ -553,7 +226,13 @@ const checkMutation = () => {
   refetchUnclaimed();
 };
 
-// program list
+// ── Program & Program Setup Zakat ─────────────────────────────────────────
+const { data: programZakat, isLoading: isProgramZakatLoading } = useQuery({
+  queryKey: ["program-zakat"],
+  queryFn: () => getProgramSetup("zakat"),
+  enabled: computed(() => activeType.value === "zakat"),
+});
+
 const { data: programData, isLoading: isProgramLoading } = useQuery({
   queryKey: ["program-list"],
   queryFn: getAllPrograms,
@@ -567,7 +246,65 @@ const programList = computed(() => {
   ];
 });
 
-// event list
+const zakatSetupProgram = computed(() => {
+  const raw = programZakat.value as any;
+  if (!raw) return null;
+  const target = raw?.data ?? raw;
+  let parsedValue: any = null;
+  if (typeof target?.value === "string") {
+    try {
+      parsedValue = JSON.parse(target.value);
+    } catch {
+      parsedValue = null;
+    }
+  } else if (typeof target?.value === "object") {
+    parsedValue = target.value;
+  }
+
+  const progId = parsedValue?.id ? Number(parsedValue.id) : null;
+  const progLink = parsedValue?.link ? String(parsedValue.link) : null;
+  return { id: progId, link: progLink };
+});
+
+const zakatProgramList = computed(() => {
+  const allProgs = Array.isArray(programData.value) ? programData.value : [];
+  const setup = zakatSetupProgram.value;
+
+  if (setup?.id) {
+    const matched = allProgs.find(
+      (p: any) => p.id === setup.id || (setup.link && p.link === setup.link),
+    );
+    if (matched) {
+      return [{ value: matched.id, text: matched.title }];
+    }
+    return [
+      {
+        value: setup.id,
+        text: setup.link
+          ? `Program Zakat (${setup.link})`
+          : `Program Zakat #${setup.id}`,
+      },
+    ];
+  }
+
+  return programList.value;
+});
+
+watch(
+  [() => activeType.value, zakatSetupProgram],
+  ([type, setup]) => {
+    if (type === "zakat" && setup?.id) {
+      items.value.forEach((item) => {
+        if (!item.program_id) {
+          item.program_id = setup.id;
+        }
+      });
+    }
+  },
+  { immediate: true },
+);
+
+// ── Event Query ────────────────────────────────────────────────────────────
 const { data: eventData, isLoading: isEventLoading } = useQuery({
   queryKey: ["event-list-select"],
   queryFn: () => getEvents({ limit: 100 }),
@@ -585,16 +322,13 @@ const eventList = computed(() => [
   ...eventRawList.value.map((e: any) => ({ value: e.id, text: e.title })),
 ]);
 
-const eventOf = (item: TransactionItem) =>
-  eventRawList.value.find((e: any) => e.id === item.event_id);
-
 const donationProgramType = computed(() => {
   const list = Array.isArray(programData.value) ? programData.value : [];
   const selected = list.find((p: any) => p.id === items.value[0]?.program_id);
   return (selected?.tipe?.nama ?? "infaq").toLowerCase();
 });
 
-// payment method search select
+// ── Payment Methods ────────────────────────────────────────────────────────
 const {
   searchQuery: paymentMethodSearchQuery,
   options: paymentMethodOptions,
@@ -610,6 +344,7 @@ const {
   limit: 10,
 });
 
+// ── Validation & Lifecycle ─────────────────────────────────────────────────
 const itemError = ref("");
 
 const rules = {
@@ -637,6 +372,7 @@ onMounted(async () => {
   userDisplay.value = user ? `${user.name} - ${user.phone}` : `User #${id}`;
 });
 
+// ── Mutation & Submit ──────────────────────────────────────────────────────
 const { mutate, isPending } = useMutation({
   mutationFn: createTransaction,
   onSuccess: () => {
@@ -748,10 +484,8 @@ const handleSubmit = async () => {
   }
 
   if (activeType.value === "zakat") {
-    payload.total = items.value.reduce(
-      (sum, item) => sum + zakatItemTotal(item),
-      0,
-    );
+    payload.total = zakatGrandTotal.value;
+    if (formState.jurnal_id) payload.jurnal_id = formState.jurnal_id;
   }
 
   if (activeType.value === "qurban") {
@@ -763,7 +497,6 @@ const handleSubmit = async () => {
 
   mutate(payload);
 };
-
 
 watch(
   () => formState.status,

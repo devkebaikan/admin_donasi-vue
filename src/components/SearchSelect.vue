@@ -1,7 +1,7 @@
 <template>
   <div class="user-search-select-wrapper">
     <select :id="id" :value="modelValue" @change="updateValue" v-bind="$attrs">
-      <option value="0" disabled>Cari user...</option>
+      <option value="0" disabled>Cari...</option>
       <!-- v-once: render awal saja. Update opsi setelahnya murni via Choices.js
            setChoices() (lihat watcher di bawah) — jika Vue ikut mem-patch v-for ini
            saat options berubah, dua sistem rebutan node <option> yang sama dan

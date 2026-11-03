@@ -165,3 +165,15 @@ export const getTransactionUnclaimed = async (data: Record<string, any>) => {
     return [];
   }
 };
+
+
+// get program setup
+export const getProgramSetup = async (type: string) => {
+  try {
+    const res = await HttpClient.get(`/program-setup/${type}`);
+    return res.data.data;
+  } catch (error) {
+    console.error("Error fetching program setup:", error);
+    return [];
+  }
+};
