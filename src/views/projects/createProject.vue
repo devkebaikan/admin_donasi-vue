@@ -553,7 +553,7 @@ const rules = computed(() => ({
   activity: { required },
   mitra_id: { required },
   program_ids: { required },
-  nominal_ajuan: { required },
+  nominal_ajuan: {  },
   waktu_pelaksanaan: { required },
 }));
 

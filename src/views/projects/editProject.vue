@@ -571,7 +571,7 @@ const formState = reactive({
 const rules = computed(() => ({
   judul: { required },
   status: { required },
-  nominal_ajuan: { required },
+  nominal_ajuan: {  },
   waktu_pelaksanaan: { required },
 }));
 
