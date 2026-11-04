@@ -125,16 +125,6 @@ const sanitizeVariant = (v: any) => {
   return clean || "primary";
 };
 
-const getAvatarClass = (card: any) => {
-  const v = sanitizeVariant(
-    card?.colorVariant ??
-      card?.color_tag ??
-      card?.donor?.color_tag ??
-      card?.variant,
-  );
-  return `bg-soft-${v} text-${v}`;
-};
-
 const getInitials = (card: any) =>
   card.initials ?? initialsOf(card?.donor?.name ?? card?.name ?? "");
 

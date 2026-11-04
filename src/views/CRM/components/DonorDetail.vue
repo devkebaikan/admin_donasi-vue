@@ -46,9 +46,9 @@
                 >({{ detail.nick }})</span
               >
             </h6>
-            <p class="mb-0 text-muted fs-11">
-              {{ detail.phone }}
-            </p>
+            <a :href="`https://wa.me/62${detail.phone}`" target="_blank" class="mb-0 text-decoration-underline text-info fs-11">
+              <i class="bx bx-message-rounded"></i> {{ detail.phone }} 
+            </a>
           </div>
         </div>
 

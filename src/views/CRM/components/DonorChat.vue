@@ -520,7 +520,8 @@ const { data: templatesRaw } = useQuery({
   enabled: computed(() => stageId.value > 0),
 });
 const templates = computed<CrmChatTemplate[]>(() =>
-  Array.isArray(templatesRaw.value) ? templatesRaw.value.filter((t: CrmChatTemplate) => t.type === "crm") : [],
+  Array.isArray(templatesRaw.value) ? templatesRaw.value : [],
+  // Array.isArray(templatesRaw.value) ? templatesRaw.value.filter((t: CrmChatTemplate) => t.type === "crm") : [],
 );
 
 const extraTemplate = ref<CrmChatTemplate | null>(null);
