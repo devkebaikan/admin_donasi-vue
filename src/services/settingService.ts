@@ -10,6 +10,18 @@ export const getSettings = async (params = {}) => {
   }
 };
 
+export const editSettings = async (payload: Record<string, any>) => {
+  try {
+    const res = await HttpClient.put("/settings/settings/bulk", payload);
+    return res.data;
+  } catch (error) {
+    console.error("Error updating settings:", error);
+    throw error;
+  }
+};
+
+
+
 export const deleteSetting = async (id: number) => {
   try {
     await HttpClient.delete(`/settings/settings/${id}`);

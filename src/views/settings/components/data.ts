@@ -79,24 +79,24 @@ export function useSettingsTable() {
           return html(`<span class="text-muted small">${formatted}</span>`);
         },
       },
-      // {
-      //   name: "Actions",
-      //   width: "100px",
-      //   sort: false,
-      //   formatter: (id: number) =>
-      //     html(`
-      //       <div class="d-flex gap-1 justify-content-center">
-      //         <button
-      //           class="btn btn-sm btn-soft-warning edit-btn"
-      //           data-action="edit"
-      //           data-id="${id}"
-      //           title="Edit Setting">
-      //           <i class="bx bx-edit fs-16"></i>
-      //         </button>
+      {
+        name: "Actions",
+        width: "100px",
+        sort: false,
+        formatter: (id: number) =>
+          html(`
+            <div class="d-flex gap-1 justify-content-center">
+              <button
+                class="btn btn-sm btn-soft-warning edit-btn"
+                data-action="edit"
+                data-id="${id}"
+                title="Edit Setting">
+                <i class="bx bx-edit fs-16"></i>
+              </button>
 
-      //       </div>
-      //     `),
-      // },
+            </div>
+          `),
+      },
     ],
     // <button
     //   class="btn btn-sm btn-soft-danger delete-btn"
@@ -111,7 +111,7 @@ export function useSettingsTable() {
       item.value,
       item.type,
       item.updated_at,
-      // item.id,
+      item.id,
     ],
   });
 

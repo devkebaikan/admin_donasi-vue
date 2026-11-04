@@ -133,16 +133,81 @@
         </UIComponentCard>
       </b-col>
     </b-row>
+
+    <!-- Modal Edit Setting -->
+    <b-modal
+      v-model="showEditModal"
+      title="Edit Setting"
+      centered
+      :ok-disabled="isSubmitting"
+      ok-title="Simpan"
+      cancel-title="Batal"
+      ok-variant="primary"
+      size="lg"
+      @ok.prevent="handleSaveSetting"
+    >
+      <form @submit.prevent="handleSaveSetting">
+        <b-row class="g-3">
+          <!-- Setting Name (Read-only) -->
+          <b-col cols="12">
+            <b-form-group label="Nama Setting" label-for="setting-name">
+              <b-form-input
+                id="setting-name"
+                :model-value="selectedSetting?.name"
+                readonly
+                disabled
+              />
+            </b-form-group>
+          </b-col>
+
+          <!-- Setting Value (Editable) -->
+          <b-col cols="12">
+            <b-form-group label="Value" label-for="setting-value">
+              <b-form-textarea
+                id="setting-value"
+                v-model="editValue"
+                rows="4"
+                placeholder="Masukkan nilai setting..."
+                :disabled="isSubmitting"
+              />
+            </b-form-group>
+          </b-col>
+        </b-row>
+      </form>
+
+      <template #footer="{ cancel }">
+        <b-button
+          variant="secondary"
+          @click="cancel()"
+          :disabled="isSubmitting"
+        >
+          Batal
+        </b-button>
+        <b-button
+          variant="primary"
+          @click="handleSaveSetting"
+          :disabled="isSubmitting"
+        >
+          <b-spinner v-if="isSubmitting" small class="me-1" />
+          {{ isSubmitting ? "Menyimpan..." : "Simpan" }}
+        </b-button>
+      </template>
+    </b-modal>
+
+   
   </VerticalLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { useMutation, useQueryClient } from "@tanstack/vue-query";
+import Swal from "sweetalert2/dist/sweetalert2.js";
+import "sweetalert2/dist/sweetalert2.css";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
 import GridJsTable from "@/components/GridJsTable.vue";
 import { useSettingsTable } from "./components/data";
-import router from "@/router";
+import { editSettings } from "@/services/settingService";
 
 const tabs = [
   { id: "tab-all", label: "All", type: "" },
@@ -153,9 +218,24 @@ const tabs = [
 ];
 
 const activeTab = ref(0);
+const queryClient = useQueryClient();
+
+const showEditModal = ref(false);
+const selectedSetting = ref<{
+  id: number;
+  name: string;
+  value: string;
+  type: string;
+  parsed_value?: any;
+} | null>(null);
+const editValue = ref("");
+
 const {
   tableOptions,
   tableKeyString,
+  tableKey,
+  tableData,
+  refetch,
   isLoading,
   isError,
   error,
@@ -169,6 +249,50 @@ const {
   resetPage,
   handleDelete,
 } = useSettingsTable();
+
+const { mutate: doEditSetting, isPending: isSubmitting } = useMutation({
+  mutationFn: (payload: Record<string, any>) => editSettings(payload),
+  onSuccess: async () => {
+    await queryClient.invalidateQueries({ queryKey: ["settings"] });
+    tableKey.value++;
+    refetch();
+    showEditModal.value = false;
+    Swal.fire({
+      title: "Berhasil!",
+      text: "Setting berhasil diperbarui.",
+      icon: "success",
+      confirmButtonColor: "#ff6c2f",
+    });
+  },
+  onError: (err: any) => {
+    console.error("Error updating setting:", err);
+    Swal.fire({
+      title: "Gagal!",
+      text:
+        err?.response?.data?.message ||
+        err?.message ||
+        "Terjadi kesalahan saat memperbarui setting.",
+      icon: "error",
+      confirmButtonColor: "#ff6c2f",
+    });
+  },
+});
+
+const handleEdit = (id: number) => {
+  const item = tableData.value.find((s: any) => s.id == id);
+  if (!item) return;
+  selectedSetting.value = item;
+  editValue.value = item.value ?? "";
+  showEditModal.value = true;
+};
+
+const handleSaveSetting = () => {
+  if (!selectedSetting.value) return;
+  const payload = {
+    [selectedSetting.value.name]: editValue.value,
+  };
+  doEditSetting(payload);
+};
 
 const onTabChange = (index: number) => {
   selectedType.value = tabs[index]?.type ?? "";
@@ -202,7 +326,7 @@ const handleGlobalClick = (event: Event) => {
   if (editBtn) {
     event.preventDefault();
     const id = editBtn.getAttribute("data-id");
-    if (id) router.push(`/settings/${id}/edit`);
+    if (id) handleEdit(Number(id));
     return;
   }
 
