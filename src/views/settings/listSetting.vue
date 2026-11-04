@@ -215,6 +215,7 @@ const tabs = [
   { id: "tab-apiKey", label: "API_Key", type: "apiKey" },
   { id: "tab-default", label: "Default", type: "default" },
   { id: "tab-migration", label: "Migration", type: "migration" },
+  { id: "tab-crm", label: "CRM", type: "crm" },
 ];
 
 const activeTab = ref(0);
