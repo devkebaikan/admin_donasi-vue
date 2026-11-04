@@ -23,6 +23,16 @@
           transaction.invoice || "-"
         }}</span>
         <div class="d-flex align-items-center gap-2">
+          <b-button
+            v-if="transaction.invoice && (transaction.status?.toLowerCase() === 'paid')"
+            variant="outline-primary"
+            size="sm"
+            class="py-0 px-2 fs-11 d-inline-flex align-items-center gap-1"
+            @click="downloadInvoiceImage"
+          >
+            <i class="bx bx-image-alt"></i>
+            Download bukti transaksi sukses
+          </b-button>
           <b-badge
             :variant="null"
             class="fw-medium fs-10"
@@ -271,6 +281,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from "vue";
 import type {
   CrmPipelineCase,
   CrmTransactionDetail,
@@ -282,7 +293,7 @@ defineEmits<{
   (e: "send-report-fu", report: Record<string, any>): void;
 }>();
 
-defineProps<{
+const props = defineProps<{
   pipelineCase: CrmPipelineCase | null;
   isTransactionLoading: boolean;
   transaction: CrmTransactionDetail | null | undefined;
@@ -294,4 +305,36 @@ defineProps<{
   formatDate: (value: string | Date | null | undefined) => string;
   transactionStatusVariant: (status?: string) => string;
 }>();
+const isDownloading = ref(false);
+
+const invoiceImageUrl = computed(() => {
+  if (!props.transaction?.invoice) return "";
+  return `https://aapi.beramalbersama.com/storage/user-uploads/invoice-jpeg/${props.transaction.invoice}.jpg`;
+});
+
+const downloadInvoiceImage = async () => {
+  if (!invoiceImageUrl.value || !props.transaction?.invoice) return;
+
+  try {
+    isDownloading.value = true;
+    const response = await fetch(invoiceImageUrl.value);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const blob = await response.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = `${props.transaction.invoice}.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(blobUrl);
+  } catch (error) {
+    console.error("Gagal mendownload gambar invoice:", error);
+    window.open(invoiceImageUrl.value, "_blank");
+  } finally {
+    isDownloading.value = false;
+  }
+};
 </script>
