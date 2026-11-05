@@ -199,7 +199,7 @@
 
                 <b-row class="g-3">
                   <!-- Nominal Ajuan -->
-                  <b-col md="6" v-if="isCanManageProject">
+                  <b-col md="6">
                     <b-form-group
                       label="Nominal Ajuan"
                       label-for="nominal-ajuan"
