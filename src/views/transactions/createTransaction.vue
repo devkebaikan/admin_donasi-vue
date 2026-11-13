@@ -235,7 +235,7 @@ const { data: programZakat, isLoading: isProgramZakatLoading } = useQuery({
 
 const { data: programData, isLoading: isProgramLoading } = useQuery({
   queryKey: ["program-list"],
-  queryFn: getAllPrograms,
+  queryFn: () => getAllPrograms({mode:'list'}),
 });
 
 const programList = computed(() => {
