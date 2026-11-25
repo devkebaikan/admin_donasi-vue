@@ -113,21 +113,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, watch } from "vue";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
+import { reactive, watch } from "vue";
+import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import { useVuelidate } from "@vuelidate/core";
 import { required, minValue, helpers } from "@vuelidate/validators";
 import { toast, type ToastOptions } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import VerticalLayout from "@/layouts/VerticalLayout.vue";
 import UIComponentCard from "@/components/UIComponentCard.vue";
-import ChoicesSelect from "@/components/ChoicesSelect.vue";
 import { createKeuangan } from "@/services/projectKeuanganService";
-import { getAllMitra } from "@/services/mitraService";
 import router from "@/router";
 import { getProjectById, getProjects } from "@/services/projectService";
-import { getAllKegiatan } from "@/services/kegiatanService";
-import { useSearchSelect } from "@/composables/useSearchSelect";
 import { useRoute } from "vue-router";
 
 const showToast = (message: string, options: ToastOptions) =>
@@ -135,7 +131,7 @@ const showToast = (message: string, options: ToastOptions) =>
 const queryClient = useQueryClient();
 
 const formState = reactive({
-  kegiatan_id: 0,
+  kegiatan_id: null,
   project_id: 0,
   mitra_id: "",
   items: "",
@@ -190,17 +186,17 @@ watch(
   { immediate: true },
 );
 
-const { data: kegiatanData, isLoading: isKegiatanLoading } = useQuery({
-  queryKey: ["kegiatans-list"],
-  queryFn: () => getAllKegiatan({ mode: "list" }),
-});
-const kegiatanList = computed(() => {
-  const list = Array.isArray(kegiatanData.value) ? kegiatanData.value : [];
-  return [
-    { value: 0, text: "-- Pilih Kegiatan --" },
-    ...list.map((k: any) => ({ value: k.id, text: k.nama ?? k.judul })),
-  ];
-});
+// const { data: kegiatanData, isLoading: isKegiatanLoading } = useQuery({
+//   queryKey: ["kegiatans-list"],
+//   queryFn: () => getAllKegiatan({ mode: "list" }),
+// });
+// const kegiatanList = computed(() => {
+//   const list = Array.isArray(kegiatanData.value) ? kegiatanData.value : [];
+//   return [
+//     { value: 0, text: "-- Pilih Kegiatan --" },
+//     ...list.map((k: any) => ({ value: k.id, text: k.nama ?? k.judul })),
+//   ];
+// });
 
 const { mutate, isPending } = useMutation({
   mutationFn: () =>

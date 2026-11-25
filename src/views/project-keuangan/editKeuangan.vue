@@ -128,7 +128,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, watch } from "vue";
+import { reactive, watch } from "vue";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { useVuelidate } from "@vuelidate/core";
 import { required, minValue, helpers } from "@vuelidate/validators";
@@ -141,8 +141,6 @@ import {
   getKeuanganById,
   updateKeuangan,
 } from "@/services/projectKeuanganService";
-import { getAllKegiatan } from "@/services/kegiatanService";
-import { getAllMitra } from "@/services/mitraService";
 import router from "@/router";
 
 const showToast = (message: string, options: ToastOptions) =>
@@ -153,22 +151,18 @@ const queryClient = useQueryClient();
 const keuanganId = Number(route.params.id);
 
 const formState = reactive({
-  kegiatan_id: 0,
-  mitra_id: 0,
+  kegiatan_id: null,
+  // mitra_id: 0,
   items: "",
   nominal: 0,
   nota: "",
 });
 
 const rules = {
-  kegiatan_id: {
-    required: helpers.withMessage("Kegiatan wajib dipilih.", required),
-    minValue: helpers.withMessage("Kegiatan wajib dipilih.", minValue(1)),
-  },
-  mitra_id: {
-    required: helpers.withMessage("Mitra wajib dipilih.", required),
-    minValue: helpers.withMessage("Mitra wajib dipilih.", minValue(1)),
-  },
+  // kegiatan_id: {
+  //   required: helpers.withMessage("Kegiatan wajib dipilih.", required),
+  //   minValue: helpers.withMessage("Kegiatan wajib dipilih.", minValue(1)),
+  // },
   items: {
     required: helpers.withMessage("Items wajib diisi.", required),
   },
@@ -192,8 +186,8 @@ const {
 
 watch(keuanganData, (data) => {
   if (!data) return;
-  formState.kegiatan_id = data.kegiatan_id ?? 0;
-  formState.mitra_id = data.mitra_id ?? 0;
+  formState.kegiatan_id = data.kegiatan_id ?? null;
+  // formState.mitra_id = data.mitra_id ?? 0;
   formState.items = data.items ?? "";
   formState.nominal = data.nominal ?? 0;
   formState.nota = data.nota ?? "";
@@ -203,7 +197,7 @@ const { mutate, isPending } = useMutation({
   mutationFn: () =>
     updateKeuangan(keuanganId, {
       kegiatan_id: formState.kegiatan_id,
-      mitra_id: formState.mitra_id,
+      // mitra_id: formState.mitra_id,
       items: formState.items,
       nominal: formState.nominal,
       nota: formState.nota,
